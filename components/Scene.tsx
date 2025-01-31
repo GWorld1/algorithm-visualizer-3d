@@ -1,7 +1,7 @@
 "use client"
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
-import { RotatingCube } from './RotatingCube'
+import BinaryTree from './BinaryTree'
 const Scene = () => {
   return (
     <div className="w-full h-screen">
@@ -11,10 +11,15 @@ const Scene = () => {
         <pointLight position={[10, 10, 10]} />
 
         {/* Objects */}
-        <RotatingCube/>
+        <BinaryTree/>
         
         {/* Camera Controls */}
-        <OrbitControls enableZoom={true} />
+        <OrbitControls 
+            minDistance={5}
+            maxDistance={20}
+            enablePan={true}
+            enableZoom={true}
+         />
       </Canvas>
     </div>
   )

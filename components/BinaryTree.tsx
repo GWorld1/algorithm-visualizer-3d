@@ -1,24 +1,49 @@
-"use client";
-import { Canvas, useFrame } from '@react-three/fiber';
+import { Line } from '@react-three/drei';
+import  TreeNode  from './TreeNode';
+import { TreeNode as TreeNodeType } from '@/types/Treenode';
+import { calculateTreeLayout } from '@/lib/TreeLayout';
+import { sampleTree } from '@/data/sampleTree';
+import { Vector3 } from 'three';
+import { useThree } from '@react-three/fiber';
+import { useEffect } from 'react';
 
-const Node = ({ position, value }: { position: [number, number, number], value: number }) => {
-  return (
-    <mesh position={position}>
-      <sphereGeometry args={[0.2]} />
-      <meshStandardMaterial color="orange" />
-    </mesh>
-  );
-};
+const BinaryTree = () => {
+  const { camera } = useThree();
+  
+  useEffect(() => {
+    // Center camera on root node
+    camera.position.set(0, 5, 10);
+    camera.lookAt(0, 0, 0);
+  }, [camera]);
+  
+  const positionedTree = calculateTreeLayout(sampleTree);
 
-const BinaryTree = ({ nodes }: { nodes: Array<{ id: number, value: number }> }) => {
-  return (
-    <Canvas>
-      <ambientLight intensity={0.5} />
-      {nodes.map((node, index) => (
-        <Node key={node.id} position={[index * 0.5, 0, 0]} value={node.value} />
-      ))}
-    </Canvas>
-  );
+  
+  const renderTree = (node: TreeNodeType, parentPos?: Vector3) => {
+    const currentPos = new Vector3(node.x, node.y, 0);
+
+    return (
+      <group key={node.value}>
+        {/* Render current node */}
+        <TreeNode node={node} position={currentPos} />
+
+        {/* Draw line to parent */}
+        {parentPos && (
+          <Line
+            points={[parentPos, currentPos]}
+            color="gray"
+            lineWidth={2}
+          />
+        )}
+
+        {/* Recursively render children */}
+        {node.left && renderTree(node.left, currentPos)}
+        {node.right && renderTree(node.right, currentPos)}
+      </group>
+    );
+  };
+
+  return renderTree(positionedTree);
 };
 
 export default BinaryTree;

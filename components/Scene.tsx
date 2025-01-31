@@ -2,9 +2,11 @@
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
 import BinaryTree from './BinaryTree'
+
 const Scene = () => {
   return (
     <div className="w-full h-screen">
+      
       <Canvas camera={{ position: [0, 0, 5], fov: 50 }}>
         {/* Lights */}
         <ambientLight intensity={0.8} />

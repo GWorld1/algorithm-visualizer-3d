@@ -1,14 +1,13 @@
 import { Line } from '@react-three/drei';
 import  TreeNode  from './TreeNode';
 import { TreeNode as TreeNodeType } from '@/types/Treenode';
-import { calculateTreeLayout } from '@/lib/TreeLayout';
-import { sampleTree } from '@/data/sampleTree';
 import { Vector3 } from 'three';
 import { useThree } from '@react-three/fiber';
 import { useEffect } from 'react';
-
+import { useAlgorithmStore } from '@/store/useAlgorithmStore';
 const BinaryTree = () => {
   const { camera } = useThree();
+  const { currentStep,steps,tree } = useAlgorithmStore();
   
   useEffect(() => {
     // Center camera on root node
@@ -16,16 +15,17 @@ const BinaryTree = () => {
     camera.lookAt(0, 0, 0);
   }, [camera]);
   
-  const positionedTree = calculateTreeLayout(sampleTree);
+  const positionedTree = tree;
 
   
   const renderTree = (node: TreeNodeType, parentPos?: Vector3) => {
     const currentPos = new Vector3(node.x, node.y, 0);
+    const isActive = steps[currentStep]?.value === node.value;
 
     return (
       <group key={node.value}>
         {/* Render current node */}
-        <TreeNode node={node} position={currentPos} />
+        <TreeNode isActive={isActive} node={node} position={currentPos} />
 
         {/* Draw line to parent */}
         {parentPos && (

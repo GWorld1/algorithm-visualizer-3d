@@ -4,4 +4,5 @@ export type TreeNode = {
     right?: TreeNode;
     x?: number; // Calculated X position
     y?: number; // Calculated Y position
+    parentValue?: number | null;
   };

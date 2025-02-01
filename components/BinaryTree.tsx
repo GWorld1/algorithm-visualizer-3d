@@ -21,28 +21,31 @@ const BinaryTree = () => {
   const renderTree = (node: TreeNodeType, parentPos?: Vector3) => {
     const currentPos = new Vector3(node.x, node.y, 0);
     const isActive = steps[currentStep]?.value === node.value;
-
+    
+    // Check if this is the edge being traversed
+    const isActiveEdge = isActive && parentPos && steps[currentStep - 1]?.value === node.parentValue;
+  
     return (
       <group key={node.value}>
         {/* Render current node */}
         <TreeNode isActive={isActive} node={node} position={currentPos} />
-
+  
         {/* Draw line to parent */}
         {parentPos && (
           <Line
             points={[parentPos, currentPos]}
-            color="gray"
-            lineWidth={2}
+            color={isActiveEdge ? "#ef4444" : "gray"} // Red when active, gray otherwise
+            lineWidth={isActiveEdge ? 4 : 2} // Thicker when active
           />
         )}
-
+  
         {/* Recursively render children */}
         {node.left && renderTree(node.left, currentPos)}
         {node.right && renderTree(node.right, currentPos)}
       </group>
     );
   };
-
+  
   return renderTree(positionedTree);
 };
 

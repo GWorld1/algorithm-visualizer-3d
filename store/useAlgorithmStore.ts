@@ -4,6 +4,8 @@ import { TreeNode } from '@/types/Treenode';
 import { create } from 'zustand';
 
 type AlgorithmState = {
+  algorithmType: 'bfs' | 'dfs';
+  setAlgorithmType: (algorithmType: 'bfs' | 'dfs') => void;
   tree: TreeNode;
   updateTree: (newTree: TreeNode) => void;
   currentStep: number;
@@ -16,6 +18,11 @@ type AlgorithmState = {
 };
 
 export const useAlgorithmStore = create<AlgorithmState>((set) => ({
+  algorithmType: 'bfs',
+  setAlgorithmType: (algorithmType) => {
+     set({ algorithmType }) 
+     useAlgorithmStore.getState().reset();
+    },
   tree: calculateTreeLayout(sampleTree),
   updateTree: (newTree) =>  {
     console.log('Updating tree:', newTree);

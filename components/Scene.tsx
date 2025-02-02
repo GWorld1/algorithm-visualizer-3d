@@ -2,18 +2,21 @@
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
 import BinaryTree from './BinaryTree'
+import { useAlgorithmStore } from '@/store/useAlgorithmStore'
+import WeightedTree from './WeightedTree'
 
 const Scene = () => {
+  const { algorithmType } = useAlgorithmStore();
   return (
-    <div className="w-full h-screen">
+   
       
       <Canvas camera={{ position: [0, 0, 5], fov: 50 }}>
         {/* Lights */}
-        <ambientLight intensity={0.8} />
+        <ambientLight intensity={2} />
         <pointLight position={[10, 10, 10]} />
 
         {/* Objects */}
-        <BinaryTree/>
+        {algorithmType === 'dijkstra' ? <WeightedTree /> : <BinaryTree />}
         
         {/* Camera Controls */}
         <OrbitControls 
@@ -23,7 +26,6 @@ const Scene = () => {
             enableZoom={true}
          />
       </Canvas>
-    </div>
   )
 }
 

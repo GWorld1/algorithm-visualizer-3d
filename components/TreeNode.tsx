@@ -52,7 +52,8 @@ const TreeNode = ({
         onPointerOut={() => { document.body.style.cursor = 'default' }}
       >
         <sphereGeometry />
-        <meshStandardMaterial color={isActive ? '#ef4444' : '#4f46e5'} />
+        <meshStandardMaterial color={isActive ? '#ef4444' : '#049ef4'} />
+       
       </mesh>
 
       {/* Value label */}

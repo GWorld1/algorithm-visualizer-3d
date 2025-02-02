@@ -1,15 +1,20 @@
 import { sampleTree } from '@/data/sampleTree';
+import { sampleWeightedTree } from '@/data/sampleWeightTree';
 import { calculateTreeLayout } from '@/lib/treeLayout';
+import { calculateWeightedTreeLayout } from '@/lib/weightedTreeLayout';
 import { TreeNode } from '@/types/Treenode';
+import { WeightedTreeNode } from '@/types/WeightedTreeNode';
 import { create } from 'zustand';
 
 type AlgorithmState = {
-  algorithmType: 'bfs' | 'dfs';
-  setAlgorithmType: (algorithmType: 'bfs' | 'dfs') => void;
+  algorithmType: 'bfs' | 'dfs' | "dijkstra";
+  setAlgorithmType: (algorithmType: 'bfs' | 'dfs' |'dijkstra') => void;
+  weightedTree?: WeightedTreeNode;
+  updateWeightedTree: (newTree: WeightedTreeNode) => void;
   tree: TreeNode;
   updateTree: (newTree: TreeNode) => void;
   currentStep: number;
-  steps: TreeNode[];
+  steps: TreeNode[] | WeightedTreeNode[];
   isPlaying: boolean;
   setSteps: (steps: TreeNode[]) => void;
   play: () => void;
@@ -28,6 +33,8 @@ export const useAlgorithmStore = create<AlgorithmState>((set) => ({
     console.log('Updating tree:', newTree);
     set({ tree: newTree })
   },
+  weightedTree: calculateWeightedTreeLayout(sampleWeightedTree),
+  updateWeightedTree: (newTree) => set({ weightedTree: newTree }),
   currentStep: 0,
   steps: [],
   isPlaying: false,

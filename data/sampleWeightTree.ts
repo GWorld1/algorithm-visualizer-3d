@@ -8,8 +8,8 @@ export const sampleWeightedTree: WeightedTreeNode = {
       node: {
         value: 2,
         edges: {
-          left: { node: { value: 4, edges: {} }, weight: 3 },
-          right: { node: { value: 5, edges: {} }, weight: 2 }
+          // left: { node: { value: 4, edges: {} }, weight: 3 },
+          // right: { node: { value: 5, edges: {} }, weight: 2 }
         }
       },
       weight: 4
@@ -18,8 +18,8 @@ export const sampleWeightedTree: WeightedTreeNode = {
       node: {
         value: 3,
         edges: {
-          left: { node: { value: 6, edges: {} }, weight: 1 },
-          right: { node: { value: 7, edges: {} }, weight: 5 }
+          // left: { node: { value: 6, edges: {} }, weight: 1 },
+          // right: { node: { value: 7, edges: {} }, weight: 5 }
         }
       },
       weight: 2

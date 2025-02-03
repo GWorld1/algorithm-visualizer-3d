@@ -1,6 +1,6 @@
 import { Controls } from "@/components/Controls";
 import Scene from "@/components/Scene";
-
+import TreeFileInput from "@/components/TreeFileInput";
 export default function Home() {
 
 
@@ -9,6 +9,15 @@ export default function Home() {
       <h1 className="text-3xl font-semibold p-4">Algorithm Visualizer</h1>
       <Scene/>
       <Controls/>
+      <TreeFileInput/>
+      <footer className="absolute bottom-0 right-0 p-4">
+        <p className="text-sm text-gray-500">
+          Created by Gnowa Rickneil | 
+          <a href="https://github.com/GWorld1">
+            <img src="/github-icon.svg" alt="Github" className="w-4 h-4 inline-block ml-1" />
+          </a>
+        </p>
+      </footer>
     </main>
   );
 }

@@ -54,26 +54,25 @@ export const generateDFSSteps = (root: TreeNode): TreeNode[] => {
 export const dijkstra = (root: WeightedTreeNode): WeightedTreeNode[] => {
   const steps: WeightedTreeNode[] = [];
   const unvisited = new Set<WeightedTreeNode>();
-  const distances = new Map<WeightedTreeNode, number>();
   
   // Initialize distances and add parent references
-  const initializeDistances = (node: WeightedTreeNode) => {
-    distances.set(node, node === root ? 0 : Infinity);
+  const initializeDistances = (node: WeightedTreeNode, visited: Set<number> = new Set()) => {
+    if (visited.has(node.value)) return;
+    visited.add(node.value);
+    
+    node.distance = node === root ? 0 : Infinity;
     unvisited.add(node);
     
-    if (node.edges.left) {
-      node.edges.left.node.parentValue = node.value;
-      initializeDistances(node.edges.left.node);
-    }
-    if (node.edges.right) {
-      node.edges.right.node.parentValue = node.value;
-      initializeDistances(node.edges.right.node);
-    }
+    // Initialize all connected nodes
+    Object.entries(node.edges).forEach(([_, edge]) => {
+      if (edge && edge.node) {
+        edge.node.parentValue = node.value;
+        initializeDistances(edge.node, visited);
+      }
+    });
   };
   
   initializeDistances(root);
-  
-  // Start with root
   root.distance = 0;
   
   while (unvisited.size > 0) {
@@ -91,21 +90,18 @@ export const dijkstra = (root: WeightedTreeNode): WeightedTreeNode[] => {
     if (!current || minDistance === Infinity) break;
     
     unvisited.delete(current);
-    steps.push(current);
-    console.log(`Visited node ${current.value} with distance ${current.distance}`);
-    // Update neighbors
-    const updateNeighbor = (edge: { node: WeightedTreeNode; weight: number }) => {
-      if (!unvisited.has(edge.node)) return;
+    steps.push({...current}); // Create a copy to preserve state for animation
+    
+    // Update all neighbors
+    Object.entries(current.edges).forEach(([_, edge]) => {
+      if (!edge || !unvisited.has(edge.node)) return;
       
       const distance = (current!.distance ?? 0) + edge.weight;
       if (distance < (edge.node.distance ?? Infinity)) {
         edge.node.distance = distance;
         edge.node.previousNode = current;
       }
-    };
-    
-    if (current.edges.left) updateNeighbor(current.edges.left);
-    if (current.edges.right) updateNeighbor(current.edges.right);
+    });
   }
   
   return steps;

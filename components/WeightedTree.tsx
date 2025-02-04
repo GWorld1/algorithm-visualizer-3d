@@ -15,8 +15,16 @@ const WeightedTree = () => {
     camera.position.set(0, 5, 10);
     camera.lookAt(0, 0, 0);
   }, [camera]);
+
+   // Keep track of visited nodes to avoid cycles
+   const visited = new Set<number>();
   
-  const renderTree = (node: WeightedTreeNodeType, parentPos?: Vector3) => {
+   const renderGraph = (node: WeightedTreeNodeType, parentPos?: Vector3) => {
+    if (visited.has(node.value)) {
+      return null;
+    }
+    visited.add(node.value);
+
     const currentPos = new Vector3(node.x, node.y, 0);
     const isActive = steps[currentStep]?.value === node.value;
     const isActiveEdge = isActive && parentPos && steps[currentStep - 1]?.value === node.parentValue;
@@ -29,23 +37,33 @@ const WeightedTree = () => {
           isActive={isActive} 
         />
   
+        {/* Render edge to parent if exists */}
         {parentPos && (
-          <>
-            <Line
-              points={[parentPos, currentPos]}
-              color={isActiveEdge ? "#ef4444" : "gray"}
-              lineWidth={isActiveEdge ? 4 : 2}
-            />
-          </>
+          <Line
+            points={[parentPos, currentPos]}
+            color={isActiveEdge ? "#ef4444" : "gray"}
+            lineWidth={isActiveEdge ? 4 : 2}
+          />
         )}
   
-        {node.edges.left && renderTree(node.edges.left.node, currentPos)}
-        {node.edges.right && renderTree(node.edges.right.node, currentPos)}
+        {/* Render all connected edges */}
+        {Object.entries(node.edges).map(([direction, edge]) => {
+          if (edge && edge.node) {
+            return renderGraph(edge.node, currentPos);
+          }
+          return null;
+        })}
       </group>
     );
   };
   
-  return weightedTree ? renderTree(weightedTree) : null;
+  const render = () => {
+    if (!weightedTree) return null;
+    visited.clear(); // Reset visited set before each render
+    return renderGraph(weightedTree);
+  };
+
+  return render();
 };
 
 export default WeightedTree;

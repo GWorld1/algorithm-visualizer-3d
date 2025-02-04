@@ -34,25 +34,23 @@ const WeightedTreeNode = ({
       )}
 
       {/* Edge weights */}
-      {node.edges.left && (
-        <Text
-          position={[-1, -1, 0]}
-          fontSize={0.2}
-          color="gray"
-        >
-          {node.edges.left.weight}
-        </Text>
-      )}
-      
-      {node.edges.right && (
-        <Text
-          position={[1, -1, 0]}
-          fontSize={0.2}
-          color="gray"
-        >
-          {node.edges.right.weight}
-        </Text>
-      )}
+      {Object.entries(node.edges).map(([key, edge], index) => {
+        const angle = (2 * Math.PI * index) / Object.keys(node.edges).length;
+        const radius = 1.5;
+        const x = Math.cos(angle) * radius;
+        const y = Math.sin(angle) * radius;
+        
+        return (
+          <Text
+            key={key}
+            position={[x, y, 0.2]}
+            fontSize={0.3}
+            color="gray"
+          >
+           {edge.weight}
+          </Text>
+        );
+      })}
     </group>
   );
 };

@@ -1,5 +1,5 @@
 // data/sampleWeightedTree.ts
-import { WeightedTreeNode } from '@/types/WeightedTreeNode';
+import { WeightedTreeNode } from '@/types/WeightedGraphNode';
 
 export const sampleWeightedTree: WeightedTreeNode = {
   value: 1,

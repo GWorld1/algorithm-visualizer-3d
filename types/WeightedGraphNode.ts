@@ -1,4 +1,3 @@
-import { TreeNode } from "./Treenode";
 // types/WeightedTreeNode.ts
 export interface WeightedTreeNode {
   value: number;

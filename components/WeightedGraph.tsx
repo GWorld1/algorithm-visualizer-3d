@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 // components/WeightedTree.tsx
 import { Line } from '@react-three/drei';
-import WeightedTreeNode from './WeightedTreeNode';
-import { WeightedTreeNode as WeightedTreeNodeType } from '@/types/WeightedTreeNode';
+import WeightedTreeNode from './WeightedGraphNode';
+import { WeightedTreeNode as WeightedTreeNodeType } from '@/types/WeightedGraphNode';
 import { Vector3 } from 'three';
 import { useThree } from '@react-three/fiber';
 import { useEffect } from 'react';

@@ -1,6 +1,6 @@
 // components/WeightedTreeNode.tsx
 import { Text } from '@react-three/drei';
-import { WeightedTreeNode as WeightedTreeNodeType } from '@/types/WeightedTreeNode';
+import { WeightedTreeNode as WeightedTreeNodeType } from '@/types/WeightedGraphNode';
 import { Vector3 } from 'three';
 
 const WeightedTreeNode = ({

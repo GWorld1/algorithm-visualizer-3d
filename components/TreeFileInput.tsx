@@ -5,7 +5,7 @@
 import { useAlgorithmStore } from "@/store/useAlgorithmStore";
 import { validateAndParseTree } from "@/lib/treeParser";
 import { calculateTreeLayout } from "@/lib/treeLayout";
-import { calculateWeightedTreeLayout } from "@/lib/weightedTreeLayout";
+import { calculateWeightedTreeLayout } from "@/lib/weightedGraphLayout";
 
 const TreeFileInput = () => {
   const { updateTree, updateWeightedTree, algorithmType } = useAlgorithmStore();

@@ -1,5 +1,5 @@
 import { TreeNode } from "@/types/Treenode";
-import { WeightedTreeNode } from '@/types/WeightedTreeNode';
+import { WeightedTreeNode } from '@/types/WeightedGraphNode';
 
 
 export const generateBFSSteps = (root: TreeNode): TreeNode[] => {

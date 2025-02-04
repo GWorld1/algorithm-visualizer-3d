@@ -1,9 +1,9 @@
 import { sampleTree } from '@/data/sampleTree';
 import { sampleWeightedTree } from '@/data/sampleWeightTree';
 import { calculateTreeLayout } from '@/lib/treeLayout';
-import { calculateWeightedTreeLayout } from '@/lib/weightedTreeLayout';
+import { calculateWeightedTreeLayout } from '@/lib/weightedGraphLayout';
 import { TreeNode } from '@/types/Treenode';
-import { WeightedTreeNode } from '@/types/WeightedTreeNode';
+import { WeightedTreeNode } from '@/types/WeightedGraphNode';
 import { create } from 'zustand';
 
 type AlgorithmState = {

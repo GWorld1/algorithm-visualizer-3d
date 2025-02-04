@@ -3,7 +3,7 @@ import { Canvas } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
 import BinaryTree from './BinaryTree'
 import { useAlgorithmStore } from '@/store/useAlgorithmStore'
-import WeightedTree from './WeightedTree'
+import WeightedTree from './WeightedGraph'
 
 const Scene = () => {
   const { algorithmType } = useAlgorithmStore();

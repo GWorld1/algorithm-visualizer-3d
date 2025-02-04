@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 // lib/weightedTreeLayout.ts
-import { WeightedTreeNode } from '@/types/WeightedTreeNode';
+import { WeightedTreeNode } from '@/types/WeightedGraphNode';
 
 export const calculateWeightedTreeLayout = (
   node: WeightedTreeNode,

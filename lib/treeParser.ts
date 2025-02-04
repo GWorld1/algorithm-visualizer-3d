@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { WeightedTreeNode } from "@/types/WeightedTreeNode";
+import { WeightedTreeNode } from "@/types/WeightedGraphNode";
 import { TreeNode } from "@/types/Treenode";
 
 interface TreeFile {

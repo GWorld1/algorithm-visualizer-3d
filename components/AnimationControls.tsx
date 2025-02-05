@@ -2,11 +2,33 @@
 
 import { dijkstra, generateBFSSteps, generateDFSSteps } from "@/lib/algorithm";
 import { useAlgorithmStore } from "@/store/useAlgorithmStore";
-import { useEffect } from "react";
+import { AlgorithmType } from "@/types/AlgorithmType";
+import { TreeNode } from "@/types/Treenode";
+import { WeightedTreeNode } from "@/types/WeightedGraphNode";
+import { useEffect} from "react";
 
 export const Controls = () => {
-    const {algorithmType, setAlgorithmType, play, pause, reset, isPlaying,tree, weightedTree } = useAlgorithmStore();
-    //const [tree] = useState(() => calculateTreeLayout(sampleTree));
+    const {dataStructure,setDataStructure,algorithmType, setAlgorithmType, play, pause, reset, isPlaying,tree, weightedTree } = useAlgorithmStore();
+    
+     // Algorithm options for each data structure
+     const algorithmOptions = {
+      binaryTree: [
+          { value: 'bfs', label: 'BFS' },
+          { value: 'dfs', label: 'DFS' }
+      ],
+      weightedGraph: [
+          { value: 'dijkstra', label: 'Dijkstra' }
+      ],
+      linkedList: [
+          { value: 'traverse', label: 'Traverse' },
+          { value: 'reverse', label: 'Reverse' }
+      ],
+      array: [
+          { value: 'bubbleSort', label: 'Bubble Sort' },
+          { value: 'quickSort', label: 'Quick Sort' }
+      ]
+  };
+
   
     const startAlgorithm = () => {
       let steps;
@@ -23,7 +45,7 @@ export const Controls = () => {
         steps = generateDFSSteps(tree);
         break;
     }
-      useAlgorithmStore.getState().setSteps(steps);
+      useAlgorithmStore.getState().setSteps(steps as TreeNode[]|WeightedTreeNode[]);
       play();
     };
   
@@ -44,19 +66,45 @@ export const Controls = () => {
       return () => clearInterval(interval);
     }, [isPlaying]);
 
+    // Handle data structure change
+    const handleDataStructureChange = (value: string) => {
+      setDataStructure(value as 'binaryTree' | 'weightedGraph' | 'linkedList' | 'array');
+      // Set first algorithm of the selected data structure as default
+      const firstAlgorithm = algorithmOptions[value as keyof typeof algorithmOptions][0].value;
+      setAlgorithmType(firstAlgorithm as AlgorithmType);
+  };
+
 
   
     return (
       <div className="fixed bottom-4 left-4 bg-white p-4 rounded-lg shadow flex items-center">
+
+        {/* Data Structure Selector */}
+        <select 
+                value={dataStructure}
+                className="appearance-none mr-2 py-2 px-4 rounded-full outline-none border-0 text-sm font-semibold bg-violet-50 text-violet-700 hover:bg-violet-100"
+                onChange={(e) => handleDataStructureChange(e.target.value)}
+            >
+                <option value="binaryTree">Binary Tree</option>
+                <option value="weightedGraph">Weighted Graph</option>
+                <option value="linkedList">Linked List</option>
+                <option value="array">Array</option>
+            </select>
+        {/* Algorithm Selector */}
         <select 
           value={algorithmType}
           className="appearance-none mr-2 py-2 px-4 rounded-full outline-none border-0 text-sm font-semibold bg-violet-50 text-violet-700 hover:bg-violet-100"
-          onChange={(e) => setAlgorithmType(e.target.value as 'bfs' | 'dfs'| 'dijkstra')}
+          onChange={(e) => setAlgorithmType(e.target.value as AlgorithmType )}
         >
-          <option value="bfs">BFS</option>
-          <option value="dfs">DFS</option>
-          <option value="dijkstra">Dijkstra</option>
+          {
+            algorithmOptions[dataStructure as keyof typeof algorithmOptions].map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))
+          }
         </select>
+
         {
           !isPlaying ? 
             <button onClick={startAlgorithm} className="text-blue-600 bg-blue-100 px-4 py-2 ml-2  rounded-full font-semibold text-sm">

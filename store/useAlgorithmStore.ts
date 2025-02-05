@@ -6,9 +6,22 @@ import { TreeNode } from '@/types/Treenode';
 import { WeightedTreeNode } from '@/types/WeightedGraphNode';
 import { create } from 'zustand';
 
+type AlgorithmType = 
+  | 'bfs' 
+  | 'dfs' 
+  | 'dijkstra'
+  | 'traverse'
+  | 'reverse'
+  | 'bubbleSort'
+  | 'quickSort';
+
+type DataStructureType = 'binaryTree' | 'weightedGraph' | 'linkedList' | 'array';
+
 type AlgorithmState = {
-  algorithmType: 'bfs' | 'dfs' | "dijkstra";
-  setAlgorithmType: (algorithmType: 'bfs' | 'dfs' |'dijkstra') => void;
+  algorithmType: AlgorithmType;
+  dataStructure: DataStructureType;
+  setAlgorithmType: (algorithmType: AlgorithmType) => void;
+  setDataStructure: (dataStructure: DataStructureType) => void;
   weightedTree?: WeightedTreeNode;
   updateWeightedTree: (newTree: WeightedTreeNode) => void;
   tree: TreeNode;
@@ -24,6 +37,11 @@ type AlgorithmState = {
 
 export const useAlgorithmStore = create<AlgorithmState>((set) => ({
   algorithmType: 'bfs',
+  dataStructure: 'binaryTree',
+  setDataStructure: (dataStructure: DataStructureType) => {
+    set({ dataStructure });
+    useAlgorithmStore.getState().reset();
+  },
   setAlgorithmType: (algorithmType) => {
      set({ algorithmType }) 
      useAlgorithmStore.getState().reset();

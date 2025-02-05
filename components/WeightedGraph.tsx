@@ -9,8 +9,8 @@ import { useEffect } from 'react';
 import { useAlgorithmStore } from '@/store/useAlgorithmStore';
 
 const WeightedTree = () => {
-  const { camera } = useThree();
   const { currentStep, steps, weightedTree } = useAlgorithmStore();
+  const { camera } = useThree();
   
   useEffect(() => {
     camera.position.set(0, 5, 10);

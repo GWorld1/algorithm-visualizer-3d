@@ -4,30 +4,46 @@ import { OrbitControls } from '@react-three/drei'
 import BinaryTree from './BinaryTree'
 import { useAlgorithmStore } from '@/store/useAlgorithmStore'
 import WeightedTree from './WeightedGraph'
+import LinkedList from './LinkedList'
+import DynamicArray from './DynamicArray'
+
 
 
 const Scene = () => {
-  const { algorithmType } = useAlgorithmStore();
+  const { dataStructure } = useAlgorithmStore();
+  const renderDataStructure = () => {
+    switch (dataStructure) {
+      case 'binaryTree':
+        return <BinaryTree />;
+      case 'weightedGraph':
+        return <WeightedTree />;
+      case 'linkedList':
+        return <LinkedList />;
+      case 'array':
+        return <DynamicArray />;
+      default:
+        return null;
+    }
+  };
   return (
-   
-      
+      <>
+     
       <Canvas camera={{ position: [0, 0, 5], fov: 50 }}>
         {/* Lights */}
         <ambientLight intensity={2} />
         <pointLight position={[10, 10, 10]} />
 
         {/* Objects */}
-        {algorithmType === 'dijkstra' ? <WeightedTree /> : <BinaryTree /> }
-        {/* <LinkedList/>
-        <DynamicArray /> */}
+        {renderDataStructure()}
         {/* Camera Controls */}
         <OrbitControls 
             minDistance={5}
             maxDistance={20}
             enablePan={true}
             enableZoom={true}
-         />
+            />
       </Canvas>
+    </>
   )
 }
 

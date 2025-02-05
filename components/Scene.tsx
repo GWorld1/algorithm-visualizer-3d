@@ -5,6 +5,7 @@ import BinaryTree from './BinaryTree'
 import { useAlgorithmStore } from '@/store/useAlgorithmStore'
 import WeightedTree from './WeightedGraph'
 
+
 const Scene = () => {
   const { algorithmType } = useAlgorithmStore();
   return (
@@ -16,8 +17,9 @@ const Scene = () => {
         <pointLight position={[10, 10, 10]} />
 
         {/* Objects */}
-        {algorithmType === 'dijkstra' ? <WeightedTree /> : <BinaryTree />}
-        
+        {algorithmType === 'dijkstra' ? <WeightedTree /> : <BinaryTree /> }
+        {/* <LinkedList/>
+        <DynamicArray /> */}
         {/* Camera Controls */}
         <OrbitControls 
             minDistance={5}

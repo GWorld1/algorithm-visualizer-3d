@@ -6,6 +6,8 @@ import { useAlgorithmStore } from '@/store/useAlgorithmStore'
 import WeightedTree from './WeightedGraph'
 import LinkedList from './LinkedList'
 import DynamicArray from './DynamicArray'
+import StackVisualization from './StackVisualization'
+import QueueVisualization from './QueueVisualization'
 
 
 
@@ -21,6 +23,11 @@ const Scene = () => {
         return <LinkedList />;
       case 'array':
         return <DynamicArray />;
+      case 'stack':
+       return <StackVisualization/>;
+      case 'queue':
+        return <QueueVisualization/>
+
       default:
         return null;
     }

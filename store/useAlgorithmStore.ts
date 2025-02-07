@@ -5,7 +5,7 @@ import { calculateWeightedTreeLayout } from '@/lib/weightedGraphLayout';
 import { TreeNode } from '@/types/Treenode';
 import { WeightedTreeNode } from '@/types/WeightedGraphNode';
 import { create } from 'zustand';
-
+import { DataStructureType } from '@/types/DataStructure';
 type AlgorithmType = 
   | 'bfs' 
   | 'dfs' 
@@ -15,7 +15,7 @@ type AlgorithmType =
   | 'bubbleSort'
   | 'quickSort';
 
-type DataStructureType = 'binaryTree' | 'weightedGraph' | 'linkedList' | 'array';
+
 
 type AlgorithmState = {
   algorithmType: AlgorithmType;

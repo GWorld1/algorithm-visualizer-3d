@@ -1,11 +1,13 @@
 "use client"
 
-import { dijkstra, generateBFSSteps, generateDFSSteps } from "@/lib/algorithm";
+import { generateBFSSteps, generateDFSSteps } from "@/lib/treeAlgorithms";
+import { dijkstra } from "@/lib/graphAlgorithms";
 import { useAlgorithmStore } from "@/store/useAlgorithmStore";
 import { AlgorithmType } from "@/types/AlgorithmType";
 import { TreeNode } from "@/types/Treenode";
 import { WeightedTreeNode } from "@/types/WeightedGraphNode";
 import { useEffect} from "react";
+import { DataStructureType } from "@/types/DataStructure";
 
 export const Controls = () => {
     const {dataStructure,setDataStructure,algorithmType, setAlgorithmType, play, pause, reset, isPlaying,tree, weightedTree } = useAlgorithmStore();
@@ -26,7 +28,15 @@ export const Controls = () => {
       array: [
           { value: 'bubbleSort', label: 'Bubble Sort' },
           { value: 'quickSort', label: 'Quick Sort' }
-      ]
+      ],
+      stack: [
+        { value: 'traverse', label: 'Traverse' },
+        
+    ],
+      queue: [
+      { value: 'traverse', label: 'Traverse' },
+      
+  ],
   };
 
   
@@ -68,7 +78,7 @@ export const Controls = () => {
 
     // Handle data structure change
     const handleDataStructureChange = (value: string) => {
-      setDataStructure(value as 'binaryTree' | 'weightedGraph' | 'linkedList' | 'array');
+      setDataStructure(value as DataStructureType);
       // Set first algorithm of the selected data structure as default
       const firstAlgorithm = algorithmOptions[value as keyof typeof algorithmOptions][0].value;
       setAlgorithmType(firstAlgorithm as AlgorithmType);
@@ -89,6 +99,8 @@ export const Controls = () => {
                 <option value="weightedGraph">Weighted Graph</option>
                 <option value="linkedList">Linked List</option>
                 <option value="array">Array</option>
+                <option value="stack">Stack</option>
+                <option value="queue">Queue</option>
             </select>
         {/* Algorithm Selector */}
         <select 

@@ -1,0 +1,1 @@
+export type DataStructureType = 'binaryTree' | 'weightedGraph' | 'linkedList' | 'array' | 'stack' | 'queue';

@@ -3,8 +3,7 @@ import * as THREE from "three";
 import useStackQueueStore from "@/store/useStackQueueStore";
 import { Text } from "@react-three/drei";
 import { animated, useSpring } from '@react-spring/three';
-import { useThree } from '@react-three/fiber';
-import { useEffect } from 'react';
+
 
 interface AnimatedMeshProps {
   index: number;
@@ -38,13 +37,8 @@ const AnimatedMesh: React.FC<AnimatedMeshProps> = ({ index, element, dequeue }) 
 
 
 const QueueVisualization = () => {
-  const { camera } = useThree();
+ 
   const { elements, enqueue, dequeue } = useStackQueueStore();
-
-  useEffect(() => {
-    camera.position.set(0, 5, 10);
-    camera.lookAt(0, 0, 0);
-  }, [camera]);
 
   const handleEnqueue = (e: THREE.Event) => {
     e.stopPropagation();

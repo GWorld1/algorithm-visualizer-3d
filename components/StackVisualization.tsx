@@ -1,19 +1,13 @@
 import * as THREE from "three";
-import { useEffect } from 'react';
 import { animated, useSpring } from '@react-spring/three';
-import { useThree } from '@react-three/fiber';
 import { Text } from '@react-three/drei';
 import useStackQueueStore from '@/store/useStackQueueStore';
 
 const StackVisualization = () => {
-  const { camera } = useThree();
+ 
   const { elements, push ,pop } = useStackQueueStore();
   
-  useEffect(() => {
-    camera.position.set(0, 5, 10);
-    camera.lookAt(0, 0, 0);
-  }, [camera]);
-
+ 
   interface SpringElement {
     idx: number;
     element: { value: number; index: number };

@@ -5,7 +5,7 @@ import BinaryTree from './BinaryTree'
 import { useAlgorithmStore } from '@/store/useAlgorithmStore'
 import WeightedTree from './WeightedGraph'
 import LinkedList from './LinkedList'
-import DynamicArray from './DynamicArray'
+import DynamicArray from './ArrayVisualization'
 import StackVisualization from './StackVisualization'
 import QueueVisualization from './QueueVisualization'
 

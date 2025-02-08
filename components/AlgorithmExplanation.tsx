@@ -1,0 +1,249 @@
+import React, { useState } from 'react';
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogDescription,
+  DialogTrigger
+} from "@/components/ui/dialog";
+import { 
+  Accordion, 
+  AccordionContent, 
+  AccordionItem, 
+  AccordionTrigger 
+} from "@/components/ui/accordion";
+import { Button } from "@/components/ui/button";
+import { 
+  Info, 
+  Play, 
+  Clock, 
+  ArrowUpDown, 
+  Shuffle 
+} from "lucide-react";
+
+interface AlgorithmExplanationProps {
+  algorithmName: string;
+  complexity: {
+    worstCase: string;
+    averageCase: string;
+    bestCase: string;
+  };
+  steps: string[];
+  visualizationTips: string[];
+  colorLegend: Array<{color: string, meaning: string}>;
+}
+
+const AlgorithmExplanation: React.FC<AlgorithmExplanationProps> = ({
+  algorithmName,
+  complexity,
+  steps,
+  visualizationTips,
+  colorLegend
+}) => {
+  const [activeSection, setActiveSection] = useState<string | null>(null);
+
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant="outline" className="flex items-center gap-2">
+          <Info className="w-4 h-4" /> Understand {algorithmName}
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>{algorithmName} Explained</DialogTitle>
+          <DialogDescription>
+            Comprehensive guide to understanding the {algorithmName} algorithm
+          </DialogDescription>
+        </DialogHeader>
+
+        {/* Algorithm Overview */}
+        <section className="bg-violet-50 p-4 rounded-lg">
+          <h2 className="text-xl font-bold mb-3 flex items-center gap-2">
+            <Play className="w-5 h-5 text-violet-600" /> Algorithm Overview
+          </h2>
+          <Accordion type="single" collapsible>
+            <AccordionItem value="complexity">
+              <AccordionTrigger className="hover:no-underline">
+                <div className="flex items-center gap-2">
+                  <Clock className="w-4 h-4" /> Time Complexity
+                </div>
+              </AccordionTrigger>
+              <AccordionContent>
+                <div className="grid grid-cols-3 gap-4 text-center">
+                  <div>
+                    <h3 className="font-semibold">Worst Case</h3>
+                    <p>{complexity.worstCase}</p>
+                  </div>
+                  <div>
+                    <h3 className="font-semibold">Average Case</h3>
+                    <p>{complexity.averageCase}</p>
+                  </div>
+                  <div>
+                    <h3 className="font-semibold">Best Case</h3>
+                    <p>{complexity.bestCase}</p>
+                  </div>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        </section>
+
+        {/* Color Legend */}
+        <section className="bg-gray-50 p-4 rounded-lg">
+          <h2 className="text-xl font-bold mb-3 flex items-center gap-2">
+            <ArrowUpDown className="w-5 h-5 text-gray-600" /> Visualization Color Guide
+          </h2>
+          <div className="grid grid-cols-3 gap-2">
+            {colorLegend.map((item, index) => (
+              <div 
+                key={index} 
+                className="flex items-center gap-2 p-2 rounded"
+                style={{backgroundColor: item.color + '20'}}
+              >
+                <div 
+                  className="w-4 h-4 rounded" 
+                  style={{backgroundColor: item.color}}
+                />
+                <span>{item.meaning}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Sorting Steps */}
+        <section className="bg-green-50 p-4 rounded-lg">
+          <h2 className="text-xl font-bold mb-3 flex items-center gap-2">
+            <Shuffle className="w-5 h-5 text-green-600" /> Sorting Process
+          </h2>
+          <ol className="space-y-2">
+            {steps.map((step, index) => (
+              <li 
+                key={index} 
+                className="bg-white p-3 rounded-lg shadow-sm border"
+              >
+                <span className="font-semibold mr-2">Step {index + 1}:</span>
+                {step}
+              </li>
+            ))}
+          </ol>
+        </section>
+
+        {/* Visualization Tips */}
+        <section className="bg-blue-50 p-4 rounded-lg">
+          <h2 className="text-xl font-bold mb-3">Visualization Tips</h2>
+          <ul className="list-disc list-inside space-y-2">
+            {visualizationTips.map((tip, index) => (
+              <li key={index} className="text-blue-800">{tip}</li>
+            ))}
+          </ul>
+        </section>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+// Quick Sort Specific Configuration
+export const QuickSortExplanation = () => (
+  <AlgorithmExplanation 
+    algorithmName="Quick Sort"
+    complexity={{
+      worstCase: "O(n²)",
+      averageCase: "O(n log n)",
+      bestCase: "O(n log n)"
+    }}
+    steps={[
+      "Select the last element as the pivot",
+      "Partition the array around the pivot",
+      "Move elements smaller than pivot to left",
+      "Move elements larger than pivot to right",
+      "Recursively apply to sub-arrays",
+      "Combine sorted sub-arrays"
+    ]}
+    visualizationTips={[
+      "Watch how the pivot (red) moves elements",
+      "Observe green regions expanding as elements get sorted",
+      "Notice recursive sorting of smaller regions",
+      "Pay attention to element comparisons (yellow)",
+      "Track how elements swap positions"
+    ]}
+    colorLegend={[
+      {color: "#22c55e", meaning: "Sorted Elements"},
+      {color: "#fbbf24", meaning: "Comparing Elements"},
+      {color: "#ef4444", meaning: "Pivot or Swapping"},
+      {color: "#10b981", meaning: "Unsorted Elements"}
+    ]}
+  />
+);
+
+export const BubbleSortExplanation = () => (
+  <AlgorithmExplanation 
+    algorithmName="Bubble Sort"
+    complexity={{
+      worstCase: "O(n²)",
+      averageCase: "O(n²)",
+      bestCase: "O(n)"
+    }}
+    steps={[
+      "Start with the first two elements of the array",
+      "Compare adjacent elements",
+      "If they are in the wrong order, swap them",
+      "Move to the next pair of adjacent elements",
+      "Repeat until the end of the array is reached",
+      "After each pass, the largest unsorted element 'bubbles up' to its correct position",
+      "Repeat the process for the entire array, reducing the unsorted region each time"
+    ]}
+    visualizationTips={[
+      "Watch how larger elements 'bubble up' to the end of the array",
+      "Notice how the green sorted region grows from right to left",
+      "Observe the yellow highlighting during element comparisons",
+      "Track how elements swap positions when out of order",
+      "See how the algorithm makes multiple passes to sort the entire array"
+    ]}
+    colorLegend={[
+      {color: "#22c55e", meaning: "Sorted Elements"},
+      {color: "#fbbf24", meaning: "Comparing Elements"},
+      {color: "#ef4444", meaning: "Swapping Elements"},
+      {color: "#10b981", meaning: "Unsorted Elements"}
+    ]}
+  />
+);
+
+export const DijkstraExplanation = () => (
+  <AlgorithmExplanation 
+    algorithmName="Dijkstra's Algorithm"
+    complexity={{
+      worstCase: "O((V + E) log V)",
+      averageCase: "O((V + E) log V)",
+      bestCase: "O((V + E) log V)"
+    }}
+    steps={[
+      "Initialize distances: Set source node distance to 0 and all other nodes to infinity",
+      "Create a set of unvisited nodes containing all nodes in the graph",
+      "For the current node (starting with source), consider all unvisited neighbors",
+      "Calculate tentative distances through the current node to each neighbor",
+      "If new calculated distance is less than previously recorded, update the distance",
+      "Mark current node as visited and remove from unvisited set",
+      "Select unvisited node with smallest tentative distance as new current node",
+      "Repeat steps 3-7 until all nodes are visited or destination is reached"
+    ]}
+    visualizationTips={[
+      "Red nodes indicate the current node being processed",
+      "Watch how distances update as shorter paths are found",
+      "Notice how the algorithm always expands to the closest unvisited node",
+      "Edge weights show the cost of moving between nodes",
+      "The distance label (d:) shows the current shortest path distance to each node",
+      "The algorithm guarantees the shortest path when it visits a node"
+    ]}
+    colorLegend={[
+      {color: "#ef4444", meaning: "Current Node"},
+      {color: "#049ef4", meaning: "Unvisited Node"},
+      {color: "#22c55e", meaning: "Visited Node"},
+      {color: "#fbbf24", meaning: "Being Evaluated"},
+      {color: "#808080", meaning: "Edge Weight"}
+    ]}
+  />
+);
+
+export default AlgorithmExplanation;

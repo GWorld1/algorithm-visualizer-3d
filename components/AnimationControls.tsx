@@ -1,5 +1,5 @@
 "use client"
-
+import { bubbleSort,quickSort } from "@/lib/sortingAlgorithms";
 import { generateBFSSteps, generateDFSSteps } from "@/lib/treeAlgorithms";
 import { dijkstra } from "@/lib/graphAlgorithms";
 import { useAlgorithmStore } from "@/store/useAlgorithmStore";
@@ -8,10 +8,12 @@ import { TreeNode } from "@/types/Treenode";
 import { WeightedTreeNode } from "@/types/WeightedGraphNode";
 import { useEffect} from "react";
 import { DataStructureType } from "@/types/DataStructure";
+import { useArrayStore } from "@/store/useArrayStore";
+import { BubbleSortExplanation, DijkstraExplanation, QuickSortExplanation } from "./AlgorithmExplanation";
 
 export const Controls = () => {
     const {dataStructure,setDataStructure,algorithmType, setAlgorithmType, play, pause, reset, isPlaying,tree, weightedTree } = useAlgorithmStore();
-    
+    const {elements} = useArrayStore();
      // Algorithm options for each data structure
      const algorithmOptions = {
       binaryTree: [
@@ -53,6 +55,12 @@ export const Controls = () => {
         break;
       case 'dfs':
         steps = generateDFSSteps(tree);
+        break;
+      case 'bubbleSort':
+        steps = bubbleSort(elements);
+        break;
+      case 'quickSort':
+        steps = quickSort(elements);
         break;
     }
       useAlgorithmStore.getState().setSteps(steps as TreeNode[]|WeightedTreeNode[]);
@@ -136,6 +144,21 @@ export const Controls = () => {
             <p className="text-sm text-gray-500 ml-2">
               Current Step: {useAlgorithmStore.getState().currentStep + 1}/{useAlgorithmStore.getState().steps.length}
             </p>
+          )
+        }
+        {
+          algorithmType === 'quickSort' && (
+            <QuickSortExplanation/>
+          )
+        }
+        {
+          algorithmType === 'bubbleSort' && (
+            <BubbleSortExplanation/>
+          )
+        }
+        {
+          algorithmType === 'dijkstra' && (
+            <DijkstraExplanation />
           )
         }
       </div>

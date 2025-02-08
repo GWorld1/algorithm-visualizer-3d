@@ -6,6 +6,7 @@ import { TreeNode } from '@/types/Treenode';
 import { WeightedTreeNode } from '@/types/WeightedGraphNode';
 import { create } from 'zustand';
 import { DataStructureType } from '@/types/DataStructure';
+import { ArrayElementState} from '@/lib/sortingAlgorithms';
 type AlgorithmType = 
   | 'bfs' 
   | 'dfs' 
@@ -27,7 +28,7 @@ type AlgorithmState = {
   tree: TreeNode;
   updateTree: (newTree: TreeNode) => void;
   currentStep: number;
-  steps: TreeNode[] | WeightedTreeNode[];
+  steps: TreeNode[] | WeightedTreeNode[] | ArrayElementState[];
   isPlaying: boolean;
   setSteps: (steps: TreeNode[]) => void;
   play: () => void;

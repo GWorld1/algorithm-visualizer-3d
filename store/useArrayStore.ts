@@ -7,7 +7,7 @@ type ArrayState = {
 };
 
 export const useArrayStore = create<ArrayState>((set) => ({
-  elements: [5, 3, 7],
+  elements: [5, 3, 7 ,1 ,100 , 45 , 8],
   insert: (index, value) => {
     set((state) => {
       const newElements = [...state.elements];

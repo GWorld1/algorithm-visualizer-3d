@@ -1,33 +1,26 @@
 "use client"
 import { Canvas } from '@react-three/fiber'
-import { OrbitControls } from '@react-three/drei'
+import { OrbitControls,Grid, Environment, GizmoHelper, GizmoViewport } from '@react-three/drei'
 import BinaryTree from './BinaryTree'
 import { useAlgorithmStore } from '@/store/useAlgorithmStore'
 import WeightedTree from './WeightedGraph'
-import LinkedList from './LinkedList'
 import DynamicArray from './ArrayVisualization'
-import StackVisualization from './StackVisualization'
-import QueueVisualization from './QueueVisualization'
+
 
 
 
 const Scene = () => {
-  const { dataStructure } = useAlgorithmStore();
+  const { dataStructure,animationSettings:{showGrid} } = useAlgorithmStore();
+   // or set this based on your logic
+
   const renderDataStructure = () => {
     switch (dataStructure) {
       case 'binaryTree':
         return <BinaryTree />;
       case 'weightedGraph':
         return <WeightedTree />;
-      case 'linkedList':
-        return <LinkedList />;
       case 'array':
         return <DynamicArray />;
-      case 'stack':
-       return <StackVisualization/>;
-      case 'queue':
-        return <QueueVisualization/>
-
       default:
         return null;
     }
@@ -36,6 +29,17 @@ const Scene = () => {
       <>
      
       <Canvas camera={{ position: [0, 0, 5], fov: 50 }}>
+      {showGrid && <Grid
+              args={[10, 10]}
+              cellSize={1}
+              cellThickness={1}
+              cellColor="#6b7280"
+              sectionSize={3}
+          />}
+          <Environment preset="city" />
+          <GizmoHelper alignment="top-right" margin={[80, 80]}>
+            <GizmoViewport />
+          </GizmoHelper>
         {/* Lights */}
         <ambientLight intensity={2} />
         <pointLight position={[10, 10, 10]} />
@@ -49,6 +53,7 @@ const Scene = () => {
             enablePan={true}
             enableZoom={true}
             />
+            
       </Canvas>
     </>
   )

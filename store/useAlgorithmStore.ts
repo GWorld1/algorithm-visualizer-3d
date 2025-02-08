@@ -16,9 +16,18 @@ type AlgorithmType =
   | 'bubbleSort'
   | 'quickSort';
 
-
+// Add to useAlgorithmStore.ts
+type AnimationSettings = {
+  speed: number;
+  autoRotate: boolean;
+  showLabels: boolean;
+  showGrid: boolean;
+};
 
 type AlgorithmState = {
+  // Add to state
+  animationSettings: AnimationSettings;
+  updateAnimationSettings: (settings: Partial<AnimationSettings>) => void;
   algorithmType: AlgorithmType;
   dataStructure: DataStructureType;
   setAlgorithmType: (algorithmType: AlgorithmType) => void;
@@ -37,6 +46,15 @@ type AlgorithmState = {
 };
 
 export const useAlgorithmStore = create<AlgorithmState>((set) => ({
+  animationSettings: {
+    speed: 1,
+    autoRotate: true,
+    showLabels: true,
+    showGrid: false,
+  },
+  updateAnimationSettings: (settings) => {
+    set((state) => ({ animationSettings: { ...state.animationSettings, ...settings } }));
+  },
   algorithmType: 'bfs',
   dataStructure: 'binaryTree',
   setDataStructure: (dataStructure: DataStructureType) => {

@@ -133,8 +133,8 @@ export const bubbleSort = (inputArr: number[]): SortStep[] => {
 // Quick Sort Implementation with Visualization Steps
 export const quickSort = (inputArr: number[]): SortStep[] => {
   const arr = [...inputArr];
-  const steps: SortStep[] = [];
-  const sortedIndices = new Set<number>();
+  // const steps: SortStep[] = [];
+  // const sortedIndices = new Set<number>();
 
   // Function to check if an index is in its final sorted position
   const isInFinalPosition = (idx: number, finalArray: number[]): boolean => {

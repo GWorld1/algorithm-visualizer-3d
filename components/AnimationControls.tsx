@@ -9,7 +9,7 @@ import { WeightedTreeNode } from "@/types/WeightedGraphNode";
 import { useEffect} from "react";
 import { DataStructureType } from "@/types/DataStructure";
 import { useArrayStore } from "@/store/useArrayStore";
-import { BubbleSortExplanation, DijkstraExplanation, QuickSortExplanation } from "./AlgorithmExplanation";
+import { BFSExplanation, BubbleSortExplanation, DFSExplanation, DijkstraExplanation, QuickSortExplanation } from "./AlgorithmExplanation";
 
 export const Controls = () => {
     const {dataStructure,setDataStructure,algorithmType, setAlgorithmType, play, pause, reset, isPlaying,tree, weightedTree } = useAlgorithmStore();
@@ -23,22 +23,11 @@ export const Controls = () => {
       weightedGraph: [
           { value: 'dijkstra', label: 'Dijkstra' }
       ],
-      linkedList: [
-          { value: 'traverse', label: 'Traverse' },
-          { value: 'reverse', label: 'Reverse' }
-      ],
       array: [
           { value: 'bubbleSort', label: 'Bubble Sort' },
           { value: 'quickSort', label: 'Quick Sort' }
       ],
-      stack: [
-        { value: 'traverse', label: 'Traverse' },
-        
-    ],
-      queue: [
-      { value: 'traverse', label: 'Traverse' },
       
-  ],
   };
 
   
@@ -105,10 +94,8 @@ export const Controls = () => {
             >
                 <option value="binaryTree">Binary Tree</option>
                 <option value="weightedGraph">Weighted Graph</option>
-                <option value="linkedList">Linked List</option>
                 <option value="array">Array</option>
-                <option value="stack">Stack</option>
-                <option value="queue">Queue</option>
+                
             </select>
         {/* Algorithm Selector */}
         <select 
@@ -161,6 +148,17 @@ export const Controls = () => {
             <DijkstraExplanation />
           )
         }
+
+      {
+        algorithmType === 'bfs' && (
+          <BFSExplanation />
+        )
+      }
+      {
+        algorithmType === 'dfs' && (
+          <DFSExplanation />
+        )
+      }
       </div>
     );
   };

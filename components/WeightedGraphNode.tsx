@@ -2,6 +2,8 @@
 import { Text } from '@react-three/drei';
 import { WeightedTreeNode as WeightedTreeNodeType } from '@/types/WeightedGraphNode';
 import { Vector3 } from 'three';
+import { animated, useSpring } from '@react-spring/three';
+import { useState } from 'react';
 
 const WeightedTreeNode = ({
   node,
@@ -14,12 +16,24 @@ const WeightedTreeNode = ({
 }) => {
   // Existing node rendering code...
 
+  const [hovered, setHovered] = useState(false);
+  const springProps = useSpring({
+    scale: hovered ? 0.6 : 0.5,
+    color: isActive ? '#ef4444' : hovered ? '#3b82f6' : '#049ef4'
+  });
+
+
   return (
     <group position={position}>
-      <mesh scale={0.5}>
+      <animated.mesh 
+      {...springProps}
+      onPointerOver={() => setHovered(true)}
+      onPointerOut={() => setHovered(false)}
+      scale={0.5}
+      >
         <sphereGeometry />
         <meshStandardMaterial color={isActive ? '#ef4444' : '#049ef4'} />
-      </mesh>
+      </animated.mesh>
 
       {/* Value label */}
       <Text position={[0, 0.7, 0]} color={"steelblue"} fontSize={0.3}>

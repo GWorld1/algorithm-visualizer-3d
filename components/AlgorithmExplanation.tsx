@@ -46,7 +46,7 @@ const AlgorithmExplanation: React.FC<AlgorithmExplanationProps> = ({
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline" className="flex items-center gap-2">
+        <Button variant="outline" className="flex items-center gap-2 mx-2">
           <Info className="w-4 h-4" /> Understand {algorithmName}
         </Button>
       </DialogTrigger>
@@ -245,5 +245,72 @@ export const DijkstraExplanation = () => (
     ]}
   />
 );
+
+export const BFSExplanation = () => (
+  <AlgorithmExplanation 
+    algorithmName="Breadth-First Search"
+    complexity={{
+      worstCase: "O(V + E)",
+      averageCase: "O(V + E)",
+      bestCase: "O(V + E)"
+    }}
+    steps={[
+      "Start at the root node and add it to a queue",
+      "Remove the first node from the queue and visit it",
+      "Add all unvisited children of the current node to the queue from left to right",
+      "Mark the current node as visited",
+      "Repeat steps 2-4 until the queue is empty",
+      "The traversal is complete when all nodes have been visited"
+    ]}
+    visualizationTips={[
+      "Notice how nodes are visited level by level",
+      "Watch the queue grow and shrink as nodes are processed",
+      "Observe how all nodes at the same depth are visited before moving deeper",
+      "Pay attention to the left-to-right order of visiting siblings",
+      "Track how the algorithm systematically explores the breadth of the tree before going deeper"
+    ]}
+    colorLegend={[
+      {color: "#ef4444", meaning: "Current Node"},
+      {color: "#049ef4", meaning: "Unvisited Node"},
+      {color: "#22c55e", meaning: "Visited Node"},
+      {color: "#fbbf24", meaning: "Nodes in Queue"},
+      {color: "#808080", meaning: "Tree Edges"}
+    ]}
+  />
+);
+
+export const DFSExplanation = () => (
+  <AlgorithmExplanation 
+    algorithmName="Depth-First Search"
+    complexity={{
+      worstCase: "O(V + E)",
+      averageCase: "O(V + E)",
+      bestCase: "O(V + E)"
+    }}
+    steps={[
+      "Start at the root node and push it onto a stack",
+      "Pop a node from the stack and visit it",
+      "Push all unvisited children of the current node onto the stack (right child first, then left)",
+      "Mark the current node as visited",
+      "Repeat steps 2-4 until the stack is empty",
+      "The traversal is complete when all nodes have been visited"
+    ]}
+    visualizationTips={[
+      "Observe how the algorithm explores as far as possible along each branch",
+      "Watch the stack grow and shrink as nodes are processed",
+      "Notice how the algorithm backtracks only when it reaches a leaf node",
+      "Pay attention to the order of pushing children (right first for left-first traversal)",
+      "Track the depth-first pattern as the algorithm explores deep into the tree before backtracking"
+    ]}
+    colorLegend={[
+      {color: "#ef4444", meaning: "Current Node"},
+      {color: "#049ef4", meaning: "Unvisited Node"},
+      {color: "#22c55e", meaning: "Visited Node"},
+      {color: "#fbbf24", meaning: "Nodes in Stack"},
+      {color: "#808080", meaning: "Tree Edges"}
+    ]}
+  />
+);
+
 
 export default AlgorithmExplanation;

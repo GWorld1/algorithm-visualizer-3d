@@ -1,44 +1,39 @@
+// components/TreeNode.tsx
 import { Mesh, Vector3 } from 'three';
-import { useRef } from 'react';
-import { Text } from '@react-three/drei';
+import { useRef, useState } from 'react';
+import { Text, Html } from '@react-three/drei';
 import { TreeNode as TreeNodeType } from '@/types/Treenode';
 import { useAlgorithmStore } from '@/store/useAlgorithmStore';
-import { calculateTreeLayout } from '@/lib/treeLayout';
-import { findNode } from '@/lib/treeUtils';
+import { addTreeNode, deleteTreeNode } from '@/lib/nodeManipulation';
 
 const TreeNode = ({
   node,
   position,
   isActive,
-  onNodeClick
 }: {
   node: TreeNodeType;
   position: Vector3;
   isActive: boolean;
-  onNodeClick?: (node: TreeNodeType) => void;
 }) => {
   const meshRef = useRef<Mesh>(null);
   const { updateTree, tree } = useAlgorithmStore();
+  const [showMenu, setShowMenu] = useState(false);
 
   const handleAddChild = (side: 'left' | 'right') => {
-    const newNode = {
-      value: Math.floor(Math.random() * 100),
-    };
-    
-    console.log('newNode', newNode);
-
-    const cloneTree = structuredClone(tree);
-    const targetNode = findNode(cloneTree, node.value);
-    
-    console.log('targetNode', targetNode);
-    console.log('targetNode ' + side, targetNode && targetNode[side]);
-
-    if (targetNode && !targetNode[side]) {
-      targetNode[side] = newNode;
-      const updatedTree = calculateTreeLayout(cloneTree);
-      console.log('updatedTree', updatedTree);
+    const newValue = Math.floor(Math.random() * 100);
+    const updatedTree = addTreeNode(tree, node.value, side, newValue);
+    if (updatedTree) {
       updateTree(updatedTree);
     }
+    setShowMenu(false);
+  };
+
+  const handleDelete = () => {
+    const updatedTree = deleteTreeNode(tree, node.value);
+    if (updatedTree) {
+      updateTree(updatedTree);
+    }
+    setShowMenu(false);
   };
 
   return (
@@ -47,13 +42,12 @@ const TreeNode = ({
       <mesh
         ref={meshRef}
         scale={0.5}
-        onClick={() => onNodeClick?.(node)}
+        onClick={() => setShowMenu(!showMenu)}
         onPointerOver={() => { document.body.style.cursor = 'pointer' }}
         onPointerOut={() => { document.body.style.cursor = 'default' }}
       >
         <sphereGeometry />
         <meshStandardMaterial color={isActive ? '#ef4444' : '#049ef4'} />
-       
       </mesh>
 
       {/* Value label */}
@@ -67,20 +61,31 @@ const TreeNode = ({
         {node.value}
       </Text>
 
-      {/* Add child buttons */}
-      <Text
-        position={[0, -0.7, 0]}
-        fontSize={0.4}
-        color={'#4f46e5'}
-        onClick={(e) => {
-          e.stopPropagation();
-          const side = prompt('Add to left or right? (l/r)');
-          if (side === 'l') handleAddChild('left');
-          if (side === 'r') handleAddChild('right');
-        }}
-      >
-        [+]
-      </Text>
+      {/* Context Menu */}
+      {showMenu && (
+        <Html position={[1, 0, 0]}>
+          <div className="bg-white p-2 rounded shadow-lg">
+            <button
+              className="block w-full text-left px-2 py-1 hover:bg-gray-100"
+              onClick={() => handleAddChild('left')}
+            >
+              Add Left
+            </button>
+            <button
+              className="block w-full text-left px-2 py-1 hover:bg-gray-100"
+              onClick={() => handleAddChild('right')}
+            >
+              Add Right
+            </button>
+            <button
+              className="block w-full text-left px-2 py-1 hover:bg-red-100 text-red-600"
+              onClick={handleDelete}
+            >
+              Delete
+            </button>
+          </div>
+        </Html>
+      )}
     </group>
   );
 };

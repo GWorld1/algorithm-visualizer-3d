@@ -63,72 +63,161 @@ export const deleteTreeNode = (
 };
 
 // Weighted Graph Operations
+const findNode = (
+  node: WeightedTreeNode, 
+  value: number, 
+  visited: Set<number> = new Set()
+): WeightedTreeNode | null => {
+  if (visited.has(node.value)) return null;
+  visited.add(node.value);
+  
+  if (node.value === value) return node;
+  
+  for (const edge of Object.values(node.edges)) {
+    const found = findNode(edge.node, value, visited);
+    if (found) return found;
+  }
+  
+  return null;
+};
+
+// Helper function to create a deep copy of the graph
+const cloneGraph = (
+  node: WeightedTreeNode, 
+  visited: Set<number> = new Set()
+): WeightedTreeNode => {
+  if (visited.has(node.value)) {
+    return {
+      value: node.value,
+      edges: {},
+      x: node.x,
+      y: node.y
+    };
+  }
+  
+  visited.add(node.value);
+  const clone: WeightedTreeNode = {
+    value: node.value,
+    edges: {},
+    x: node.x,
+    y: node.y
+  };
+  
+  Object.entries(node.edges).forEach(([key, edge]) => {
+    clone.edges[key] = {
+      node: cloneGraph(edge.node, visited),
+      weight: edge.weight
+    };
+  });
+  
+  return clone;
+};
+
 export const addGraphNode = (
   graph: WeightedTreeNode,
   newValue: number,
   connections: Array<{targetValue: number, weight: number}>
 ): WeightedTreeNode => {
-  const newGraph = structuredClone(graph);
+  // Create a deep copy of the graph
+  const newGraph = cloneGraph(graph);
+  
+  // Create the new node
   const newNode: WeightedTreeNode = {
     value: newValue,
-    edges: {}
+    edges: {},
+    x: 0,
+    y: 0
   };
 
-  // Add the new node regardless of connections
-  newGraph.edges[newValue] = {
-    node: newNode,
-    weight: 1
-  };
-
-  // Add connections if any
+  // Track if we've successfully added any connections
+  let hasConnections = false;
+  
+  // Add connections between the new node and target nodes
   connections.forEach(({ targetValue, weight }) => {
-    const targetNode = findGraphNode(newGraph, targetValue);
+    const targetNode = findNode(newGraph, targetValue, new Set());
     if (targetNode) {
-      newNode.edges[targetValue] = { node: targetNode, weight };
-      targetNode.edges[newValue] = { node: newNode, weight };
+      hasConnections = true;
+      
+      // Create bidirectional edges
+      const edgeKey = `edge_${targetNode.value}_${newValue}`;
+      const reverseEdgeKey = `edge_${newValue}_${targetNode.value}`;
+      
+      // Add edge from target to new node
+      targetNode.edges[edgeKey] = {
+        node: newNode,
+        weight
+      };
+      
+      // Add edge from new node to target
+      newNode.edges[reverseEdgeKey] = {
+        node: targetNode,
+        weight
+      };
     }
   });
 
-  return calculateWeightedTreeLayout(newGraph);
+  // If we have any successful connections, add the new node to the graph structure
+  if (hasConnections) {
+    // Find any existing node to attach the new node to the graph structure
+    const firstConnection = connections[0];
+    if (firstConnection) {
+      const attachNode = findNode(newGraph, firstConnection.targetValue, new Set());
+      if (attachNode) {
+        // We don't need to add any additional edges here since we already created
+        // the bidirectional connections above
+        return calculateWeightedTreeLayout(newGraph);
+      }
+    }
+  }
+  
+  return graph; // Return original graph if no connections were made
 };
 
 export const deleteGraphNode = (
   graph: WeightedTreeNode,
   valueToDelete: number
 ): WeightedTreeNode => {
-  const newGraph = structuredClone(graph);
+  const visited = new Set<number>();
   
-  // Remove all edges pointing to the node to be deleted
-  const removeEdges = (node: WeightedTreeNode, visited: Set<number>) => {
-    if (visited.has(node.value)) return;
+  // Create new graph without the deleted node
+  const filterNode = (node: WeightedTreeNode, visited: Set<number>): WeightedTreeNode => {
+    if (visited.has(node.value)) {
+      return {
+        value: node.value,
+        edges: {},
+        x: node.x,
+        y: node.y
+      };
+    }
+    
     visited.add(node.value);
     
-    delete node.edges[valueToDelete];
+    const newNode: WeightedTreeNode = {
+      value: node.value,
+      edges: {},
+      x: node.x,
+      y: node.y
+    };
     
-    Object.values(node.edges).forEach(edge => {
-      removeEdges(edge.node, visited);
+    // Only keep edges that don't point to the deleted node
+    Object.entries(node.edges).forEach(([key, edge]) => {
+      if (edge.node.value !== valueToDelete) {
+        newNode.edges[key] = {
+          node: filterNode(edge.node, visited),
+          weight: edge.weight
+        };
+      }
     });
+    
+    return newNode;
   };
-
-  removeEdges(newGraph, new Set());
-  return calculateWeightedTreeLayout(newGraph);
-};
-
-// Helper function to find a node in the weighted graph
-const findGraphNode = (
-  graph: WeightedTreeNode,
-  value: number,
-  visited: Set<number> = new Set()
-): WeightedTreeNode | null => {
-  if (visited.has(graph.value)) return null;
-  visited.add(graph.value);
   
-  if (graph.value === value) return graph;
-  
-  for (const edge of Object.values(graph.edges)) {
-    const found = findGraphNode(edge.node, value, visited);
-    if (found) return found;
+  // If we're deleting the root node, find a new root
+  if (graph.value === valueToDelete) {
+    const firstEdge = Object.values(graph.edges)[0];
+    return firstEdge ? calculateWeightedTreeLayout(firstEdge.node) : graph;
   }
   
-  return null;
+  const newGraph = filterNode(graph, new Set());
+  return calculateWeightedTreeLayout(newGraph);
 };

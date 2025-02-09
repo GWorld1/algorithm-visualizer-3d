@@ -21,22 +21,38 @@ const WeightedTreeNode = ({
   const { updateWeightedTree, weightedTree } = useAlgorithmStore();
 
   const springProps = useSpring({
-    scale: hovered ? 0.6 : 0.5,
+    scale: hovered ? [0.6, 0.6, 0.6] : [0.5, 0.5, 0.5],
     color: isActive ? '#ef4444' : hovered ? '#3b82f6' : '#049ef4'
   });
 
   const handleAddConnection = () => {
-    const targetValue = parseInt(prompt('Enter target node value:') || '0');
-    const weight = parseInt(prompt('Enter edge weight:') || '1');
+    const targetValue = parseInt(prompt('Enter target node value:') || '');
+    if (isNaN(targetValue)) {
+      alert('Please enter a valid node value');
+      return;
+    }
     
-    if (targetValue && weight && weightedTree) {
-      console.log('Adding node:', { targetValue, weight });
-      const updatedGraph = addGraphNode(weightedTree, node.value + 1, [{
+    const weight = parseInt(prompt('Enter edge weight:') || '');
+    if (isNaN(weight) || weight <= 0) {
+      alert('Please enter a valid positive weight');
+      return;
+    }
+    
+    if (targetValue === node.value) {
+      alert('Cannot connect node to itself');
+      return;
+    }
+    
+    if (weightedTree) {
+      // Only create connection between the current node and target node
+      const updatedGraph = addGraphNode(weightedTree, targetValue, [{
         targetValue: node.value,
         weight
       }]);
-      if (updatedGraph) {
-        console.log('Updated graph:', updatedGraph);
+      
+      if (updatedGraph === weightedTree) {
+        alert('Could not create connection. Make sure the target node exists.');
+      } else {
         updateWeightedTree(updatedGraph);
       }
     }
@@ -56,45 +72,38 @@ const WeightedTreeNode = ({
   return (
     <group position={position}>
       <animated.mesh
-        {...springProps}
+        scale={springProps.scale}
         onClick={() => setShowMenu(!showMenu)}
         onPointerOver={() => setHovered(true)}
         onPointerOut={() => setHovered(false)}
       >
         <sphereGeometry />
-        <meshStandardMaterial color={isActive ? '#ef4444' : '#049ef4'} />
+        <animated.meshStandardMaterial color={springProps.color} />
       </animated.mesh>
 
       {/* Value label */}
-      <Text position={[0, 0.7, 0]} color="steelblue" fontSize={0.3}>
+      <Text
+        position={[0, 0.7, 0]}
+        color="black"
+        fontSize={0.3}
+        anchorX="center"
+        anchorY="middle"
+      >
         {node.value}
       </Text>
 
-      {/* Distance label */}
+      {/* Distance label (for Dijkstra's algorithm) */}
       {node.distance !== undefined && (
-        <Text position={[0, -0.7, 0]} fontSize={0.3} color="gray">
-          d: {node.distance}
+        <Text
+          position={[0, -0.7, 0]}
+          fontSize={0.3}
+          color="gray"
+          anchorX="center"
+          anchorY="middle"
+        >
+          d: {node.distance === Infinity ? '∞' : node.distance}
         </Text>
       )}
-
-      {/* Edge weights */}
-      {Object.entries(node.edges).map(([key, edge], index) => {
-        const angle = (2 * Math.PI * index) / Object.keys(node.edges).length;
-        const radius = 1.5;
-        const x = Math.cos(angle) * radius;
-        const y = Math.sin(angle) * radius;
-        
-        return (
-          <Text
-            key={key}
-            position={[x, y, 0.2]}
-            fontSize={0.3}
-            color="gray"
-          >
-            {edge.weight}
-          </Text>
-        );
-      })}
 
       {/* Context Menu */}
       {showMenu && (

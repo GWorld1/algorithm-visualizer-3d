@@ -28,7 +28,7 @@ const Scene = () => {
   return (
       <>
      
-      <Canvas camera={{ position: [0, 0, 5], fov: 50 }}>
+      <Canvas camera={{ position: [0, 0, 15], fov: 50 }}>
       {showGrid && <Grid
               args={[10, 10]}
               cellSize={1}
@@ -48,8 +48,8 @@ const Scene = () => {
         {renderDataStructure()}
         {/* Camera Controls */}
         <OrbitControls 
-            minDistance={5}
-            maxDistance={20}
+            minDistance={10}
+            maxDistance={30}
             enablePan={true}
             enableZoom={true}
             />

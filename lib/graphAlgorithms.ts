@@ -1,6 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { WeightedTreeNode } from '@/types/WeightedGraphNode';
-
 
 export interface DijkstraStep {
   currentNode: WeightedTreeNode;
@@ -20,8 +18,7 @@ export const dijkstra = (root: WeightedTreeNode, sourceValue: number): DijkstraS
     visited.add(node.value);
     
     distances.set(node.value, node.value === sourceValue ? 0 : Infinity);
-    paths.set(node.value, []); // Initialize path as empty for all nodes
-
+    paths.set(node.value, [sourceValue]); // Initialize path with source node
     unvisited.add(node);
     
     Object.values(node.edges).forEach(edge => {
@@ -46,14 +43,7 @@ export const dijkstra = (root: WeightedTreeNode, sourceValue: number): DijkstraS
     return null;
   };
   
-    const sourceNode = findSourceNode(root); // Find the source node
-    if (!sourceNode) {
-        throw new Error('Source node not found');
-    }
-    
-    // Initialize paths for all nodes
-    initializeNodes(root);
-
+  const sourceNode = findSourceNode(root);
   if (!sourceNode) {
     throw new Error('Source node not found');
   }

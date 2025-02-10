@@ -24,7 +24,7 @@ const WeightedTreeNode = ({
 
   const springProps = useSpring({
     scale: hovered ? [0.6, 0.6, 0.6] : [0.5, 0.5, 0.5],
-    color: isActive ? '#ef4444' : hovered ? '#3b82f6' : '#049ef4'
+    color: node.value === 1 ? 'violet' :  isActive ? '#ef4444' : hovered ? '#3b82f6' : '#049ef4'
   });
 
   const handleAddConnection = () => {

@@ -7,8 +7,7 @@ import { useEffect } from 'react';
 import { useAlgorithmStore } from '@/store/useAlgorithmStore';
 import { DijkstraStep } from '@/lib/graphAlgorithms';
 
-const WeightedGraph = () => {
-
+const WeightedTree = () => {
   const { currentStep, steps, weightedTree, algorithmType } = useAlgorithmStore();
   const { camera } = useThree();
   
@@ -18,7 +17,7 @@ const WeightedGraph = () => {
   }, [camera]);
 
   const isDijkstra = algorithmType === 'dijkstra';
-  const currentDijkstraStep = isDijkstra ? steps[currentStep] as unknown as DijkstraStep : null;
+  const currentDijkstraStep = isDijkstra ? steps[currentStep] as DijkstraStep : null;
   
   const isNodeInCurrentPath = (nodeValue: number): boolean => {
     if (!currentDijkstraStep) return false;
@@ -132,4 +131,4 @@ const WeightedGraph = () => {
   return renderGraph();
 };
 
-export default WeightedGraph;
+export default WeightedTree;

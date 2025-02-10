@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 // lib/nodeManipulation.ts
 import { TreeNode } from "@/types/Treenode";
 import { WeightedTreeNode } from "@/types/WeightedGraphNode";

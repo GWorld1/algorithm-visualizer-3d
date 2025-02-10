@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { 
   Dialog, 
   DialogContent, 
@@ -41,7 +41,7 @@ const AlgorithmExplanation: React.FC<AlgorithmExplanationProps> = ({
   visualizationTips,
   colorLegend
 }) => {
-  const [activeSection, setActiveSection] = useState<string | null>(null);
+ // const [activeSection, setActiveSection] = useState<string | null>(null);
 
   return (
     <Dialog>

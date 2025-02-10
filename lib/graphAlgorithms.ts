@@ -68,6 +68,7 @@ export const dijkstra = (root: WeightedTreeNode, sourceValue: number): DijkstraS
     unvisited.delete(current);
     
     // Update distances to neighbors
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     Object.entries(current.edges).forEach(([_, edge]) => {
       if (!edge || !unvisited.has(edge.node)) return;
       

@@ -17,7 +17,7 @@ const WeightedTree = () => {
   }, [camera]);
 
   const isDijkstra = algorithmType === 'dijkstra';
-  const currentDijkstraStep = isDijkstra ? steps[currentStep] as DijkstraStep : null;
+  const currentDijkstraStep = isDijkstra ? steps[currentStep] as unknown as DijkstraStep : null;
   
   const isNodeInCurrentPath = (nodeValue: number): boolean => {
     if (!currentDijkstraStep) return false;

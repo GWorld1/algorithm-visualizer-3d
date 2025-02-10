@@ -74,7 +74,7 @@ const WeightedTreeNode = ({
   return (
     <group position={position}>
       <animated.mesh
-        scale={springProps.scale}
+        scale={springProps.scale.to((x, y, z) => [x, y, z])}
         onClick={() => setShowMenu(!showMenu)}
         onPointerOver={() => setHovered(true)}
         onPointerOut={() => setHovered(false)}

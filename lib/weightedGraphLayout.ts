@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { WeightedTreeNode } from '@/types/WeightedGraphNode';
 
 interface NodePosition {

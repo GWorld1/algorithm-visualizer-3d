@@ -6,12 +6,34 @@ import { useAlgorithmStore } from "@/store/useAlgorithmStore";
 import { AlgorithmType } from "@/types/AlgorithmType";
 import { TreeNode } from "@/types/Treenode";
 import { WeightedTreeNode } from "@/types/WeightedGraphNode";
-import { useEffect} from "react";
+import { useEffect, useState} from "react";
 import { DataStructureType } from "@/types/DataStructure";
 import { useArrayStore } from "@/store/useArrayStore";
 import { BFSExplanation, BubbleSortExplanation, DFSExplanation, DijkstraExplanation, QuickSortExplanation } from "./AlgorithmExplanation";
 
 export const Controls = () => {
+      // Add state for source node
+    const [sourceNode, setSourceNode] = useState<number | null>(null);
+
+    // Collect all available nodes for source selection
+  const getAvailableNodes = () => {
+    if (!weightedTree) return [];
+    const nodes: number[] = [];
+    const visited = new Set<number>();
+    
+    const collectNodes = (node: WeightedTreeNode) => {
+      if (visited.has(node.value)) return;
+      visited.add(node.value);
+      nodes.push(node.value);
+      
+      Object.values(node.edges).forEach(edge => {
+        if (edge.node) collectNodes(edge.node);
+      });
+    };
+    
+    collectNodes(weightedTree);
+    return nodes.sort((a, b) => a - b);
+  };
     const {dataStructure,setDataStructure,algorithmType, setAlgorithmType, play, pause, reset, isPlaying,tree, weightedTree } = useAlgorithmStore();
     const {elements} = useArrayStore();
      // Algorithm options for each data structure
@@ -35,9 +57,12 @@ export const Controls = () => {
       let steps;
     switch (algorithmType) {
       case 'dijkstra':
-        if (!weightedTree) return;
-        steps = dijkstra(weightedTree);
-        console.log(steps);
+        if (!weightedTree || sourceNode === null) {
+          alert('Please select a source node');
+          return;
+        }
+        steps = dijkstra(weightedTree, sourceNode);
+        play();
         break;
       case 'bfs':
         steps = generateBFSSteps(tree);
@@ -111,6 +136,21 @@ export const Controls = () => {
             ))
           }
         </select>
+
+        {algorithmType === 'dijkstra' && (
+        <select
+          value={sourceNode ?? ''}
+          onChange={(e) => setSourceNode(Number(e.target.value))}
+          className="appearance-none mr-2 py-2 px-4 rounded-full outline-none border-0 text-sm font-semibold bg-violet-50 text-violet-700 hover:bg-violet-100"
+        >
+          <option value="">Select Source Node</option>
+          {getAvailableNodes().map(value => (
+            <option key={value} value={value}>
+              Node {value}
+            </option>
+          ))}
+        </select>
+      )}
 
         {
           !isPlaying ? 

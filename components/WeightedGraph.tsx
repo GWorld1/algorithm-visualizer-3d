@@ -1,98 +1,109 @@
-// components/WeightedTree.tsx
-import { Line,Text } from '@react-three/drei';
+import { Line, Text } from '@react-three/drei';
 import WeightedTreeNode from './WeightedGraphNode';
 import { WeightedTreeNode as WeightedTreeNodeType } from '@/types/WeightedGraphNode';
 import { Vector3 } from 'three';
 import { useThree } from '@react-three/fiber';
 import { useEffect } from 'react';
 import { useAlgorithmStore } from '@/store/useAlgorithmStore';
+import { DijkstraStep } from '@/lib/graphAlgorithms';
 
-const WeightedTree = () => {
-  const { currentStep, steps, weightedTree } = useAlgorithmStore();
+const WeightedGraph = () => {
+
+  const { currentStep, steps, weightedTree, algorithmType } = useAlgorithmStore();
   const { camera } = useThree();
   
   useEffect(() => {
-    camera.position.set(0, 5, 15);
+    camera.position.set(15, 15, 15);
     camera.lookAt(0, 0, 0);
   }, [camera]);
 
-  // Collect all nodes and edges first to avoid duplicate rendering
-  const collectNodesAndEdges = (root: WeightedTreeNodeType) => {
-    const nodes = new Map<number, WeightedTreeNodeType>();
-    const edges = new Set<string>();
+  const isDijkstra = algorithmType === 'dijkstra';
+  const currentDijkstraStep = isDijkstra ? steps[currentStep] as unknown as DijkstraStep : null;
+  
+  const isNodeInCurrentPath = (nodeValue: number): boolean => {
+    if (!currentDijkstraStep) return false;
+    const currentNode = currentDijkstraStep.currentNode;
+    const path = currentDijkstraStep.paths.get(currentNode.value);
+    return path?.includes(nodeValue) ?? false;
+  };
+  
+  const isEdgeInCurrentPath = (node1Value: number, node2Value: number): boolean => {
+    if (!currentDijkstraStep) return false;
+    const currentNode = currentDijkstraStep.currentNode;
+    const path = currentDijkstraStep.paths.get(currentNode.value);
+    if (!path) return false;
     
-    const traverse = (node: WeightedTreeNodeType) => {
-      if (nodes.has(node.value)) return;
-      
-      nodes.set(node.value, node);
-      
-      Object.values(node.edges).forEach(edge => {
-        if (!edge.node) return;
-        
-        // Create a unique identifier for each edge
-        const edgeId = [node.value, edge.node.value].sort().join('-');
-        if (!edges.has(edgeId)) {
-          edges.add(edgeId);
-        }
-        
-        traverse(edge.node);
-      });
-    };
-    
-    if (root) {
-      traverse(root);
-    }
-    
-    return { nodes, edges };
+    // Check if these nodes are adjacent in the path
+    const index1 = path.indexOf(node1Value);
+    const index2 = path.indexOf(node2Value);
+    return index1 !== -1 && index2 !== -1 && Math.abs(index1 - index2) === 1;
   };
 
   const renderGraph = () => {
     if (!weightedTree) return null;
     
-    const { nodes, edges } = collectNodesAndEdges(weightedTree);
+    const nodes = new Map<number, WeightedTreeNodeType>();
+    const edges = new Set<string>();
+    
+    const collectNodes = (node: WeightedTreeNodeType, visited: Set<number> = new Set()) => {
+      if (visited.has(node.value)) return;
+      visited.add(node.value);
+      nodes.set(node.value, node);
+      
+      Object.values(node.edges).forEach(edge => {
+        if (!edge.node) return;
+        const edgeId = [node.value, edge.node.value].sort().join('-');
+        edges.add(edgeId);
+        collectNodes(edge.node, visited);
+      });
+    };
+    
+    collectNodes(weightedTree);
     
     return (
       <group>
-        {/* Render Edges First */}
+        {/* Render Edges */}
         {Array.from(edges).map(edgeId => {
           const [node1Value, node2Value] = edgeId.split('-').map(Number);
           const node1 = nodes.get(node1Value)!;
           const node2 = nodes.get(node2Value)!;
           
-          const isActive = (
-            steps[currentStep]?.value === node1Value && 
-            steps[currentStep - 1]?.value === node2Value
-          ) || (
-            steps[currentStep]?.value === node2Value && 
-            steps[currentStep - 1]?.value === node1Value
-          );
-
-          // Find the edge weight
+          const isInPath = isEdgeInCurrentPath(node1Value, node2Value);
+          
           const edge = Object.values(node1.edges).find(e => e.node.value === node2Value);
           const weight = edge?.weight ?? 1;
+          
+          const midPoint = new Vector3(
+            ((node1.x ?? 0) + (node2.x ?? 0)) / 2,
+            ((node1.y ?? 0) + (node2.y ?? 0)) / 2,
+            ((node1.z ?? 0) + (node2.z ?? 0)) / 2
+          );
           
           return (
             <group key={edgeId}>
               <Line
                 points={[
-                  new Vector3(node1.x ?? 0, node1.y ?? 0, 0),
-                  new Vector3(node2.x ?? 0, node2.y ?? 0, 0)
+                  new Vector3(node1.x ?? 0, node1.y ?? 0, node1.z ?? 0),
+                  new Vector3(node2.x ?? 0, node2.y ?? 0, node2.z ?? 0)
                 ]}
-                color={isActive ? "#ef4444" : "gray"}
-                lineWidth={isActive ? 4 : 2}
+                color={isInPath ? "#22c55e" : "gray"}
+                lineWidth={isInPath ? 4 : 2}
               />
-              {/* Edge weight label positioned at midpoint */}
-              <group position={[
-                ((node1.x ?? 0) + (node2.x ?? 0)) / 2,
-                ((node1.y ?? 0) + (node2.y ?? 0)) / 2,
-                0
-              ]}>
+              <group position={midPoint.toArray()}>
                 <mesh scale={[0.3, 0.3, 0.3]}>
                   <sphereGeometry />
-                  <meshStandardMaterial color="white" />
+                  <meshStandardMaterial color={isInPath ? "#22c55e" : "white"} />
                 </mesh>
                 <group position={[0, 0.4, 0]}>
-                  <WeightLabel weight={weight} />
+                  <Text
+                    fontSize={0.3}
+                    color="black"
+                    anchorX="center"
+                    anchorY="middle"
+                    quaternion={camera.quaternion}
+                  >
+                    {weight}
+                  </Text>
                 </group>
               </group>
             </group>
@@ -101,13 +112,16 @@ const WeightedTree = () => {
 
         {/* Render Nodes */}
         {Array.from(nodes.values()).map(node => {
-          const isActive = steps[currentStep]?.value === node.value;
+          const isInPath = isNodeInCurrentPath(node.value);
+          const distance = currentDijkstraStep?.distances.get(node.value);
+          
           return (
             <WeightedTreeNode
               key={node.value}
               node={node}
-              position={new Vector3(node.x ?? 0, node.y ?? 0, 0)}
-              isActive={isActive}
+              position={new Vector3(node.x ?? 0, node.y ?? 0, node.z ?? 0)}
+              isActive={isInPath}
+              distance={distance}
             />
           );
         })}
@@ -118,20 +132,4 @@ const WeightedTree = () => {
   return renderGraph();
 };
 
-// Helper component for weight labels
-const WeightLabel = ({ weight }: { weight: number }) => {
-  return (
-    <mesh>
-      <Text
-        fontSize={0.3}
-        position={[0, 0, 0]}
-        color="black"
-      >
-        {weight}
-      </Text>
-      <meshStandardMaterial color="black" />
-    </mesh>
-  );
-};
-
-export default WeightedTree;
+export default WeightedGraph;

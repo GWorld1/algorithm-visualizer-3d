@@ -10,11 +10,13 @@ import { addGraphNode, deleteGraphNode } from '@/lib/nodeManipulation';
 const WeightedTreeNode = ({
   node,
   position,
-  isActive
+  isActive,
+  distance
 }: {
   node: WeightedTreeNodeType;
   position: Vector3;
   isActive: boolean;
+  distance: number | undefined
 }) => {
   const [hovered, setHovered] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
@@ -93,7 +95,7 @@ const WeightedTreeNode = ({
       </Text>
 
       {/* Distance label (for Dijkstra's algorithm) */}
-      {node.distance !== undefined && (
+      {distance !== undefined && (
         <Text
           position={[0, -0.7, 0]}
           fontSize={0.3}
@@ -101,7 +103,8 @@ const WeightedTreeNode = ({
           anchorX="center"
           anchorY="middle"
         >
-          d: {node.distance === Infinity ? '∞' : node.distance}
+          d: {distance === Infinity ? '∞' : distance}
+
         </Text>
       )}
 

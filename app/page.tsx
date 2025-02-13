@@ -1,6 +1,7 @@
 "use client"
 import { Controls } from "@/components/AnimationControls";
 import ArrayController from "@/components/ArrayController";
+import LinkedListControls from "@/components/LinkedListControl";
 import Scene from "@/components/Scene";
 import { useAlgorithmStore } from "@/store/useAlgorithmStore";
 export default function Home() {
@@ -13,6 +14,7 @@ export default function Home() {
       <Scene/>
       <Controls/>
         {dataStructure === 'array' && <ArrayController/>}
+        {dataStructure === 'linkedList' && <LinkedListControls/>}
       
       <footer className="absolute bottom-0 right-0 p-4">
         <p className="text-sm text-gray-500">

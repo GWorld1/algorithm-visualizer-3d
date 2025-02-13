@@ -1,12 +1,29 @@
 "use client"
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls,Grid, Environment, GizmoHelper, GizmoViewport } from '@react-three/drei'
-import BinaryTree from './BinaryTree'
+import dynamic from 'next/dynamic'
 import { useAlgorithmStore } from '@/store/useAlgorithmStore'
-import WeightedTree from './WeightedGraph'
-import DynamicArray from './ArrayVisualization'
 
 
+const BinaryTree = dynamic(() => import('@/components/BinaryTree'), {
+  suspense: true,
+  ssr: false,
+});
+
+const WeightedTree = dynamic(() => import('@/components/WeightedGraph'), {
+  suspense: true,
+  ssr: false,
+});
+
+const DynamicArray = dynamic(() => import('@/components/ArrayVisualization'), {
+  suspense: true,
+  ssr: false,
+});
+
+const LinkedList = dynamic(() => import('@/components/LinkedListVisualization'), {
+  suspense: true,
+  ssr: false,
+});
 
 
 const Scene = () => {
@@ -21,6 +38,8 @@ const Scene = () => {
         return <WeightedTree />;
       case 'array':
         return <DynamicArray />;
+      case 'linkedList':
+        return <LinkedList />;
       default:
         return null;
     }

@@ -2,11 +2,13 @@ import { sampleTree } from '@/data/sampleTree';
 import { sampleWeightedTree } from '@/data/sampleWeightTree';
 import { calculateTreeLayout } from '@/lib/treeLayout';
 import { calculateWeightedTreeLayout } from '@/lib/weightedGraphLayout';
+import {calculateLinkedListLayout} from '@/lib/linkedListLayout';
 import { TreeNode } from '@/types/Treenode';
 import { WeightedTreeNode } from '@/types/WeightedGraphNode';
 import { create } from 'zustand';
 import { DataStructureType } from '@/types/DataStructure';
 import { ArrayElementState} from '@/lib/sortingAlgorithms';
+import { LinkedListNode } from '@/types/LinkedListNode'; // Import LinkedListNode
 type AlgorithmType = 
   | 'bfs' 
   | 'dfs' 
@@ -14,7 +16,11 @@ type AlgorithmType =
   | 'traverse'
   | 'reverse'
   | 'bubbleSort'
-  | 'quickSort';
+  | 'quickSort'
+  | 'createLinkedList'
+  | 'searchLinkedList'
+  | 'insertNode'
+  | 'deleteNode'
 
 // Add to useAlgorithmStore.ts
 type AnimationSettings = {
@@ -43,6 +49,8 @@ type AlgorithmState = {
   play: () => void;
   pause: () => void;
   reset: () => void;
+  linkedList: LinkedListNode | null; // Add linkedList
+  updateLinkedList: (newList: LinkedListNode) => void; // Add updateLinkedList
 };
 
 export const useAlgorithmStore = create<AlgorithmState>((set) => ({
@@ -79,4 +87,6 @@ export const useAlgorithmStore = create<AlgorithmState>((set) => ({
   play: () => set({ isPlaying: true }),
   pause: () => set({ isPlaying: false }),
   reset: () => set({ currentStep: 0, isPlaying: false }),
+  linkedList: null, // Initialize linkedList to null
+  updateLinkedList: (newList) => set({ linkedList: calculateLinkedListLayout(newList) }), // Implement updateLinkedList
 }));

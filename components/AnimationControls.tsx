@@ -10,9 +10,11 @@ import { useEffect} from "react";
 import { DataStructureType } from "@/types/DataStructure";
 import { useArrayStore } from "@/store/useArrayStore";
 import { BFSExplanation, BubbleSortExplanation, DFSExplanation, DijkstraExplanation, QuickSortExplanation } from "./AlgorithmExplanation";
+import { LinkedListNode } from "@/types/LinkedListNode";
+
 
 export const Controls = () => {
-    const {dataStructure,setDataStructure,algorithmType, setAlgorithmType, play, pause, reset, isPlaying,tree, weightedTree } = useAlgorithmStore();
+    const {dataStructure,setDataStructure,algorithmType, setAlgorithmType, play, pause, reset, isPlaying,tree, weightedTree} = useAlgorithmStore();
     const {elements} = useArrayStore();
      // Algorithm options for each data structure
      const algorithmOptions = {
@@ -27,6 +29,12 @@ export const Controls = () => {
           { value: 'bubbleSort', label: 'Bubble Sort' },
           { value: 'quickSort', label: 'Quick Sort' }
       ],
+      linkedList: [
+        { value: 'createLinkedList', label: 'Create Linked List' },
+        { value: 'searchLinkedList', label: 'Search Node' },
+        { value: 'insertNode', label: 'Insert Node' },
+        { value: 'deleteNode', label: 'Delete Node' },
+    ],
       
   };
 
@@ -51,8 +59,10 @@ export const Controls = () => {
       case 'quickSort':
         steps = quickSort(elements);
         break;
+      default:
+        return;
     }
-      useAlgorithmStore.getState().setSteps(steps as TreeNode[]|WeightedTreeNode[]);
+      useAlgorithmStore.getState().setSteps(steps as TreeNode[]|WeightedTreeNode[]|LinkedListNode[]);
       play();
     };
   
@@ -109,6 +119,7 @@ export const Controls = () => {
                 <option value="binaryTree">Binary Tree</option>
                 <option value="weightedGraph">Weighted Graph</option>
                 <option value="array">Array</option>
+                <option value="linkedList">Linked List</option>
                 
             </select>
         {/* Algorithm Selector */}

@@ -81,6 +81,20 @@ export const Controls = () => {
       setAlgorithmType(firstAlgorithm as AlgorithmType);
   };
 
+  const goToNextStep = () => {
+    useAlgorithmStore.setState((state) => ({
+      currentStep:
+        state.currentStep < state.steps.length - 1
+          ? state.currentStep + 1
+          : state.currentStep,
+    }));
+  };
+
+  const goToPreviousStep = () => {
+    useAlgorithmStore.setState((state) => ({
+      currentStep: state.currentStep > 0 ? state.currentStep - 1 : 0,
+    }));
+  };
 
   
     return (
@@ -112,6 +126,14 @@ export const Controls = () => {
           }
         </select>
 
+        
+        <button
+          onClick={goToPreviousStep}
+          className="text-blue-600 bg-blue-100 px-4 py-2 ml-2  rounded-full font-semibold text-sm"
+        >
+          Previous
+        </button>
+
         {
           !isPlaying ? 
             <button onClick={startAlgorithm} className="text-blue-600 bg-blue-100 px-4 py-2 ml-2  rounded-full font-semibold text-sm">
@@ -122,10 +144,17 @@ export const Controls = () => {
             Pause
           </button>
         }
+
+        <button
+          onClick={goToNextStep}
+          className="text-blue-600 bg-blue-100 px-4 py-2 ml-2  rounded-full font-semibold text-sm"
+        >
+          Next
+        </button>
+
         <button onClick={reset} className="text-gray-600 bg-gray-100 px-4 py-2  ml-2 rounded-full font-semibold text-sm">
           Reset
         </button>
-
         {
           isPlaying && (
             <p className="text-sm text-gray-500 ml-2">

@@ -1,3 +1,4 @@
+"use client"
 import { useArrayStore } from '@/store/useArrayStore';
 import React, { useState } from 'react'
 

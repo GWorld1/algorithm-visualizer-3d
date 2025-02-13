@@ -1,4 +1,4 @@
-"use client";
+"use client"
 import { Controls } from "@/components/AnimationControls";
 import ArrayController from "@/components/ArrayController";
 import Scene from "@/components/Scene";

@@ -4,11 +4,11 @@
 import { useState } from "react";
 import { useAlgorithmStore } from "@/store/useAlgorithmStore";
 import { createLinkedList, searchLinkedList, insertNode, deleteNode } from "@/lib/linkedListAlgorithms";
-import { useArrayStore } from "@/store/useArrayStore";
+
 
 const LinkedListControls = () => {
   const { updateLinkedList, linkedList } = useAlgorithmStore();
-  const { elements } = useArrayStore();
+  const [elements,setElements] = useState<number[]>([1,10,9])
   const [searchValue, setSearchValue] = useState<number | null>(null);
   const [insertAfterValue, setInsertAfterValue] = useState<number | null>(null);
   const [insertNewValue, setInsertNewValue] = useState<number | null>(null);
@@ -16,7 +16,7 @@ const LinkedListControls = () => {
 
   const handleCreateLinkedList = () => {
     const newList = createLinkedList(elements);
-    updateLinkedList(newList);
+    updateLinkedList(newList!);
   };
 
   const handleSearch = () => {
@@ -38,7 +38,7 @@ const LinkedListControls = () => {
       return;
     }
     const insertedList = insertNode(linkedList, insertAfterValue, insertNewValue);
-    updateLinkedList(insertedList);
+    updateLinkedList(insertedList!);
   };
 
   const handleDelete = () => {
@@ -47,17 +47,27 @@ const LinkedListControls = () => {
       return;
     }
     const deletedList = deleteNode(linkedList, deleteValue);
-    updateLinkedList(deletedList);
+    updateLinkedList(deletedList!);
   };
 
   return (
-    <div className="fixed bottom-4 right-4 shadow z-10flex flex-col gap-2 p-4 bg-gray-100 rounded-md">
+    <div className="fixed bottom-4 right-4 shadow z-10 flex flex-col gap-2 p-4 bg-gray-100 rounded-md">
       <h3 className="text-lg font-semibold">Linked List Operations</h3>
 
-      <button onClick={handleCreateLinkedList} className="bg-blue-500 text-white p-2 rounded hover:bg-blue-700">
-        Create Linked List
-      </button>
-
+      <div className="flex flex-row space-x-2">
+        <label htmlFor="elements">Elements:</label>
+        <input
+          type="text"
+          id="elements"
+          className="p-1 border rounded"
+          value={elements.join(', ')}
+          onChange={(e) => setElements(e.target.value.split(',').map(Number))}
+        />
+        <button onClick={handleCreateLinkedList} className="bg-blue-500 text-white p-2 rounded hover:bg-blue-700">
+          Create Linked List
+        </button>
+      </div>
+      
       <div className="flex items-center gap-2">
         <label htmlFor="searchValue">Search Value:</label>
         <input

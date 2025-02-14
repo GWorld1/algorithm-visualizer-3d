@@ -11,7 +11,7 @@ export const calculateLinkedListLayout = (
     current.x = x;
     current.y = 0; // Keep nodes on the same horizontal level
     x += spacing;
-    current = current.next;
+    current = current.next ?? null;
   }
   return head;
 };

@@ -8,7 +8,7 @@ import { WeightedTreeNode } from '@/types/WeightedGraphNode';
 import { create } from 'zustand';
 import { DataStructureType } from '@/types/DataStructure';
 import { ArrayElementState} from '@/lib/sortingAlgorithms';
-import { LinkedListNode } from '@/types/LinkedListNode'; // Import LinkedListNode
+import { LinkedListNode } from "@/types/LinkedListNode"; // Import LinkedListNode
 type AlgorithmType = 
   | 'bfs' 
   | 'dfs' 

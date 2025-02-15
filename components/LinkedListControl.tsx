@@ -2,12 +2,14 @@
 "use client";
 
 import { useState } from "react";
-import { useAlgorithmStore } from "@/store/useAlgorithmStore";
+import { useLinkedListStore } from "@/store/useLinkedListStore"; // Import the new store
 import { createLinkedList, searchLinkedList, insertNode, deleteNode } from "@/lib/linkedListAlgorithms";
+import { useAlgorithmStore } from "@/store/useAlgorithmStore";
 
 
 const LinkedListControls = () => {
-  const { algorithmType, updateLinkedList, linkedList, setSteps, play } = useAlgorithmStore();
+  const { algorithmType,play } = useAlgorithmStore();
+  const { setLinkedList, setSteps,  linkedList } = useLinkedListStore(); // Use the new store
   const [elements, setElements] = useState<number[]>([1, 10, 9]);
   const [searchValue, setSearchValue] = useState<number | null>(null);
   const [insertAfterValue, setInsertAfterValue] = useState<number | null>(null);
@@ -16,10 +18,10 @@ const LinkedListControls = () => {
   
   const handleCreateLinkedList = () => {
     const steps = createLinkedList(elements);
-    useAlgorithmStore.getState().setSteps(steps);
+    setSteps(steps); // Use the new store's setSteps
     play();
     if (steps.length > 0) {
-      updateLinkedList(steps[steps.length - 1].list!);
+      setLinkedList(steps[steps.length - 1].list!); // Use the new store's setLinkedList
     }
   };
 
@@ -29,7 +31,7 @@ const LinkedListControls = () => {
       return;
     }
     const steps = searchLinkedList(linkedList, searchValue);
-    useAlgorithmStore.getState().setSteps(steps);
+    setSteps(steps); // Use the new store's setSteps
     play();
   };
 
@@ -39,7 +41,7 @@ const LinkedListControls = () => {
       return;
     }
     const steps = insertNode(linkedList, insertAfterValue, insertNewValue);
-    useAlgorithmStore.getState().setSteps(steps);
+    setSteps(steps); // Use the new store's setSteps
     play();
   };
 
@@ -49,7 +51,7 @@ const LinkedListControls = () => {
       return;
     }
     const steps = deleteNode(linkedList, deleteValue);
-    useAlgorithmStore.getState().setSteps(steps);
+    setSteps(steps); // Use the new store's setSteps
     play();
   };
   

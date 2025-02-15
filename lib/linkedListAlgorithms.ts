@@ -1,6 +1,6 @@
 import { LinkedListNode } from "@/types/LinkedListNode";
 
-type LinkedListStep = {
+export type LinkedListStep = {
   list: LinkedListNode | null;
   description: string;
 };

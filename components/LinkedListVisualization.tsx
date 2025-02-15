@@ -1,11 +1,11 @@
 // components/LinkedList.tsx
 import { LinkedListNode as LinkedListNodeType } from "@/types/LinkedListNode";
-import { useAlgorithmStore } from "@/store/useAlgorithmStore";
 import { calculateLinkedListLayout } from "@/lib/linkedListLayout";
 import { Line, Text } from "@react-three/drei";
 import { Vector3 } from "three";
 import { useEffect } from "react";
 import { useThree } from "@react-three/fiber";
+import { useLinkedListStore } from "@/store/useLinkedListStore"; // Import the new store
 
 const LinkedListNode = ({ node }: { node: LinkedListNodeType }) => {
   return (
@@ -28,7 +28,7 @@ const LinkedListNode = ({ node }: { node: LinkedListNodeType }) => {
 };
 
 const LinkedList = () => {
-  const { linkedList, steps, currentStep } = useAlgorithmStore();
+  const { linkedList, steps, currentStep } = useLinkedListStore(); // Use the new store
   const { camera } = useThree();
 
   useEffect(() => {

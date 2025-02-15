@@ -2,13 +2,14 @@ import { sampleTree } from '@/data/sampleTree';
 import { sampleWeightedTree } from '@/data/sampleWeightTree';
 import { calculateTreeLayout } from '@/lib/treeLayout';
 import { calculateWeightedTreeLayout } from '@/lib/weightedGraphLayout';
-import {calculateLinkedListLayout} from '@/lib/linkedListLayout';
 import { TreeNode } from '@/types/Treenode';
 import { WeightedTreeNode } from '@/types/WeightedGraphNode';
 import { create } from 'zustand';
 import { DataStructureType } from '@/types/DataStructure';
 import { ArrayElementState} from '@/lib/sortingAlgorithms';
-import { LinkedListNode } from "@/types/LinkedListNode"; // Import LinkedListNode
+import { useLinkedListStore } from './useLinkedListStore';
+
+
 type AlgorithmType = 
   | 'bfs' 
   | 'dfs' 
@@ -43,14 +44,13 @@ type AlgorithmState = {
   tree: TreeNode;
   updateTree: (newTree: TreeNode) => void;
   currentStep: number;
-  steps: TreeNode[] | WeightedTreeNode[] | ArrayElementState[] | LinkedListNode[];
+  steps: TreeNode[] | WeightedTreeNode[] | ArrayElementState[] ;
   isPlaying: boolean;
   setSteps: (steps: TreeNode[]) => void;
   play: () => void;
   pause: () => void;
   reset: () => void;
-  linkedList: LinkedListNode | null; // Add linkedList
-  updateLinkedList: (newList: LinkedListNode) => void; // Add updateLinkedList
+  
 };
 
 export const useAlgorithmStore = create<AlgorithmState>((set) => ({
@@ -66,12 +66,14 @@ export const useAlgorithmStore = create<AlgorithmState>((set) => ({
   algorithmType: 'bfs',
   dataStructure: 'binaryTree',
   setDataStructure: (dataStructure: DataStructureType) => {
-    set({ dataStructure });
+    set({ dataStructure, currentStep: 0 });
     useAlgorithmStore.getState().reset();
+    useLinkedListStore.getState().reset(); // Reset linked list store
   },
   setAlgorithmType: (algorithmType) => {
-     set({ algorithmType }) 
+    set({ algorithmType, currentStep: 0 }); // Reset currentStep here
      useAlgorithmStore.getState().reset();
+     useLinkedListStore.getState().reset(); // Reset linked list store
     },
   tree: calculateTreeLayout(sampleTree),
   updateTree: (newTree) =>  {
@@ -87,6 +89,5 @@ export const useAlgorithmStore = create<AlgorithmState>((set) => ({
   play: () => set({ isPlaying: true }),
   pause: () => set({ isPlaying: false }),
   reset: () => set({ currentStep: 0, isPlaying: false }),
-  linkedList: null, // Initialize linkedList to null
-  updateLinkedList: (newList) => set({ linkedList: calculateLinkedListLayout(newList) }), // Implement updateLinkedList
+  
 }));

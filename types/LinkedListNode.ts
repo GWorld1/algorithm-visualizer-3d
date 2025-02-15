@@ -1,5 +1,5 @@
 // types/LinkedListNode.ts
-export interface LinkedListNode {
+export type LinkedListNode = {
     value: number;
     x?: number;
     y?: number;

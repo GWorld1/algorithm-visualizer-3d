@@ -43,7 +43,7 @@ type AlgorithmState = {
   tree: TreeNode;
   updateTree: (newTree: TreeNode) => void;
   currentStep: number;
-  steps: TreeNode[] | WeightedTreeNode[] | ArrayElementState[];
+  steps: TreeNode[] | WeightedTreeNode[] | ArrayElementState[] | LinkedListNode[];
   isPlaying: boolean;
   setSteps: (steps: TreeNode[]) => void;
   play: () => void;

@@ -7,16 +7,20 @@ import { createLinkedList, searchLinkedList, insertNode, deleteNode } from "@/li
 
 
 const LinkedListControls = () => {
-  const {algorithmType, updateLinkedList, linkedList } = useAlgorithmStore();
-  const [elements,setElements] = useState<number[]>([1,10,9])
+  const { algorithmType, updateLinkedList, linkedList, setSteps, play } = useAlgorithmStore();
+  const [elements, setElements] = useState<number[]>([1, 10, 9]);
   const [searchValue, setSearchValue] = useState<number | null>(null);
   const [insertAfterValue, setInsertAfterValue] = useState<number | null>(null);
   const [insertNewValue, setInsertNewValue] = useState<number | null>(null);
   const [deleteValue, setDeleteValue] = useState<number | null>(null);
-
+  
   const handleCreateLinkedList = () => {
-    const newList = createLinkedList(elements);
-    updateLinkedList(newList!);
+    const steps = createLinkedList(elements);
+    useAlgorithmStore.getState().setSteps(steps);
+    play();
+    if (steps.length > 0) {
+      updateLinkedList(steps[steps.length - 1].list!);
+    }
   };
 
   const handleSearch = () => {
@@ -24,12 +28,9 @@ const LinkedListControls = () => {
       alert("Please enter a value to search.");
       return;
     }
-    const searchedNode = searchLinkedList(linkedList, searchValue);
-    if (searchedNode) {
-      alert(`Node with value ${searchValue} found!`);
-    } else {
-      alert(`Node with value ${searchValue} not found.`);
-    }
+    const steps = searchLinkedList(linkedList, searchValue);
+    useAlgorithmStore.getState().setSteps(steps);
+    play();
   };
 
   const handleInsert = () => {
@@ -37,8 +38,9 @@ const LinkedListControls = () => {
       alert("Please enter values for both 'Insert After' and 'New Value'.");
       return;
     }
-    const insertedList = insertNode(linkedList, insertAfterValue, insertNewValue);
-    updateLinkedList(insertedList!);
+    const steps = insertNode(linkedList, insertAfterValue, insertNewValue);
+    useAlgorithmStore.getState().setSteps(steps);
+    play();
   };
 
   const handleDelete = () => {
@@ -46,10 +48,11 @@ const LinkedListControls = () => {
       alert("Please enter a value to delete.");
       return;
     }
-    const deletedList = deleteNode(linkedList, deleteValue);
-    updateLinkedList(deletedList!);
+    const steps = deleteNode(linkedList, deleteValue);
+    useAlgorithmStore.getState().setSteps(steps);
+    play();
   };
-
+  
   return (
     <div className="fixed bottom-4 right-4 shadow z-10 flex flex-col gap-2 p-4 bg-white rounded-md">
       {

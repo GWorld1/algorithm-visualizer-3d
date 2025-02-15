@@ -13,6 +13,7 @@ import { BFSExplanation, BubbleSortExplanation, DFSExplanation, DijkstraExplanat
 import { LinkedListNode } from "@/types/LinkedListNode";
 
 
+
 export const Controls = () => {
     const {dataStructure,setDataStructure,algorithmType, setAlgorithmType, play, pause, reset, isPlaying,tree, weightedTree} = useAlgorithmStore();
     const {elements} = useArrayStore();

@@ -5,4 +5,8 @@ export type AlgorithmType =
   | 'traverse'
   | 'reverse'
   | 'bubbleSort'
-  | 'quickSort';
+  | 'quickSort'
+  | 'createLinkedList'
+  | 'searchLinkedList'
+  | 'insertNode'
+  | 'deleteNode';

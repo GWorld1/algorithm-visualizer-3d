@@ -28,7 +28,7 @@ const LinkedListNode = ({ node }: { node: LinkedListNodeType }) => {
 };
 
 const LinkedList = () => {
-  const { linkedList } = useAlgorithmStore();
+  const { linkedList, steps, currentStep } = useAlgorithmStore();
   const { camera } = useThree();
 
   useEffect(() => {
@@ -36,7 +36,10 @@ const LinkedList = () => {
     camera.lookAt(0, 0, 0);
   }, [camera]);
 
-  const positionedLinkedList = linkedList ? calculateLinkedListLayout(linkedList) : null;
+  // Use the current step's linked list if available
+  const currentList = steps[currentStep]?.list ?? linkedList;
+  const positionedLinkedList = currentList ? calculateLinkedListLayout(currentList) : null;
+ 
 
   const renderList = (node: LinkedListNodeType | null): JSX.Element | null => {
     if (!node) return null;

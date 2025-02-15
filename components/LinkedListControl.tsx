@@ -7,7 +7,7 @@ import { createLinkedList, searchLinkedList, insertNode, deleteNode } from "@/li
 
 
 const LinkedListControls = () => {
-  const { updateLinkedList, linkedList } = useAlgorithmStore();
+  const {algorithmType, updateLinkedList, linkedList } = useAlgorithmStore();
   const [elements,setElements] = useState<number[]>([1,10,9])
   const [searchValue, setSearchValue] = useState<number | null>(null);
   const [insertAfterValue, setInsertAfterValue] = useState<number | null>(null);
@@ -51,10 +51,10 @@ const LinkedListControls = () => {
   };
 
   return (
-    <div className="fixed bottom-4 right-4 shadow z-10 flex flex-col gap-2 p-4 bg-gray-100 rounded-md">
-      <h3 className="text-lg font-semibold">Linked List Operations</h3>
-
-      <div className="flex flex-row space-x-2">
+    <div className="fixed bottom-4 right-4 shadow z-10 flex flex-col gap-2 p-4 bg-white rounded-md">
+      {
+      algorithmType == 'createLinkedList' &&
+      <div className="flex flex-row space-x-2 items-center">
         <label htmlFor="elements">Elements:</label>
         <input
           type="text"
@@ -67,8 +67,11 @@ const LinkedListControls = () => {
           Create Linked List
         </button>
       </div>
+      }
       
-      <div className="flex items-center gap-2">
+      {
+        algorithmType == 'searchLinkedList' &&
+        <div className="flex items-center gap-2">
         <label htmlFor="searchValue">Search Value:</label>
         <input
           type="number"
@@ -80,8 +83,11 @@ const LinkedListControls = () => {
           Search
         </button>
       </div>
+      }
 
-      <div className="flex items-center gap-2">
+      {
+        algorithmType == 'insertNode' &&
+        <div className="flex items-center gap-2">
         <label htmlFor="insertAfterValue">Insert After:</label>
         <input
           type="number"
@@ -99,9 +105,12 @@ const LinkedListControls = () => {
         <button onClick={handleInsert} className="bg-yellow-500 text-white p-2 rounded hover:bg-yellow-700">
           Insert
         </button>
-      </div>
+      </div>}
 
-      <div className="flex items-center gap-2">
+
+      {
+        algorithmType == 'deleteNode' &&
+        <div className="flex items-center gap-2">
         <label htmlFor="deleteValue">Delete Value:</label>
         <input
           type="number"
@@ -112,7 +121,7 @@ const LinkedListControls = () => {
         <button onClick={handleDelete} className="bg-red-500 text-white p-2 rounded hover:bg-red-700">
           Delete
         </button>
-      </div>
+      </div>}
     </div>
   );
 };

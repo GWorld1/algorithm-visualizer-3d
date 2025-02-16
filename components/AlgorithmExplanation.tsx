@@ -172,7 +172,7 @@ export const QuickSortExplanation = () => (
       {color: "#22c55e", meaning: "Sorted Elements"},
       {color: "#fbbf24", meaning: "Comparing Elements"},
       {color: "#ef4444", meaning: "Pivot or Swapping"},
-      {color: "#10b981", meaning: "Unsorted Elements"}
+      {color: "steelblue", meaning: "Unsorted Elements"}
     ]}
   />
 );
@@ -205,7 +205,7 @@ export const BubbleSortExplanation = () => (
       {color: "#22c55e", meaning: "Sorted Elements"},
       {color: "#fbbf24", meaning: "Comparing Elements"},
       {color: "#ef4444", meaning: "Swapping Elements"},
-      {color: "#10b981", meaning: "Unsorted Elements"}
+      {color: "steelblue", meaning: "Unsorted Elements"}
     ]}
   />
 );

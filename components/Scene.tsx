@@ -3,6 +3,7 @@ import { Canvas } from '@react-three/fiber'
 import { OrbitControls,Grid, Environment, GizmoHelper, GizmoViewport } from '@react-three/drei'
 import dynamic from 'next/dynamic'
 import { useAlgorithmStore } from '@/store/useAlgorithmStore'
+import StepDescription from './StepDescription'
 
 
 const BinaryTree = dynamic(() => import('@/components/BinaryTree'), {
@@ -47,6 +48,7 @@ const Scene = () => {
   return (
       <>
      
+      <StepDescription/>  
       <Canvas camera={{ position: [0, 0, 15], fov: 50 }}>
       {showGrid && <Grid
               args={[10, 10]}

@@ -11,6 +11,7 @@ export type SortStep = {
   indices: [number, number];
   array: number[];
   elements: ArrayElementState[];
+  description: string; // Added description field
 };
 
 // sortingAlgorithms.ts
@@ -61,57 +62,55 @@ export const bubbleSort = (inputArr: number[]): SortStep[] => {
     let swapped = false;
 
     for (let j = 0; j < n - i - 1; j++) {
-      // Add comparison step
+      // Add comparison step with description
       steps.push({
         action: 'compare',
         indices: [j, j + 1],
         array: [...arr],
         elements: createElementStates(arr, [j, j + 1], [], Array.from(sortedIndices)),
+        description: `Comparing elements at positions ${j} (${arr[j]}) and ${j + 1} (${arr[j + 1]})`
       });
 
       if (arr[j] > arr[j + 1]) {
-        // Add swap step
+        // Add swap step with description
         steps.push({
           action: 'swap',
           indices: [j, j + 1],
           array: [...arr],
           elements: createElementStates(arr, [], [j, j + 1], Array.from(sortedIndices)),
+          description: `Swapping ${arr[j]} and ${arr[j + 1]} as ${arr[j]} > ${arr[j + 1]}`
         });
 
-        // Perform the swap
         [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]];
         swapped = true;
 
-        // Add step after swap is complete
         steps.push({
           action: 'complete',
           indices: [j, j + 1],
           array: [...arr],
           elements: createElementStates(arr, [], [], Array.from(sortedIndices)),
+          description: `Completed swapping elements`
         });
       }
     }
 
-    // Mark the last element in this pass as sorted
     sortedIndices.add(n - i - 1);
 
-    // Check if elements are in their final positions
     for (let k = 0; k < n; k++) {
       if (isInFinalPosition(k, arr)) {
         sortedIndices.add(k);
       }
     }
 
-    // Add step to show sorted elements
     steps.push({
       action: 'complete',
       indices: [n - i - 1, n - i - 1],
       array: [...arr],
       elements: createElementStates(arr, [], [], Array.from(sortedIndices)),
+      description: `Element ${arr[n - i - 1]} is now in its sorted position`
     });
 
     if (!swapped) {
-      // If no swaps occurred, all remaining elements are sorted
       for (let k = 0; k < n; k++) {
         sortedIndices.add(k);
       }
@@ -119,12 +118,12 @@ export const bubbleSort = (inputArr: number[]): SortStep[] => {
     }
   }
 
-  // Final step with all elements marked as sorted
   steps.push({
     action: 'complete',
     indices: [0, 0],
     array: [...arr],
     elements: createElementStates(arr, [], [], Array.from(sortedIndices)),
+    description: 'Array is now fully sorted!'
   });
 
   return steps;
@@ -179,42 +178,40 @@ export const quickSort = (inputArr: number[]): SortStep[] => {
     const pivot = currentArr[high];
     let i = low - 1;
 
-    // Initial pivot selection step
     partitionSteps.push({
       action: 'compare',
       indices: [high, high],
       array: [...currentArr],
-      elements: createElementStates(currentArr, high, [], [])
+      elements: createElementStates(currentArr, high, [], []),
+      description: `Selected pivot element: ${pivot} at position ${high}`
     });
 
     for (let j = low; j < high; j++) {
-      // Comparison step
       partitionSteps.push({
         action: 'compare',
         indices: [j, high],
         array: [...currentArr],
-        elements: createElementStates(currentArr, high, [j], [])
+        elements: createElementStates(currentArr, high, [j], []),
+        description: `Comparing element ${currentArr[j]} with pivot ${pivot}`
       });
 
       if (currentArr[j] <= pivot) {
         i++;
 
-        // Swap elements
         if (i !== j) {
           [currentArr[i], currentArr[j]] = [currentArr[j], currentArr[i]];
 
-          // Swap visualization step
           partitionSteps.push({
             action: 'swap',
             indices: [i, j],
             array: [...currentArr],
-            elements: createElementStates(currentArr, high, [], [i, j])
+            elements: createElementStates(currentArr, high, [], [i, j]),
+            description: `Moving ${currentArr[i]} to the left side of pivot as it's smaller/equal`
           });
         }
       }
     }
 
-    // Final swap to put pivot in correct position
     const pivotIndex = i + 1;
     [currentArr[pivotIndex], currentArr[high]] = [currentArr[high], currentArr[pivotIndex]];
     
@@ -222,7 +219,8 @@ export const quickSort = (inputArr: number[]): SortStep[] => {
       action: 'complete',
       indices: [pivotIndex, high],
       array: [...currentArr],
-      elements: createElementStates(currentArr, pivotIndex, [], [], new Set([pivotIndex]))
+      elements: createElementStates(currentArr, pivotIndex, [], [], new Set([pivotIndex])),
+      description: `Placed pivot ${pivot} in its final position ${pivotIndex}`
     });
 
     return { pivotIndex, steps: partitionSteps };
@@ -241,7 +239,8 @@ export const quickSort = (inputArr: number[]): SortStep[] => {
         action: 'compare',
         indices: [low, high],
         array: [...currentArr],
-        elements: createElementStates(currentArr)
+        elements: createElementStates(currentArr),
+        description: `Comparing elements at positions ${low} (${currentArr[low]}) and ${high} (${currentArr[high]})`
       });
 
       // Partition the array
@@ -266,7 +265,8 @@ export const quickSort = (inputArr: number[]): SortStep[] => {
         action: 'complete',
         indices: [low, high],
         array: [...currentArr],
-        elements: createElementStates(currentArr, undefined, [], [], sortedIndicesSet)
+        elements: createElementStates(currentArr, undefined, [], [], sortedIndicesSet),
+        description: `Elements at positions ${low} (${currentArr[low]}) and ${high} (${currentArr[high]}) are now sorted`
       });
     }
 
@@ -282,7 +282,8 @@ export const quickSort = (inputArr: number[]): SortStep[] => {
     action: 'complete',
     indices: [0, arr.length - 1],
     array: arr,
-    elements: createElementStates(arr, undefined, [], [], allSortedIndices)
+    elements: createElementStates(arr, undefined, [], [], allSortedIndices),
+    description: 'All elements are now sorted!'
   });
 
   return finalSteps;

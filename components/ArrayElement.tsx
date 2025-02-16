@@ -13,7 +13,7 @@ const getColorForState = (state: string) => {
     case 'sorted':
       return '#22c55e'; // Green
     default:
-      return '#10b981'; // Default teal
+      return 'steelblue'; // Default teal
   }
 };
 

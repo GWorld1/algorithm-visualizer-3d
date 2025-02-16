@@ -11,12 +11,14 @@ import { DataStructureType } from "@/types/DataStructure";
 import { useArrayStore } from "@/store/useArrayStore";
 import { BFSExplanation, BubbleSortExplanation, DFSExplanation, DijkstraExplanation, QuickSortExplanation } from "./AlgorithmExplanation";
 import { LinkedListNode } from "@/types/LinkedListNode";
+import { useLinkedListStore } from "@/store/useLinkedListStore";
 
 
 
 export const Controls = () => {
     const {dataStructure,setDataStructure,algorithmType, setAlgorithmType, play, pause, reset, isPlaying,tree, weightedTree} = useAlgorithmStore();
     const {elements} = useArrayStore();
+    const { setIsPlaying} = useLinkedListStore();
      // Algorithm options for each data structure
      const algorithmOptions = {
       binaryTree: [
@@ -64,7 +66,12 @@ export const Controls = () => {
         return;
     }
       useAlgorithmStore.getState().setSteps(steps as TreeNode[]|WeightedTreeNode[]|LinkedListNode[]);
-      play();
+      
+      if(dataStructure === 'linkedList'){
+        setIsPlaying(true);
+      }else{
+        play();
+      }
     };
   
     
@@ -93,6 +100,12 @@ export const Controls = () => {
   };
 
   const goToNextStep = () => {
+
+    if (dataStructure === 'linkedList') {
+      useLinkedListStore.getState().goToNextStep();
+      return;
+    }
+
     useAlgorithmStore.setState((state) => ({
       currentStep:
         state.currentStep < state.steps.length - 1
@@ -102,6 +115,12 @@ export const Controls = () => {
   };
 
   const goToPreviousStep = () => {
+
+    if (dataStructure === 'linkedList') {
+      useLinkedListStore.getState().goToPreviousStep();
+      return;
+    }
+
     useAlgorithmStore.setState((state) => ({
       currentStep: state.currentStep > 0 ? state.currentStep - 1 : 0,
     }));
@@ -147,7 +166,7 @@ export const Controls = () => {
         </button>
 
         {
-          !isPlaying ? 
+          !isPlaying   ? 
             <button onClick={startAlgorithm} className="text-blue-600 bg-blue-100 px-4 py-2 ml-2  rounded-full font-semibold text-sm">
               Play 
             </button>

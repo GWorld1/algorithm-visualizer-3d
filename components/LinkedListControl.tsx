@@ -1,15 +1,15 @@
 // components/LinkedListControls.tsx
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLinkedListStore } from "@/store/useLinkedListStore"; // Import the new store
 import { createLinkedList, searchLinkedList, insertNode, deleteNode } from "@/lib/linkedListAlgorithms";
 import { useAlgorithmStore } from "@/store/useAlgorithmStore";
 
 
 const LinkedListControls = () => {
-  const { algorithmType,play } = useAlgorithmStore();
-  const { setLinkedList, setSteps,  linkedList } = useLinkedListStore(); // Use the new store
+  const { algorithmType } = useAlgorithmStore();
+  const { setLinkedList, setSteps,  linkedList, isPlaying, setIsPlaying  } = useLinkedListStore(); // Use the new store
   const [elements, setElements] = useState<number[]>([1, 10, 9]);
   const [searchValue, setSearchValue] = useState<number | null>(null);
   const [insertAfterValue, setInsertAfterValue] = useState<number | null>(null);
@@ -19,7 +19,7 @@ const LinkedListControls = () => {
   const handleCreateLinkedList = () => {
     const steps = createLinkedList(elements);
     setSteps(steps); // Use the new store's setSteps
-    play();
+    setIsPlaying(true); // Use the new store's setIsPlaying();
     if (steps.length > 0) {
       setLinkedList(steps[steps.length - 1].list!); // Use the new store's setLinkedList
     }
@@ -32,7 +32,7 @@ const LinkedListControls = () => {
     }
     const steps = searchLinkedList(linkedList, searchValue);
     setSteps(steps); // Use the new store's setSteps
-    play();
+    setIsPlaying(true); // Use the new store's setIsPlaying();
   };
 
   const handleInsert = () => {
@@ -42,7 +42,7 @@ const LinkedListControls = () => {
     }
     const steps = insertNode(linkedList, insertAfterValue, insertNewValue);
     setSteps(steps); // Use the new store's setSteps
-    play();
+    setIsPlaying(true); // Use the new store's setIsPlaying();
   };
 
   const handleDelete = () => {
@@ -52,8 +52,27 @@ const LinkedListControls = () => {
     }
     const steps = deleteNode(linkedList, deleteValue);
     setSteps(steps); // Use the new store's setSteps
-    play();
+    setIsPlaying(true); // Use the new store's setIsPlaying();
   };
+
+  useEffect(() => {
+        if (!isPlaying) return;
+        
+        const interval = setInterval(() => {
+          useLinkedListStore.setState((state) => ({
+            currentStep: 
+              state.currentStep < state.steps.length - 1 
+                ? state.currentStep + 1 
+                : state.currentStep
+          }));
+
+         
+        }, 1000);
+        if (useLinkedListStore.getState().currentStep === useLinkedListStore.getState().steps.length - 1) {
+          setIsPlaying(false);
+        }
+        return () => clearInterval(interval);
+      }, [isPlaying]);
   
   return (
     <div className="fixed bottom-4 right-4 shadow z-10 flex flex-col gap-2 p-4 bg-white rounded-md">

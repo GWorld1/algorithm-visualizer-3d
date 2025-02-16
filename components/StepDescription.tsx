@@ -7,7 +7,7 @@ const StepDescription = () => {
   const { currentStep, steps, algorithmType } = useAlgorithmStore();
 
   // Only show for sorting algorithms
-  if (!['bubbleSort', 'quickSort'].includes(algorithmType)) {
+  if (!['bubbleSort', 'quickSort', 'insertionSort','selectionSort', 'mergeSort'].includes(algorithmType)) {
     return null;
   }
 

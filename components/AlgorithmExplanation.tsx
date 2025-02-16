@@ -312,5 +312,103 @@ export const DFSExplanation = () => (
   />
 );
 
+export const InsertionSortExplanation = () => (
+  <AlgorithmExplanation 
+    algorithmName="Insertion Sort"
+    complexity={{
+      worstCase: "O(n²)",
+      averageCase: "O(n²)",
+      bestCase: "O(n)"
+    }}
+    steps={[
+      "Start from the second element, considering first element as sorted",
+      "Take current element and store it as key",
+      "Compare key with each element in sorted portion from right to left",
+      "If element is greater than key, shift it one position ahead",
+      "Place key in its correct position in sorted portion",
+      "Repeat for all unsorted elements"
+    ]}
+    visualizationTips={[
+      "Watch how the sorted portion grows from left to right",
+      "Notice how elements shift to make space for insertion",
+      "Observe the comparison process within sorted portion",
+      "See how each element finds its correct position",
+      "Pay attention to how fewer comparisons are needed for nearly sorted arrays"
+    ]}
+    colorLegend={[
+      {color: "#22c55e", meaning: "Sorted Elements"},
+      {color: "#fbbf24", meaning: "Comparing Elements"},
+      {color: "#ef4444", meaning: "Element Being Inserted"},
+      {color: "steelblue", meaning: "Unsorted Elements"}
+    ]}
+  />
+);
+
+export const SelectionSortExplanation = () => (
+  <AlgorithmExplanation 
+    algorithmName="Selection Sort"
+    complexity={{
+      worstCase: "O(n²)",
+      averageCase: "O(n²)",
+      bestCase: "O(n²)"
+    }}
+    steps={[
+      "Start with the first unsorted element",
+      "Find the minimum element in the remaining unsorted array",
+      "Compare each element with the current minimum",
+      "Update minimum if a smaller element is found",
+      "Swap the found minimum with the first unsorted position",
+      "Repeat until all elements are sorted"
+    ]}
+    visualizationTips={[
+      "Watch how the algorithm finds the minimum element in each pass",
+      "Notice the growing sorted region on the left side",
+      "Observe how elements are compared against the current minimum",
+      "Track how the minimum element 'bubbles' to its correct position",
+      "See how the algorithm makes exactly one swap per pass"
+    ]}
+    colorLegend={[
+      {color: "#22c55e", meaning: "Sorted Elements"},
+      {color: "#fbbf24", meaning: "Comparing Elements"},
+      {color: "#ef4444", meaning: "Current Minimum/Swapping"},
+      {color: "steelblue", meaning: "Unsorted Elements"}
+    ]}
+  />
+);
+
+
+export const MergeSortExplanation = () => (
+  <AlgorithmExplanation 
+    algorithmName="Merge Sort"
+    complexity={{
+      worstCase: "O(n log n)",
+      averageCase: "O(n log n)",
+      bestCase: "O(n log n)"
+    }}
+    steps={[
+      "Divide the array into two halves recursively until we have single elements",
+      "Compare elements from both halves and merge them in sorted order",
+      "Place smaller element first in the merged array",
+      "Continue until all elements are merged",
+      "Repeat the process up the recursion tree",
+      "Finally merge all sorted subarrays into one sorted array"
+    ]}
+    visualizationTips={[
+      "Watch how the array is divided into smaller subarrays",
+      "Notice the comparing and merging of elements in sorted order",
+      "Observe how smaller sorted arrays are combined into larger sorted arrays",
+      "Pay attention to the divide-and-conquer strategy in action",
+      "See how the sorted portions grow and combine"
+    ]}
+    colorLegend={[
+      {color: "#22c55e", meaning: "Sorted Subarrays"},
+      {color: "#fbbf24", meaning: "Comparing Elements"},
+      {color: "#ef4444", meaning: "Merging Elements"},
+      {color: "steelblue", meaning: "Unsorted Elements"}
+    ]}
+  />
+);
+
+
 
 export default AlgorithmExplanation;

@@ -1,5 +1,5 @@
 "use client"
-import { bubbleSort, quickSort } from "@/lib/sortingAlgorithms";
+import { bubbleSort, insertionSort, mergeSort, quickSort, selectionSort } from "@/lib/sortingAlgorithms";
 import { generateBFSSteps, generateDFSSteps } from "@/lib/treeAlgorithms";
 import { dijkstra } from "@/lib/graphAlgorithms";
 import { useAlgorithmStore } from "@/store/useAlgorithmStore";
@@ -9,7 +9,7 @@ import { WeightedTreeNode } from "@/types/WeightedGraphNode";
 import { useEffect } from "react";
 import { DataStructureType } from "@/types/DataStructure";
 import { useArrayStore } from "@/store/useArrayStore";
-import { BFSExplanation, BubbleSortExplanation, DFSExplanation, DijkstraExplanation, QuickSortExplanation } from "./AlgorithmExplanation";
+import { BFSExplanation, BubbleSortExplanation, DFSExplanation, DijkstraExplanation, InsertionSortExplanation, MergeSortExplanation, QuickSortExplanation, SelectionSortExplanation } from "./AlgorithmExplanation";
 import { useLinkedListStore } from "@/store/useLinkedListStore";
 
 export const Controls = () => {
@@ -48,10 +48,13 @@ export const Controls = () => {
     ],
     weightedGraph: [
       { value: 'dijkstra', label: 'Dijkstra' }
-    ],
+    ], 
     array: [
       { value: 'bubbleSort', label: 'Bubble Sort' },
-      { value: 'quickSort', label: 'Quick Sort' }
+      { value: 'quickSort', label: 'Quick Sort' },
+      { value: 'insertionSort', label: 'Insertion Sort' } ,
+      { value: 'selectionSort', label: 'Selection Sort' }  ,
+      { value: 'mergeSort', label: 'Merge Sort' }
     ],
     linkedList: [
       { value: 'createLinkedList', label: 'Create Linked List' },
@@ -84,6 +87,15 @@ export const Controls = () => {
         break;
       case 'quickSort':
         steps = quickSort(elements);
+        break;
+      case 'insertionSort':
+        steps = insertionSort(elements);
+        break;
+      case 'selectionSort':
+        steps = selectionSort(elements);
+        break;
+      case 'mergeSort':
+        steps = mergeSort(elements);
         break;
       default:
         return;
@@ -245,9 +257,12 @@ export const Controls = () => {
 
       {algorithmType === 'quickSort' && <QuickSortExplanation />}
       {algorithmType === 'bubbleSort' && <BubbleSortExplanation />}
+      {algorithmType === 'insertionSort' && <InsertionSortExplanation />}
       {algorithmType === 'dijkstra' && <DijkstraExplanation />}
       {algorithmType === 'bfs' && <BFSExplanation />}
       {algorithmType === 'dfs' && <DFSExplanation />}
+      {algorithmType === 'selectionSort' && <SelectionSortExplanation />}
+      {algorithmType === 'mergeSort' && <MergeSortExplanation />}
     </div>
   );
 };

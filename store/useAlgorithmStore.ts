@@ -92,7 +92,11 @@ export const useAlgorithmStore = create<AlgorithmState>((set) => ({
   play: () => set({ isPlaying: true }),
   pause: () => set({ isPlaying: false }),
   reset: () => {
-    set({ currentStep: 0, isPlaying: false })
+    set({ 
+      currentStep: 0, 
+      isPlaying: false,
+      steps: [] // Clear the steps when resetting
+    });
     useLinkedListStore.getState().reset();
   }
   

@@ -8,6 +8,7 @@ import { create } from 'zustand';
 import { DataStructureType } from '@/types/DataStructure';
 import { ArrayElementState} from '@/lib/sortingAlgorithms';
 import { useLinkedListStore } from './useLinkedListStore';
+import { LinkedListStep } from '@/lib/linkedListAlgorithms';
 
 
 type AlgorithmType = 
@@ -32,6 +33,7 @@ type AnimationSettings = {
   autoRotate: boolean;
   showLabels: boolean;
   showGrid: boolean;
+  stepDuration: number; // Add step duration control
 };
 
 type AlgorithmState = {
@@ -47,7 +49,7 @@ type AlgorithmState = {
   tree: TreeNode;
   updateTree: (newTree: TreeNode) => void;
   currentStep: number;
-  steps: TreeNode[] | WeightedTreeNode[] | ArrayElementState[] ;
+  steps: TreeNode[] | WeightedTreeNode[] | ArrayElementState[] | LinkedListStep[];
   isPlaying: boolean;
   setSteps: (steps: TreeNode[]) => void;
   play: () => void;
@@ -62,6 +64,7 @@ export const useAlgorithmStore = create<AlgorithmState>((set) => ({
     autoRotate: true,
     showLabels: true,
     showGrid: false,
+    stepDuration: 1000 // Default step duration in milliseconds
   },
   updateAnimationSettings: (settings) => {
     set((state) => ({ animationSettings: { ...state.animationSettings, ...settings } }));

@@ -23,7 +23,11 @@ export const Controls = () => {
     reset: resetMainAnimation,
     isPlaying: isPlayingMain,
     tree,
-    weightedTree
+    weightedTree,
+    animationSettings,
+    currentStep,
+    steps,
+    
   } = useAlgorithmStore();
 
   const { elements } = useArrayStore();
@@ -120,31 +124,18 @@ export const Controls = () => {
     }
   };
 
-  useEffect(() => {
-    if (!isPlaying) return;
-
-    const interval = setInterval(() => {
-      if (dataStructure === 'linkedList') {
-        const currentStep = useLinkedListStore.getState().currentStep;
-        const totalSteps = useLinkedListStore.getState().steps.length;
-        
-        if (currentStep < totalSteps - 1) {
-          linkedListNextStep();
-        } else {
-          setLinkedListPlaying(false);
-        }
-      } else {
-        useAlgorithmStore.setState((state) => ({
-          currentStep:
-            state.currentStep < state.steps.length - 1
-              ? state.currentStep + 1
-              : state.currentStep
-        }));
-      }
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [isPlaying, dataStructure]);
+// In your animation component
+useEffect(() => {
+  let interval: NodeJS.Timeout;
+  if (isPlaying && useAlgorithmStore.getState().currentStep < useAlgorithmStore.getState().steps.length - 1) {
+    interval = setInterval(() => {
+      useAlgorithmStore.setState(state => ({
+        currentStep: Math.min(state.currentStep + 1, state.steps.length - 1)
+      }));
+    }, animationSettings.stepDuration); 
+  }
+  return () => clearInterval(interval);
+}, [isPlaying, currentStep, steps, animationSettings.stepDuration]);
 
   // Handle data structure change
   const handleDataStructureChange = (value: string) => {

@@ -30,15 +30,22 @@ export const useLinkedListStore = create<LinkedListState>((set) => ({
   setSteps: (steps) => set({ steps }),
   setCurrentStep: (step) => set({ currentStep: step }),
   setIsPlaying: (playing) => set({ isPlaying: playing }),
-  reset: () => set({ currentStep: 0, isPlaying: false }),
+  reset: () => set({ 
+    currentStep: 0, 
+    isPlaying: false, 
+    steps: [],
+    // Don't reset the linkedList here, as we want to keep it between operations
+  }),
   goToNextStep: () => {
     set((state) => ({
       currentStep: Math.min(state.currentStep + 1, state.steps.length - 1),
+      isPlaying: false, // Pause animation when manually stepping
     }));
   },
   goToPreviousStep: () => {
     set((state) => ({
       currentStep: Math.max(state.currentStep - 1, 0),
+      isPlaying: false, // Pause animation when manually stepping
     }));
   },
 }));

@@ -116,9 +116,22 @@ export const Controls = () => {
     }
   };
 
+  // Add this effect to update the linkedList state when steps are completed
+  useEffect(() => {
+    // When we have linked list steps and we're at the last step, update the linkedList state
+    if (dataStructure === 'linkedList' && linkedListSteps.length > 0 && 
+        linkedListCurrentStep === linkedListSteps.length - 1) {
+      const finalList = linkedListSteps[linkedListCurrentStep].list;
+      useLinkedListStore.getState().setLinkedList(finalList);
+    }
+  }, [dataStructure, linkedListSteps, linkedListCurrentStep]);
+  
+  // Also update the reset function to ensure it properly clears the linked list
   const resetAnimation = () => {
     if (dataStructure === 'linkedList') {
       resetLinkedList();
+      // Also clear the linked list itself when resetting
+      useLinkedListStore.getState().setLinkedList(null);
     } else {
       resetMainAnimation();
     }
@@ -145,25 +158,69 @@ useEffect(() => {
     setAlgorithmType(firstAlgorithm as AlgorithmType);
   };
 
+  // Handle algorithm change
+const handleAlgorithmChange = (value: AlgorithmType) => {
+  setAlgorithmType(value);
+  
+  // Reset any existing steps and state
+  if (dataStructure === 'linkedList') {
+    // Clear any existing steps but keep the current linked list
+    useLinkedListStore.getState().setSteps([]);
+    useLinkedListStore.getState().setCurrentStep(0);
+    useLinkedListStore.getState().setIsPlaying(false);
+  }
+};
+
   const goToNextStep = () => {
     if (dataStructure === 'linkedList') {
       linkedListNextStep();
+      setLinkedListPlaying(false); // Ensure animation pauses
     } else {
       useAlgorithmStore.setState((state) => ({
         currentStep:
           state.currentStep < state.steps.length - 1
             ? state.currentStep + 1
             : state.currentStep,
+        isPlaying: false, // Ensure animation pauses
       }));
     }
   };
 
+  
+useEffect(() => {
+  let interval: NodeJS.Timeout;
+  
+  // Handle main animation
+  if (isPlayingMain && !isPlayingLinkedList && currentStep < steps.length - 1) {
+    interval = setInterval(() => {
+      useAlgorithmStore.setState(state => ({
+        currentStep: Math.min(state.currentStep + 1, state.steps.length - 1)
+      }));
+    }, animationSettings.stepDuration);
+  }
+  
+  // Handle linked list animation
+  if (isPlayingLinkedList && linkedListCurrentStep < linkedListSteps.length - 1) {
+    interval = setInterval(() => {
+      useLinkedListStore.setState(state => ({
+        currentStep: Math.min(state.currentStep + 1, state.steps.length - 1)
+      }));
+    }, animationSettings.stepDuration);
+  }
+
+  return () => clearInterval(interval);
+}, [isPlaying, isPlayingLinkedList, currentStep, steps, linkedListCurrentStep, linkedListSteps, animationSettings.stepDuration, isPlayingMain]);
+
+
+
   const goToPreviousStep = () => {
     if (dataStructure === 'linkedList') {
       linkedListPreviousStep();
+      setLinkedListPlaying(false); // Ensure animation pauses
     } else {
       useAlgorithmStore.setState((state) => ({
         currentStep: state.currentStep > 0 ? state.currentStep - 1 : 0,
+        isPlaying: false, // Ensure animation pauses
       }));
     }
   };
@@ -186,7 +243,7 @@ useEffect(() => {
       <select
         value={algorithmType}
         className="appearance-none mr-2 py-2 px-4 rounded-full outline-none border-0 text-sm font-semibold bg-violet-50 text-violet-700 hover:bg-violet-100"
-        onChange={(e) => setAlgorithmType(e.target.value as AlgorithmType)}
+        onChange={(e) => handleAlgorithmChange(e.target.value as AlgorithmType)}
       >
         {
           algorithmOptions[dataStructure as keyof typeof algorithmOptions].map((option) => (
@@ -234,15 +291,15 @@ useEffect(() => {
         Reset
       </button>
 
-      {isPlaying && dataStructure === 'linkedList' && (
+      {(dataStructure === 'linkedList' && linkedListSteps.length > 0) && (
         <p className="text-sm text-gray-500 ml-2">
           Current Step: {linkedListCurrentStep + 1}/{linkedListSteps.length}
         </p>
       )}
 
-      {isPlaying && dataStructure !== 'linkedList' && (
+      {(dataStructure !== 'linkedList' && steps.length > 0) && (
         <p className="text-sm text-gray-500 ml-2">
-          Current Step: {useAlgorithmStore.getState().currentStep + 1}/{useAlgorithmStore.getState().steps.length}
+          Current Step: {currentStep + 1}/{steps.length}
         </p>
       )}
 

@@ -68,7 +68,9 @@ const LinkedList = () => {
   }, [camera]);
 
   const currentStep_ = steps[currentStep];
-  const currentList = isPlaying ? currentStep_?.list : linkedList;
+  const initialList = steps[0]?.list;
+  //const initialPositionedList = initialList? calculateLinkedListLayout(initialList) : null;
+  const currentList = currentStep_?.list || linkedList || null;
   const positionedLinkedList = currentList ? calculateLinkedListLayout(currentList) : null;
 
   const renderList = (node: LinkedListNodeType | null): JSX.Element | null => {

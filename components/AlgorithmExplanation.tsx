@@ -409,6 +409,125 @@ export const MergeSortExplanation = () => (
   />
 );
 
+// Add these exports at the end of the file
+
+export const LinkedListInsertExplanation = () => (
+  <AlgorithmExplanation 
+    algorithmName="Linked List Insertion"
+    complexity={{
+      worstCase: "O(n)",
+      averageCase: "O(n)",
+      bestCase: "O(1)"
+    }}
+    steps={[
+      "Start at the head of the linked list",
+      "Traverse the list until finding the node after which to insert",
+      "Create a new node with the given value",
+      "Set the new node's next pointer to the current node's next",
+      "Set the current node's next pointer to the new node"
+    ]}
+    visualizationTips={[
+      "Watch how the algorithm traverses the list to find the insertion point",
+      "Notice how the new node (green) is created and linked into the list",
+      "Observe how the pointers are updated to maintain the list structure",
+      "Pay attention to the special case when inserting at the head"
+    ]}
+    colorLegend={[
+      {color: "#22c55e", meaning: "New Node"},
+      {color: "#fbbf24", meaning: "Current Node"},
+      {color: "#ef4444", meaning: "Target Node"},
+      {color: "steelblue", meaning: "Traversed Nodes"}
+    ]}
+  />
+);
+
+export const LinkedListDeleteExplanation = () => (
+  <AlgorithmExplanation 
+    algorithmName="Linked List Deletion"
+    complexity={{
+      worstCase: "O(n)",
+      averageCase: "O(n)",
+      bestCase: "O(1)"
+    }}
+    steps={[
+      "Start at the head of the linked list",
+      "If deleting the head, update the head pointer to the next node",
+      "Otherwise, traverse the list until finding the node before the one to delete",
+      "Update the previous node's next pointer to skip the node to be deleted",
+      "The skipped node will be garbage collected"
+    ]}
+    visualizationTips={[
+      "Watch how the algorithm traverses to find the node to delete",
+      "Notice the red highlighting of the node to be deleted",
+      "Observe how the pointers are updated to bypass the deleted node",
+      "Pay attention to the special case when deleting the head node"
+    ]}
+    colorLegend={[
+      {color: "#ef4444", meaning: "Node to Delete"},
+      {color: "#fbbf24", meaning: "Current Node"},
+      {color: "#22c55e", meaning: "Updated Pointer"},
+      {color: "steelblue", meaning: "Traversed Nodes"}
+    ]}
+  />
+);
+
+export const LinkedListSearchExplanation = () => (
+  <AlgorithmExplanation 
+    algorithmName="Linked List Search"
+    complexity={{
+      worstCase: "O(n)",
+      averageCase: "O(n)",
+      bestCase: "O(1)"
+    }}
+    steps={[
+      "Start at the head of the linked list",
+      "Compare the current node's value with the target value",
+      "If they match, the search is successful",
+      "If not, move to the next node and repeat",
+      "If the end of the list is reached without finding the value, the search is unsuccessful"
+    ]}
+    visualizationTips={[
+      "Watch how the algorithm traverses the list node by node",
+      "Notice the yellow highlighting of the current node being examined",
+      "Observe how the target node is highlighted in green when found",
+      "Pay attention to the traversal path through the list"
+    ]}
+    colorLegend={[
+      {color: "#22c55e", meaning: "Target Found"},
+      {color: "#fbbf24", meaning: "Current Node"},
+      {color: "steelblue", meaning: "Traversed Nodes"}
+    ]}
+  />
+);
+
+export const LinkedListCreateExplanation = () => (
+  <AlgorithmExplanation 
+    algorithmName="Linked List Creation"
+    complexity={{
+      worstCase: "O(n)",
+      averageCase: "O(n)",
+      bestCase: "O(n)"
+    }}
+    steps={[
+      "Create the head node with the first value",
+      "For each remaining value, create a new node",
+      "Set the current node's next pointer to the new node",
+      "Move the current pointer to the new node",
+      "Repeat until all values are added to the list"
+    ]}
+    visualizationTips={[
+      "Watch how the list grows as each new node is added",
+      "Notice the green highlighting of newly created nodes",
+      "Observe how the current pointer moves through the list",
+      "Pay attention to how the list structure forms step by step"
+    ]}
+    colorLegend={[
+      {color: "#22c55e", meaning: "New Node"},
+      {color: "#fbbf24", meaning: "Current Node"},
+      {color: "steelblue", meaning: "Existing Nodes"}
+    ]}
+  />
+);
 
 
 export default AlgorithmExplanation;

@@ -9,7 +9,10 @@ import { WeightedTreeNode } from "@/types/WeightedGraphNode";
 import { useEffect } from "react";
 import { DataStructureType } from "@/types/DataStructure";
 import { useArrayStore } from "@/store/useArrayStore";
-import { BFSExplanation, BubbleSortExplanation, DFSExplanation, DijkstraExplanation, InsertionSortExplanation, MergeSortExplanation, QuickSortExplanation, SelectionSortExplanation } from "./AlgorithmExplanation";
+import { BFSExplanation, BubbleSortExplanation, DFSExplanation, DijkstraExplanation, InsertionSortExplanation, MergeSortExplanation, QuickSortExplanation, SelectionSortExplanation,LinkedListInsertExplanation,
+  LinkedListDeleteExplanation,
+  LinkedListSearchExplanation,
+  LinkedListCreateExplanation } from "./AlgorithmExplanation";
 import { useLinkedListStore } from "@/store/useLinkedListStore";
 
 export const Controls = () => {
@@ -311,6 +314,10 @@ useEffect(() => {
       {algorithmType === 'dfs' && <DFSExplanation />}
       {algorithmType === 'selectionSort' && <SelectionSortExplanation />}
       {algorithmType === 'mergeSort' && <MergeSortExplanation />}
+      {algorithmType === 'createLinkedList' && <LinkedListCreateExplanation />}
+      {algorithmType === 'searchLinkedList' && <LinkedListSearchExplanation />}
+      {algorithmType === 'insertNode' && <LinkedListInsertExplanation />}
+      {algorithmType === 'deleteNode' && <LinkedListDeleteExplanation />}
     </div>
   );
 };

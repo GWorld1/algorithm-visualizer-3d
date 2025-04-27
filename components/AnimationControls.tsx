@@ -41,7 +41,7 @@ export const Controls = () => {
     currentStep: linkedListCurrentStep,
     goToNextStep: linkedListNextStep,
     goToPreviousStep: linkedListPreviousStep,
-    reset: resetLinkedList
+    resetLinkedListAnimation: resetLinkedListAnimation
   } = useLinkedListStore();
 
   // Combined play state
@@ -73,8 +73,13 @@ export const Controls = () => {
 
   const startAlgorithm = () => {
     if (dataStructure === 'linkedList') {
+      // Reset the steps and current step before playing
+    useLinkedListStore.getState().setCurrentStep(0);
+    // Only set isPlaying to true if there are steps to play
+    if (linkedListSteps.length > 0) {
       setLinkedListPlaying(true);
-      return;
+    }
+    return;
     }
 
     let steps;
@@ -119,39 +124,47 @@ export const Controls = () => {
     }
   };
 
-  // Add this effect to update the linkedList state when steps are completed
-  useEffect(() => {
-    // When we have linked list steps and we're at the last step, update the linkedList state
-    if (dataStructure === 'linkedList' && linkedListSteps.length > 0 && 
-        linkedListCurrentStep === linkedListSteps.length - 1) {
-      const finalList = linkedListSteps[linkedListCurrentStep].list;
-      useLinkedListStore.getState().setLinkedList(finalList);
-    }
-  }, [dataStructure, linkedListSteps, linkedListCurrentStep]);
+  // Replace the existing animation useEffect with this unified version
+useEffect(() => {
+  let interval: NodeJS.Timeout;
   
+  if (isPlaying) {
+    if (dataStructure === 'linkedList' && linkedListCurrentStep < linkedListSteps.length - 1) {
+      interval = setInterval(() => {
+        useLinkedListStore.setState(state => ({
+          currentStep: Math.min(state.currentStep + 1, state.steps.length - 1)
+        }));
+      }, animationSettings.stepDuration);
+    } else if (dataStructure !== 'linkedList' && currentStep < steps.length - 1) {
+      interval = setInterval(() => {
+        useAlgorithmStore.setState(state => ({
+          currentStep: Math.min(state.currentStep + 1, state.steps.length - 1)
+        }));
+      }, animationSettings.stepDuration);
+    }
+  }
+
+  return () => clearInterval(interval);
+}, [
+  isPlaying, 
+  dataStructure, 
+  currentStep, 
+  steps, 
+  linkedListCurrentStep, 
+  linkedListSteps, 
+  animationSettings.stepDuration
+]);
+
   // Also update the reset function to ensure it properly clears the linked list
   const resetAnimation = () => {
     if (dataStructure === 'linkedList') {
-      resetLinkedList();
+      resetLinkedListAnimation();
       // Also clear the linked list itself when resetting
-      useLinkedListStore.getState().setLinkedList(null);
+     // useLinkedListStore.getState().setLinkedList(null);
     } else {
       resetMainAnimation();
     }
   };
-
-// In your animation component
-useEffect(() => {
-  let interval: NodeJS.Timeout;
-  if (isPlaying && useAlgorithmStore.getState().currentStep < useAlgorithmStore.getState().steps.length - 1) {
-    interval = setInterval(() => {
-      useAlgorithmStore.setState(state => ({
-        currentStep: Math.min(state.currentStep + 1, state.steps.length - 1)
-      }));
-    }, animationSettings.stepDuration); 
-  }
-  return () => clearInterval(interval);
-}, [isPlaying, currentStep, steps, animationSettings.stepDuration]);
 
   // Handle data structure change
   const handleDataStructureChange = (value: string) => {

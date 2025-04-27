@@ -9,7 +9,7 @@ import { useAlgorithmStore } from "@/store/useAlgorithmStore";
 
 const LinkedListControls = () => {
   const { algorithmType } = useAlgorithmStore();
-  const { setLinkedList, setSteps,  linkedList, isPlaying, setIsPlaying  } = useLinkedListStore(); // Use the new store
+  const { setLinkedList, setSteps, linkedList, isPlaying, setIsPlaying, resetSteps} = useLinkedListStore(); // Use the new store
   const [elements, setElements] = useState<number[]>([1, 10, 9]);
   const [searchValue, setSearchValue] = useState<number | null>(null);
   const [insertAfterValue, setInsertAfterValue] = useState<number | null>(null);
@@ -17,6 +17,7 @@ const LinkedListControls = () => {
   const [deleteValue, setDeleteValue] = useState<number | null>(null);
   
   const handleCreateLinkedList = () => {
+   
     const steps = createLinkedList(elements);
     setSteps(steps); // Use the new store's setSteps
     setIsPlaying(true); // Use the new store's setIsPlaying();
@@ -26,16 +27,19 @@ const LinkedListControls = () => {
   };
 
   const handleSearch = () => {
+    resetSteps();
     if (searchValue === null) {
       alert("Please enter a value to search.");
       return;
     }
+
     const steps = searchLinkedList(linkedList, searchValue);
     setSteps(steps); // Use the new store's setSteps
     setIsPlaying(true); // Use the new store's setIsPlaying();
   };
 
   const handleInsert = () => {
+    resetSteps();
     if (insertAfterValue === null || insertNewValue === null) {
       alert("Please enter values for both 'Insert After' and 'New Value'.");
       return;
@@ -46,6 +50,7 @@ const LinkedListControls = () => {
   };
 
   const handleDelete = () => {
+    resetSteps();
     if (deleteValue === null) {
       alert("Please enter a value to delete.");
       return;

@@ -73,8 +73,10 @@ export const Controls = () => {
 
   const startAlgorithm = () => {
     if (dataStructure === 'linkedList') {
-      // Reset the steps and current step before playing
-    useLinkedListStore.getState().setCurrentStep(0);
+      if (linkedListSteps.length === 0) {
+        // This is a new algorithm, so reset the current step
+        useLinkedListStore.getState().setCurrentStep(0);
+      }
     // Only set isPlaying to true if there are steps to play
     if (linkedListSteps.length > 0) {
       setLinkedListPlaying(true);

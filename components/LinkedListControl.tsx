@@ -75,9 +75,10 @@ const LinkedListControls = () => {
         }, 1000);
         if (useLinkedListStore.getState().currentStep === useLinkedListStore.getState().steps.length - 1) {
           setIsPlaying(false);
+          console.log("animation stop")
         }
         return () => clearInterval(interval);
-      }, [isPlaying]);
+      }, [isPlaying, setIsPlaying]);
   
   return (
     <div className="fixed bottom-4 right-4 shadow z-10 flex flex-col gap-2 p-4 bg-white rounded-md">

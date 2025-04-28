@@ -235,6 +235,17 @@ export const deleteNode = (head: LinkedListNode | null, valueToDelete: number): 
 
   // Special case: deleting head
   if (head.value === valueToDelete) {
+    // First, show examining the head
+    steps.push({
+      list: copyLinkedList(head),
+      description: `Examining head node with value ${head.value}`,
+      highlightedNodes: {
+        current: head.value,
+        traversed: []
+      }
+    });
+    
+    // Then, show that we found the node to delete
     steps.push({
       list: copyLinkedList(head),
       description: `Found node to delete at head`,
@@ -269,13 +280,23 @@ export const deleteNode = (head: LinkedListNode | null, valueToDelete: number): 
     });
 
     if (current.next.value === valueToDelete) {
+      // First, show examining the next node
+      steps.push({
+        list: copyLinkedList(head),
+        description: `Examining next node with value ${current.next.value}`,
+        highlightedNodes: {
+          current: current.next.value,
+          traversed: [...traversed, current.value]
+        }
+      });
+      
+      // Then, show that we found the node to delete
       steps.push({
         list: copyLinkedList(head),
         description: `Found node to delete: ${valueToDelete}`,
         highlightedNodes: {
-          current: current.value,
           deleted: valueToDelete,
-          traversed
+          traversed: [...traversed, current.value]
         }
       });
 

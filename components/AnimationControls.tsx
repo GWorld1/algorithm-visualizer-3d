@@ -16,9 +16,12 @@ import { BFSExplanation, BubbleSortExplanation, DFSExplanation, DijkstraExplanat
   CreateBSTExplanation } from "./AlgorithmExplanation";
 import { useLinkedListStore } from "@/store/useLinkedListStore";
 import { generateRandomBST } from "@/lib/nodeManipulation";
+import { generateBSTInsertSteps } from "@/lib/bstAlgorithms";
+
 
 export const Controls = () => {
   const [treeSize, setTreeSize] = useState<string>('');
+  const [insertValue, setInsertValue] = useState<string>('');
   const {
     dataStructure,
     setDataStructure,
@@ -55,7 +58,8 @@ export const Controls = () => {
     binaryTree: [
       { value: 'create', label: 'Create BST' },
       { value: 'bfs', label: 'BFS' },
-      { value: 'dfs', label: 'DFS' }
+      { value: 'dfs', label: 'DFS' },
+      { value: 'bstInsert', label: 'Insert Node' } // Make sure this is added
     ],
     weightedGraph: [
       { value: 'dijkstra', label: 'Dijkstra' }
@@ -115,6 +119,23 @@ export const Controls = () => {
       case 'mergeSort':
         steps = mergeSort(elements);
         break;
+      case 'bstInsert':
+        if (!tree) return;
+        const value = parseInt(insertValue);
+        if (isNaN(value)) {
+          alert("Please enter a valid number");
+          return;
+        }
+        steps = generateBSTInsertSteps(tree, value);
+        
+        // Set the steps and start the animation
+        useAlgorithmStore.getState().setSteps(steps);
+        playMainAnimation();
+        
+        // Clear the input field for next insertion
+        setInsertValue('');
+        return; // Return early to avoid the default steps setting below
+        
       default:
         return;
     }
@@ -310,6 +331,25 @@ useEffect(() => {
             Generate
           </button>
         </div>
+      )}
+
+      {/* Add node insertion input */}
+      {dataStructure === 'binaryTree' && algorithmType === 'bstInsert' && (
+        <div className="flex items-center gap-2 mr-2">
+          <input
+            type="number"
+            value={insertValue}
+            onChange={(e) => setInsertValue(e.target.value)}
+            placeholder="Enter node value"
+            className="w-32 px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <button
+            onClick={startAlgorithm}
+            className="text-blue-600 bg-blue-100 px-4 py-2 rounded-full font-semibold text-sm"
+          >
+            Insert
+          </button>
+        </div> 
       )}
 
       <button

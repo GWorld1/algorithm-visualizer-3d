@@ -61,10 +61,12 @@ export const useAlgorithmStore = create<AlgorithmState>((set) => ({
     useLinkedListStore.getState().reset(); // Reset linked list store
   },
   setAlgorithmType: (algorithmType) => {
-    set({ algorithmType, currentStep: 0 }); // Reset currentStep here
-     useAlgorithmStore.getState().reset();
-     useLinkedListStore.getState().reset(); // Reset linked list store
-    },
+    set({ 
+      algorithmType, 
+      currentStep: 0,
+      steps: [] // Reset steps when changing algorithm type
+    });
+  },
   tree: calculateTreeLayout(sampleTree),
   updateTree: (newTree) =>  {
     console.log('Updating tree:', newTree);
@@ -75,7 +77,11 @@ export const useAlgorithmStore = create<AlgorithmState>((set) => ({
   currentStep: 0,
   steps: [],
   isPlaying: false,
-  setSteps: (steps) => set({ steps }),
+  setSteps: (steps) => set({ 
+    steps,
+    currentStep: 0, // Reset current step when setting new steps
+    isPlaying: false // Ensure animation is paused when setting new steps
+  }),
   play: () => set({ isPlaying: true }),
   pause: () => set({ isPlaying: false }),
   reset: () => {

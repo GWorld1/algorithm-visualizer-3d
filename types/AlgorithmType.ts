@@ -13,4 +13,5 @@ export type AlgorithmType =
   | 'searchLinkedList'
   | 'insertNode'
   | 'deleteNode'
-  | 'create';
+  | 'create'
+  | 'bstInsert'; // Added new algorithm type

@@ -556,4 +556,35 @@ export const CreateBSTExplanation = () => (
   />
 );
 
+export const BSTInsertExplanation = () => (
+  <AlgorithmExplanation 
+    algorithmName="BST Insertion"
+    complexity={{
+      worstCase: "O(h)",
+      averageCase: "O(log n)",
+      bestCase: "O(1)"
+    }}
+    steps={[
+      "Start at the root of the tree",
+      "Compare the value to be inserted with the current node",
+      "If the value is less than the current node, go to the left subtree",
+      "If the value is greater than the current node, go to the right subtree",
+      "If we reach a null pointer (empty spot), insert the new node there",
+      "If the value already exists in the tree, do nothing (BSTs don't allow duplicates)"
+    ]}
+    visualizationTips={[
+      "Watch how the algorithm traverses the tree to find the insertion point",
+      "Notice how the BST property is maintained (smaller values to the left, larger to the right)",
+      "Observe how the new node (highlighted in red) is inserted at the correct position",
+      "Pay attention to the path taken to find the insertion point"
+    ]}
+    colorLegend={[
+      {color: "#ef4444", meaning: "Current Node Being Examined"},
+      {color: "#22c55e", meaning: "Newly Inserted Node"},
+      {color: "#049ef4", meaning: "Regular Tree Nodes"},
+      {color: "gray", meaning: "Tree Edges"}
+    ]}
+  />
+);
+
 export default AlgorithmExplanation;

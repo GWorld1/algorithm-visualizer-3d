@@ -2,17 +2,28 @@ import React from 'react';
 import { useAlgorithmStore } from '@/store/useAlgorithmStore';
 import { Card, CardContent } from '@/components/ui/card';
 import { Lightbulb } from 'lucide-react';
+import { BSTStep } from '@/lib/bstAlgorithms';
 
 const StepDescription = () => {
   const { currentStep, steps, algorithmType } = useAlgorithmStore();
 
-  // Only show for sorting algorithms
-  if (!['bubbleSort', 'quickSort', 'insertionSort','selectionSort', 'mergeSort'].includes(algorithmType)) {
+  // Only show for sorting algorithms and BST insertion
+  if (!['bubbleSort', 'quickSort', 'insertionSort', 'selectionSort', 'mergeSort', 'bstInsert'].includes(algorithmType)) {
     return null;
   }
 
-  const currentStepData = steps[currentStep];
-  if (!currentStepData?.description) {
+  let description = '';
+  
+  // Handle different step formats based on algorithm type
+  if (algorithmType === 'bstInsert') {
+    const bstStep = steps[currentStep] as unknown as BSTStep;
+    description = bstStep?.description || '';
+  } else {
+    // For sorting algorithms
+    description = (steps[currentStep] as any)?.description || '';
+  }
+
+  if (!description) {
     return null;
   }
 
@@ -23,7 +34,7 @@ const StepDescription = () => {
           <Lightbulb className="w-5 h-5 text-yellow-500 mt-1 flex-shrink-0" />
           <div>
             <h3 className="font-semibold text-sm text-gray-900">Step {currentStep + 1} of {steps.length}</h3>
-            <p className="text-sm text-gray-600 mt-1">{currentStepData.description}</p>
+            <p className="text-sm text-gray-600 mt-1">{description}</p>
           </div>
         </div>
       </CardContent>

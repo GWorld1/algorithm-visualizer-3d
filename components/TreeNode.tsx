@@ -18,13 +18,19 @@ const TreeNode = ({
   const meshRef = useRef<Mesh>(null);
   const { updateTree, tree } = useAlgorithmStore();
   const [showMenu, setShowMenu] = useState(false);
+  const [showAddDialog, setShowAddDialog] = useState(false);
+  const [newValue, setNewValue] = useState('');
 
-  const handleAddChild = (side: 'left' | 'right') => {
-    const newValue = Math.floor(Math.random() * 100);
-    const updatedTree = addTreeNode(tree, node.value, side, newValue);
-    if (updatedTree) {
-      updateTree(updatedTree);
+  const handleAddNode = () => {
+    const value = parseInt(newValue);
+    if (!isNaN(value)) {
+      const updatedTree = addTreeNode(tree, node.value, 'left', value); // Side parameter is ignored now
+      if (updatedTree) {
+        updateTree(updatedTree);
+      }
     }
+    setShowAddDialog(false);
+    setNewValue('');
     setShowMenu(false);
   };
 
@@ -67,22 +73,48 @@ const TreeNode = ({
           <div className="bg-white p-2 rounded shadow-lg">
             <button
               className="block w-full text-left px-2 py-1 hover:bg-gray-100"
-              onClick={() => handleAddChild('left')}
+              onClick={() => setShowAddDialog(true)}
             >
-              Add Left
-            </button>
-            <button
-              className="block w-full text-left px-2 py-1 hover:bg-gray-100"
-              onClick={() => handleAddChild('right')}
-            >
-              Add Right
+              Add Node
             </button>
             <button
               className="block w-full text-left px-2 py-1 hover:bg-red-100 text-red-600"
               onClick={handleDelete}
             >
-              Delete
+              Delete Node
             </button>
+          </div>
+        </Html>
+      )}
+
+      {/* Add Node Dialog */}
+      {showAddDialog && (
+        <Html position={[1, 1, 0]}>
+          <div className="bg-white p-2 rounded shadow-lg">
+            <input
+              type="number"
+              value={newValue}
+              onChange={(e) => setNewValue(e.target.value)}
+              className="border p-1 mb-2 w-full"
+              placeholder="Enter value"
+            />
+            <div className="flex gap-2">
+              <button
+                className="px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
+                onClick={handleAddNode}
+              >
+                Add
+              </button>
+              <button
+                className="px-2 py-1 bg-gray-500 text-white rounded hover:bg-gray-600"
+                onClick={() => {
+                  setShowAddDialog(false);
+                  setNewValue('');
+                }}
+              >
+                Cancel
+              </button>
+            </div>
           </div>
         </Html>
       )}

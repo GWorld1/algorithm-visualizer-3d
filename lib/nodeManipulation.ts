@@ -8,28 +8,33 @@ import { calculateWeightedTreeLayout } from "./weightedGraphLayout";
 // Binary Tree Operations
 export const addTreeNode = (
   tree: TreeNode,
-  parentValue: number,
-  side: 'left' | 'right',
+  _parentValue: number, // Ignored as we'll determine placement automatically
+  _side: 'left' | 'right', // Ignored as we'll determine placement automatically
   newValue: number
 ): TreeNode => {
   const newTree = structuredClone(tree);
   
-  const findAndAddNode = (node: TreeNode): boolean => {
-    if (node.value === parentValue) {
-      if (!node[side]) {
-        node[side] = { value: newValue };
-        return true;
-      }
-      return false; // Position already occupied
+  const insertNode = (node: TreeNode): boolean => {
+    if (newValue === node.value) {
+      return false; // Duplicate values not allowed in BST
     }
     
-    let added = false;
-    if (node.left) added = findAndAddNode(node.left);
-    if (!added && node.right) added = findAndAddNode(node.right);
-    return added;
+    if (newValue < node.value) {
+      if (!node.left) {
+        node.left = { value: newValue };
+        return true;
+      }
+      return insertNode(node.left);
+    } else {
+      if (!node.right) {
+        node.right = { value: newValue };
+        return true;
+      }
+      return insertNode(node.right);
+    }
   };
 
-  if (findAndAddNode(newTree)) {
+  if (insertNode(newTree)) {
     return calculateTreeLayout(newTree);
   }
   return tree;
@@ -39,28 +44,49 @@ export const deleteTreeNode = (
   tree: TreeNode,
   valueToDelete: number
 ): TreeNode | null => {
-  if (tree.value === valueToDelete) {
-    return null;
-  }
+  if (!tree) return null;
 
   const newTree = structuredClone(tree);
-  
-  const findAndDeleteNode = (node: TreeNode): void => {
-    if (node.left?.value === valueToDelete) {
-      node.left = undefined;
-      return;
+
+  const findMinValue = (node: TreeNode): number => {
+    let current = node;
+    while (current.left) {
+      current = current.left;
     }
-    if (node.right?.value === valueToDelete) {
-      node.right = undefined;
-      return;
-    }
-    
-    if (node.left) findAndDeleteNode(node.left);
-    if (node.right) findAndDeleteNode(node.right);
+    return current.value;
   };
 
-  findAndDeleteNode(newTree);
-  return calculateTreeLayout(newTree);
+  const deleteNode = (node: TreeNode | undefined, value: number): TreeNode | undefined => {
+    if (!node) return undefined;
+
+    // Search for the node
+    if (value < node.value) {
+      node.left = deleteNode(node.left, value);
+    } else if (value > node.value) {
+      node.right = deleteNode(node.right, value);
+    } else {
+      // Node found, handle deletion
+      
+      // Case 1: Leaf node
+      if (!node.left && !node.right) {
+        return undefined;
+      }
+      
+      // Case 2: Node with one child
+      if (!node.left) return node.right;
+      if (!node.right) return node.left;
+      
+      // Case 3: Node with two children
+      // Find the smallest value in right subtree (successor)
+      const minValue = findMinValue(node.right);
+      node.value = minValue; // Replace current node's value
+      node.right = deleteNode(node.right, minValue); // Delete the successor
+    }
+    return node;
+  };
+
+  const result = deleteNode(newTree, valueToDelete);
+  return result ? calculateTreeLayout(result) : null;
 };
 
 // Weighted Graph Operations

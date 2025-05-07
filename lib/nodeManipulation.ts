@@ -89,6 +89,49 @@ export const deleteTreeNode = (
   return result ? calculateTreeLayout(result) : null;
 };
 
+export const generateRandomBST = (size: number): TreeNode | null => {
+  if (size <= 0) return null;
+
+  // Generate random values ensuring BST property
+  const usedValues = new Set<number>();
+  const getRandomValue = (): number => {
+    let value;
+    do {
+      value = Math.floor(Math.random() * (size * 3)); // Multiply by 3 to have more spacing between numbers
+    } while (usedValues.has(value));
+    usedValues.add(value);
+    return value;
+  };
+
+  // Create root
+  const root: TreeNode = {
+    value: getRandomValue(),
+  };
+
+  // Insert remaining nodes
+  for (let i = 1; i < size; i++) {
+    const value = getRandomValue();
+    let current = root;
+    while (true) {
+      if (value < current.value) {
+        if (!current.left) {
+          current.left = { value };
+          break;
+        }
+        current = current.left;
+      } else {
+        if (!current.right) {
+          current.right = { value };
+          break;
+        }
+        current = current.right;
+      }
+    }
+  }
+
+  return calculateTreeLayout(root);
+};
+
 // Weighted Graph Operations
 const findNode = (
   node: WeightedTreeNode, 

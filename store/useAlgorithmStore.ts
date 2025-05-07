@@ -9,25 +9,9 @@ import { DataStructureType } from '@/types/DataStructure';
 import { ArrayElementState} from '@/lib/sortingAlgorithms';
 import { useLinkedListStore } from './useLinkedListStore';
 import { LinkedListStep } from '@/lib/linkedListAlgorithms';
+import { AlgorithmType } from '@/types/AlgorithmType';
 
 
-type AlgorithmType = 
-  | 'bfs' 
-  | 'dfs' 
-  | 'dijkstra'
-  | 'traverse'
-  | 'reverse'
-  | 'bubbleSort'
-  | 'quickSort'
-  | 'insertionSort'
-  | 'selectionSort'
-  | 'mergeSort'
-  | 'createLinkedList'
-  | 'searchLinkedList'
-  | 'insertNode'
-  | 'deleteNode'
-
-// Add to useAlgorithmStore.ts
 type AnimationSettings = {
   speed: number;
   autoRotate: boolean;

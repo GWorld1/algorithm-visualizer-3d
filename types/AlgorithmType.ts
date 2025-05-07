@@ -6,7 +6,11 @@ export type AlgorithmType =
   | 'reverse'
   | 'bubbleSort'
   | 'quickSort'
+  | 'insertionSort'
+  | 'selectionSort'
+  | 'mergeSort'
   | 'createLinkedList'
   | 'searchLinkedList'
   | 'insertNode'
-  | 'deleteNode';
+  | 'deleteNode'
+  | 'create';

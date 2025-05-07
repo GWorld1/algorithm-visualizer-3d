@@ -529,5 +529,31 @@ export const LinkedListCreateExplanation = () => (
   />
 );
 
+export const CreateBSTExplanation = () => (
+  <AlgorithmExplanation 
+    algorithmName="Binary Search Tree Creation"
+    complexity={{
+      worstCase: "O(n log n)",
+      averageCase: "O(n log n)",
+      bestCase: "O(n log n)"
+    }}
+    steps={[
+      "Specify the desired size of the binary search tree",
+      "Generate random unique values for each node",
+      "Insert values maintaining BST property: left subtree values < node value < right subtree values",
+      "Layout tree for visualization"
+    ]}
+    visualizationTips={[
+      "The tree automatically maintains BST property during creation",
+      "Left children are always smaller than their parent",
+      "Right children are always larger than their parent",
+      "Notice how the tree remains balanced due to random value distribution"
+    ]}
+    colorLegend={[
+      {color: "#049ef4", meaning: "Tree Nodes"},
+      {color: "#808080", meaning: "Tree Edges"}
+    ]}
+  />
+);
 
 export default AlgorithmExplanation;

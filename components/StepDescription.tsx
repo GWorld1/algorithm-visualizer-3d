@@ -6,16 +6,15 @@ import { BSTStep } from '@/lib/bstAlgorithms';
 
 const StepDescription = () => {
   const { currentStep, steps, algorithmType } = useAlgorithmStore();
-
-  // Only show for sorting algorithms and BST insertion
-  if (!['bubbleSort', 'quickSort', 'insertionSort', 'selectionSort', 'mergeSort', 'bstInsert'].includes(algorithmType)) {
+  // Only show for sorting algorithms and BST operations
+  if (!['bubbleSort', 'quickSort', 'insertionSort', 'selectionSort', 'mergeSort', 'bstInsert', 'bstSearch'].includes(algorithmType)) {
     return null;
   }
 
   let description = '';
   
   // Handle different step formats based on algorithm type
-  if (algorithmType === 'bstInsert') {
+  if (algorithmType === 'bstInsert' || algorithmType === 'bstSearch') {
     const bstStep = steps[currentStep] as unknown as BSTStep;
     description = bstStep?.description || '';
   } else {

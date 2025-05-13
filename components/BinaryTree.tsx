@@ -1,11 +1,13 @@
 import { Line } from '@react-three/drei';
 import TreeNode from './TreeNode';
-import { TreeNode as TreeNodeType } from '@/types/Treenode';
 import { Vector3 } from 'three';
 import { useThree } from '@react-three/fiber';
 import { useEffect } from 'react';
 import { useAlgorithmStore } from '@/store/useAlgorithmStore';
 import { BSTStep } from '@/lib/bstAlgorithms';
+import TreeNodeComponent from './TreeNode';
+import { TreeNode as TreeNodeType } from '@/types/Treenode';
+
 
 const BinaryTree = () => {
   const { camera } = useThree();
@@ -16,10 +18,10 @@ const BinaryTree = () => {
     camera.position.set(0, 5, 10);
     camera.lookAt(0, 0, 0);
   }, [camera]);
-  
+
   // Effect to update the main tree when BST insertion is complete
   useEffect(() => {
-    // Only run for BST insertion and when we're at the last step
+    // Only update tree for BST insertion when at the last step
     if (algorithmType === 'bstInsert' && currentStep === steps.length - 1 && steps.length > 0) {
       const bstStep = steps[currentStep] as unknown as BSTStep;
       if (bstStep?.tree) {
@@ -28,11 +30,11 @@ const BinaryTree = () => {
     }
   }, [algorithmType, currentStep, steps, updateTree]);
   
-  // Use the tree from the current step for BST insertion, otherwise use the main tree
+  // Use the tree from the current step for BST insertion and search, otherwise use the main tree
   let treeToRender = tree;
   
-  // For BST insertion, use the tree from the current step
-  if (algorithmType === 'bstInsert' && steps[currentStep]) {
+  // For BST insertion and search, use the tree from the current step
+  if ((algorithmType === 'bstInsert' || algorithmType === 'bstSearch') && steps[currentStep]) {
     const bstStep = steps[currentStep] as unknown as BSTStep;
     if (bstStep.tree) {
       treeToRender = bstStep.tree;
@@ -40,29 +42,28 @@ const BinaryTree = () => {
   }
   
   const renderTree = (node: TreeNodeType, parentPos?: Vector3) => {
-    // Rest of the component remains unchanged
     const currentPos = new Vector3(node.x, node.y, 0);
     
     // Determine if node is active based on algorithm type
     let isActive = false;
     
-    if (algorithmType === 'bstInsert') {
-      // For BST insertion, check if this is the current node being examined
+    if (algorithmType === 'bstInsert' || algorithmType === 'bstSearch') {
+      // For BST operations, check if this is the current node being examined
       const bstStep = steps[currentStep] as unknown as BSTStep;
-      isActive = bstStep?.currentNode === node.value;
-    } else {
+      isActive = bstStep?.currentNode === node.value;    } else {
       // For other algorithms like BFS/DFS
-      isActive = steps[currentStep]?.value === node.value;
+      const currentStepNode = steps[currentStep] as TreeNodeType;
+      isActive = currentStepNode?.value === node.value;
     }
     
     // Check if this is the edge being traversed
-    const isActiveEdge = isActive && parentPos && steps[currentStep - 1]?.value === node.parentValue;
+    const prevStepNode = steps[currentStep - 1] as TreeNodeType;
+    const isActiveEdge = isActive && parentPos && prevStepNode?.value === node.parentValue;
   
     return (
-      <group key={node.value}>
-        {/* Render current node */}
-        <TreeNode isActive={isActive} node={node} position={currentPos} />
-  
+      <group key={node.value}>        {/* Render current node */}
+        <TreeNodeComponent isActive={isActive} node={node} position={currentPos} />
+
         {/* Draw line to parent */}
         {parentPos && (
           <Line

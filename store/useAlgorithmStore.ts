@@ -10,6 +10,7 @@ import { ArrayElementState} from '@/lib/sortingAlgorithms';
 import { useLinkedListStore } from './useLinkedListStore';
 import { LinkedListStep } from '@/lib/linkedListAlgorithms';
 import { AlgorithmType } from '@/types/AlgorithmType';
+import { BSTStep } from '@/lib/bstAlgorithms';
 
 
 type AnimationSettings = {
@@ -33,9 +34,9 @@ type AlgorithmState = {
   tree: TreeNode;
   updateTree: (newTree: TreeNode) => void;
   currentStep: number;
-  steps: TreeNode[] | WeightedTreeNode[] | ArrayElementState[] | LinkedListStep[];
+  steps: TreeNode[] | WeightedTreeNode[] | ArrayElementState[] | LinkedListStep[] | BSTStep[];
   isPlaying: boolean;
-  setSteps: (steps: TreeNode[]) => void;
+  setSteps: (steps: TreeNode[] | WeightedTreeNode[] | ArrayElementState[] | LinkedListStep[] | BSTStep[]) => void;
   play: () => void;
   pause: () => void;
   reset: () => void;
@@ -74,10 +75,9 @@ export const useAlgorithmStore = create<AlgorithmState>((set) => ({
   },
   weightedTree: calculateWeightedTreeLayout(sampleWeightedTree),
   updateWeightedTree: (newTree) => set({ weightedTree: newTree }),
-  currentStep: 0,
-  steps: [],
+  currentStep: 0,  steps: [],
   isPlaying: false,
-  setSteps: (steps) => set({ 
+  setSteps: (steps: TreeNode[] | WeightedTreeNode[] | ArrayElementState[] | LinkedListStep[] | BSTStep[]) => set({ 
     steps,
     currentStep: 0, // Reset current step when setting new steps
     isPlaying: false // Ensure animation is paused when setting new steps

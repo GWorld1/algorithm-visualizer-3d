@@ -1,5 +1,5 @@
 export type AlgorithmType = 
-  | 'bfs' 
+  'bfs' 
   | 'dfs' 
   | 'dijkstra'
   | 'traverse'
@@ -14,4 +14,5 @@ export type AlgorithmType =
   | 'insertNode'
   | 'deleteNode'
   | 'create'
-  | 'bstInsert'; // Added new algorithm type
+  | 'bstInsert'
+  | 'bstSearch';

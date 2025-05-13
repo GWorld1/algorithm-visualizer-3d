@@ -10,18 +10,20 @@ import { useEffect, useState } from "react";
 import { DataStructureType } from "@/types/DataStructure";
 import { useArrayStore } from "@/store/useArrayStore";
 import { BFSExplanation, BubbleSortExplanation, DFSExplanation, DijkstraExplanation, InsertionSortExplanation, MergeSortExplanation, QuickSortExplanation, SelectionSortExplanation,LinkedListInsertExplanation,
-  LinkedListDeleteExplanation,
-  LinkedListSearchExplanation,
+  LinkedListDeleteExplanation,  LinkedListSearchExplanation,
   LinkedListCreateExplanation,
-  CreateBSTExplanation } from "./AlgorithmExplanation";
+  CreateBSTExplanation,
+  BSTSearchExplanation,
+  BSTInsertExplanation } from "./AlgorithmExplanation";
 import { useLinkedListStore } from "@/store/useLinkedListStore";
 import { generateRandomBST } from "@/lib/nodeManipulation";
-import { generateBSTInsertSteps } from "@/lib/bstAlgorithms";
+import { generateBSTInsertSteps, generateBSTSearchSteps } from "@/lib/bstAlgorithms";
 
 
 export const Controls = () => {
   const [treeSize, setTreeSize] = useState<string>('');
   const [insertValue, setInsertValue] = useState<string>('');
+  const [searchValue, setSearchValue] = useState<string>('');
   const {
     dataStructure,
     setDataStructure,
@@ -59,7 +61,8 @@ export const Controls = () => {
       { value: 'create', label: 'Create BST' },
       { value: 'bfs', label: 'BFS' },
       { value: 'dfs', label: 'DFS' },
-      { value: 'bstInsert', label: 'Insert Node' } // Make sure this is added
+      { value: 'bstInsert', label: 'Insert Node' },
+      { value: 'bstSearch', label: 'Search Node' }
     ],
     weightedGraph: [
       { value: 'dijkstra', label: 'Dijkstra' }
@@ -119,6 +122,18 @@ export const Controls = () => {
       case 'mergeSort':
         steps = mergeSort(elements);
         break;
+      case 'bstSearch':
+        if (!tree) return;
+        const searchValueInt = parseInt(searchValue);
+        if (isNaN(searchValueInt)) {
+          alert("Please enter a valid number");
+          return;
+        }
+        steps = generateBSTSearchSteps(tree, searchValueInt);
+        useAlgorithmStore.getState().setSteps(steps);
+        playMainAnimation();
+        setSearchValue('');
+        return;
       case 'bstInsert':
         if (!tree) return;
         const value = parseInt(insertValue);
@@ -284,6 +299,43 @@ useEffect(() => {
     }
   };
 
+  const getAlgorithmExplanation = () => {
+    switch (algorithmType) {
+      case 'bfs':
+        return <BFSExplanation />;
+      case 'dfs':
+        return <DFSExplanation />;
+      case 'bubbleSort':
+        return <BubbleSortExplanation />;
+      case 'quickSort':
+        return <QuickSortExplanation />;
+      case 'insertionSort':
+        return <InsertionSortExplanation />;
+      case 'selectionSort':
+        return <SelectionSortExplanation />;
+      case 'mergeSort':
+        return <MergeSortExplanation />;
+      case 'dijkstra':
+        return <DijkstraExplanation />;
+      case 'createLinkedList':
+        return <LinkedListCreateExplanation />;
+      case 'searchLinkedList':
+        return <LinkedListSearchExplanation />;
+      case 'insertNode':
+        return <LinkedListInsertExplanation />;
+      case 'deleteNode':
+        return <LinkedListDeleteExplanation />;
+      case 'create':
+        return <CreateBSTExplanation />;
+      case 'bstInsert':
+        return <BSTInsertExplanation />;
+      case 'bstSearch':
+        return <BSTSearchExplanation />;
+      default:
+        return null;
+    }
+  }
+
   return (
     <div className="fixed bottom-4 left-4 bg-white p-4 rounded-lg shadow flex items-center">
       {/* Data Structure Selector */}
@@ -350,6 +402,23 @@ useEffect(() => {
             Insert
           </button>
         </div> 
+      )}      {/* Add search input field */}
+      {dataStructure === 'binaryTree' && algorithmType === 'bstSearch' && (
+        <div className="flex items-center gap-2 mr-2">
+          <input
+            type="number"
+            value={searchValue}
+            onChange={(e) => setSearchValue(e.target.value)}
+            placeholder="Enter value to search"
+            className="w-32 px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <button
+            onClick={startAlgorithm}
+            className="text-blue-600 bg-blue-100 px-4 py-2 rounded-full font-semibold text-sm"
+          >
+            Search
+          </button>
+        </div>
       )}
 
       <button
@@ -401,19 +470,7 @@ useEffect(() => {
         </p>
       )}
 
-      {algorithmType === 'quickSort' && <QuickSortExplanation />}
-      {algorithmType === 'bubbleSort' && <BubbleSortExplanation />}
-      {algorithmType === 'insertionSort' && <InsertionSortExplanation />}
-      {algorithmType === 'dijkstra' && <DijkstraExplanation />}
-      {algorithmType === 'bfs' && <BFSExplanation />}
-      {algorithmType === 'dfs' && <DFSExplanation />}
-      {algorithmType === 'selectionSort' && <SelectionSortExplanation />}
-      {algorithmType === 'mergeSort' && <MergeSortExplanation />}
-      {algorithmType === 'createLinkedList' && <LinkedListCreateExplanation />}
-      {algorithmType === 'searchLinkedList' && <LinkedListSearchExplanation />}
-      {algorithmType === 'insertNode' && <LinkedListInsertExplanation />}
-      {algorithmType === 'deleteNode' && <LinkedListDeleteExplanation />}
-      {algorithmType === 'create' && <CreateBSTExplanation />}
+      {getAlgorithmExplanation()}
     </div>
   );
 };

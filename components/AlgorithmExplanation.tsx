@@ -587,4 +587,36 @@ export const BSTInsertExplanation = () => (
   />
 );
 
+export const BSTSearchExplanation = () => (
+  <AlgorithmExplanation 
+    algorithmName="BST Search"
+    complexity={{
+      worstCase: "O(h)",
+      averageCase: "O(log n)",
+      bestCase: "O(1)"
+    }}
+    steps={[
+      "Start at the root of the tree",
+      "Compare the search value with the current node value",
+      "If the values match, the search is successful",
+      "If search value < current node value, go to the left subtree",
+      "If search value > current node value, go to the right subtree",
+      "If we reach a null pointer, the value is not in the tree",
+      "Repeat steps 2-5 until the value is found or determined to not exist"
+    ]}
+    visualizationTips={[
+      "Watch how the algorithm traverses down the tree",
+      "Notice how the BST property guides the search direction",
+      "Observe the current node highlight as the search progresses",
+      "Pay attention to the comparison results that determine the path"
+    ]}
+    colorLegend={[
+      {color: "#ef4444", meaning: "Current Node Being Examined"},
+      {color: "#22c55e", meaning: "Target Node Found"},
+      {color: "#049ef4", meaning: "Regular Tree Nodes"},
+      {color: "gray", meaning: "Tree Edges"}
+    ]}
+  />
+);
+
 export default AlgorithmExplanation;

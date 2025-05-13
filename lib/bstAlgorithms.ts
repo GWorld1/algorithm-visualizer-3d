@@ -103,3 +103,80 @@ export const generateBSTInsertSteps = (
   
   return steps;
 };
+
+export const generateBSTSearchSteps = (
+  originalTree: TreeNode,
+  valueToSearch: number
+): BSTStep[] => {
+  const steps: BSTStep[] = [];
+  
+  // Clone the tree to avoid modifying the original
+  const tree = structuredClone(originalTree);
+  
+  // Add initial step
+  steps.push({
+    tree: structuredClone(tree),
+    description: `Starting BST search for value ${valueToSearch}`
+  });
+
+  // Recursive function to search and generate steps
+  const searchWithSteps = (node: TreeNode, value: number, path: string = ""): boolean => {
+    // Highlight current node being examined
+    steps.push({
+      tree: calculateTreeLayout(structuredClone(tree)),
+      currentNode: node.value,
+      description: `Examining node ${node.value}${path}`
+    });
+    
+    // Check if found
+    if (value === node.value) {
+      steps.push({
+        tree: calculateTreeLayout(structuredClone(tree)),
+        currentNode: node.value,
+        description: `Found ${value} at current node!`
+      });
+      return true;
+    }
+    
+    // Search left
+    if (value < node.value) {
+      steps.push({
+        tree: calculateTreeLayout(structuredClone(tree)),
+        currentNode: node.value,
+        description: `${value} < ${node.value}, moving to the left child`
+      });
+      
+      if (!node.left) {
+        steps.push({
+          tree: calculateTreeLayout(structuredClone(tree)),
+          description: `Value ${value} not found in the tree`
+        });
+        return false;
+      }
+      
+      return searchWithSteps(node.left, value, ` → left of ${node.value}`);
+    }
+    
+    // Search right
+    steps.push({
+      tree: calculateTreeLayout(structuredClone(tree)),
+      currentNode: node.value,
+      description: `${value} > ${node.value}, moving to the right child`
+    });
+    
+    if (!node.right) {
+      steps.push({
+        tree: calculateTreeLayout(structuredClone(tree)),
+        description: `Value ${value} not found in the tree`
+      });
+      return false;
+    }
+    
+    return searchWithSteps(node.right, value, ` → right of ${node.value}`);
+  };
+  
+  // Start search process
+  searchWithSteps(tree, valueToSearch);
+  
+  return steps;
+};

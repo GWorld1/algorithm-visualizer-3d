@@ -1,6 +1,7 @@
 // types/WeightedTreeNode.ts
 export interface WeightedTreeNode {
   value: number;
+  isSource?: boolean;
   x?: number;
   y?: number;
   z?: number;  // Added z coordinate

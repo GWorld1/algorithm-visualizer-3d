@@ -95,11 +95,14 @@ export const Controls = () => {
     return;
     }
 
-    let steps;
-    switch (algorithmType) {
+    let steps;    switch (algorithmType) {
       case 'dijkstra':
         if (!weightedTree) return;
-        steps = dijkstra(weightedTree, 1);
+        if (!weightedTree.isSource) {
+          alert('Please select a source node first');
+          return;
+        }
+        steps = dijkstra(weightedTree, weightedTree.value);
         break;
       case 'bfs':
         steps = generateBFSSteps(tree);

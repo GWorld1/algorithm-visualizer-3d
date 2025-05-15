@@ -11,6 +11,7 @@ import { useLinkedListStore } from './useLinkedListStore';
 import { LinkedListStep } from '@/lib/linkedListAlgorithms';
 import { AlgorithmType } from '@/types/AlgorithmType';
 import { BSTStep } from '@/lib/bstAlgorithms';
+import { DijkstraStep } from '@/lib/graphAlgorithms';
 
 
 type AnimationSettings = {
@@ -34,9 +35,9 @@ type AlgorithmState = {
   tree: TreeNode;
   updateTree: (newTree: TreeNode) => void;
   currentStep: number;
-  steps: TreeNode[] | WeightedTreeNode[] | ArrayElementState[] | LinkedListStep[] | BSTStep[];
+  steps: TreeNode[] | WeightedTreeNode[] | ArrayElementState[] | LinkedListStep[] | BSTStep[] | DijkstraStep[];
   isPlaying: boolean;
-  setSteps: (steps: TreeNode[] | WeightedTreeNode[] | ArrayElementState[] | LinkedListStep[] | BSTStep[]) => void;
+  setSteps: (steps: TreeNode[] | WeightedTreeNode[] | ArrayElementState[] | LinkedListStep[] | BSTStep[] | DijkstraStep[]) => void;
   play: () => void;
   pause: () => void;
   reset: () => void;
@@ -74,10 +75,38 @@ export const useAlgorithmStore = create<AlgorithmState>((set) => ({
     set({ tree: newTree })
   },
   weightedTree: calculateWeightedTreeLayout(sampleWeightedTree),
-  updateWeightedTree: (newTree) => set({ weightedTree: newTree }),
+  updateWeightedTree: (newTree) => {
+    set({ weightedTree: newTree });
+    // If we're in Dijkstra mode, recalculate with the new source
+    const state = useAlgorithmStore.getState();
+    if (state.algorithmType === 'dijkstra') {
+      // Find the source node
+      const findSourceNode = (node: WeightedTreeNode, visited = new Set<number>()): WeightedTreeNode | null => {
+        if (visited.has(node.value)) return null;
+        visited.add(node.value);
+        
+        if (node.isSource) return node;
+        
+        for (const edge of Object.values(node.edges)) {
+          const found = findSourceNode(edge.node, visited);
+          if (found) return found;
+        }
+        
+        return null;
+      };
+      
+      const sourceNode = findSourceNode(newTree);
+      if (sourceNode) {
+        import('@/lib/graphAlgorithms').then(({ dijkstra }) => {
+          const steps = dijkstra(newTree, sourceNode.value);
+          set({ steps, currentStep: 0 });
+        });
+      }
+    }
+  },
   currentStep: 0,  steps: [],
   isPlaying: false,
-  setSteps: (steps: TreeNode[] | WeightedTreeNode[] | ArrayElementState[] | LinkedListStep[] | BSTStep[]) => set({ 
+  setSteps: (steps: TreeNode[] | WeightedTreeNode[] | ArrayElementState[] | LinkedListStep[] | BSTStep[] | DijkstraStep[]) => set({ 
     steps,
     currentStep: 0, // Reset current step when setting new steps
     isPlaying: false // Ensure animation is paused when setting new steps

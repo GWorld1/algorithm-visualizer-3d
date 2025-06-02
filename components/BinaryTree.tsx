@@ -5,6 +5,7 @@ import { useThree } from '@react-three/fiber';
 import { useEffect } from 'react';
 import { useAlgorithmStore } from '@/store/useAlgorithmStore';
 import { BSTStep } from '@/lib/bstAlgorithms';
+import { TraversalStep } from '@/lib/treeAlgorithms';
 import TreeNodeComponent from './TreeNode';
 import { TreeNode as TreeNodeType } from '@/types/Treenode';
 
@@ -30,14 +31,22 @@ const BinaryTree = () => {
     }
   }, [algorithmType, currentStep, steps, updateTree]);
   
-  // Use the tree from the current step for BST insertion and search, otherwise use the main tree
+  // Use the tree from the current step for algorithms that provide tree data, otherwise use the main tree
   let treeToRender = tree;
-  
+
   // For BST insertion and search, use the tree from the current step
   if ((algorithmType === 'bstInsert' || algorithmType === 'bstSearch') && steps[currentStep]) {
     const bstStep = steps[currentStep] as unknown as BSTStep;
     if (bstStep.tree) {
       treeToRender = bstStep.tree;
+    }
+  }
+
+  // For BFS and DFS, use the tree from the current step
+  if ((algorithmType === 'bfs' || algorithmType === 'dfs') && steps[currentStep]) {
+    const traversalStep = steps[currentStep] as unknown as TraversalStep;
+    if (traversalStep.tree) {
+      treeToRender = traversalStep.tree;
     }
   }
   
@@ -46,19 +55,34 @@ const BinaryTree = () => {
     
     // Determine if node is active based on algorithm type
     let isActive = false;
-    
+
     if (algorithmType === 'bstInsert' || algorithmType === 'bstSearch') {
       // For BST operations, check if this is the current node being examined
       const bstStep = steps[currentStep] as unknown as BSTStep;
-      isActive = bstStep?.currentNode === node.value;    } else {
-      // For other algorithms like BFS/DFS
+      isActive = bstStep?.currentNode === node.value;
+    } else if (algorithmType === 'bfs' || algorithmType === 'dfs') {
+      // For BFS/DFS operations, check if this is the current node being visited
+      const traversalStep = steps[currentStep] as unknown as TraversalStep;
+      isActive = traversalStep?.currentNode === node.value;
+    } else {
+      // For other algorithms (legacy format)
       const currentStepNode = steps[currentStep] as TreeNodeType;
       isActive = currentStepNode?.value === node.value;
     }
     
     // Check if this is the edge being traversed
-    const prevStepNode = steps[currentStep - 1] as TreeNodeType;
-    const isActiveEdge = isActive && parentPos && prevStepNode?.value === node.parentValue;
+    let isActiveEdge = false;
+    if (isActive && parentPos && currentStep > 0) {
+      if (algorithmType === 'bfs' || algorithmType === 'dfs') {
+        // For BFS/DFS, check the previous traversal step
+        const prevTraversalStep = steps[currentStep - 1] as unknown as TraversalStep;
+        isActiveEdge = prevTraversalStep?.currentNode === node.parentValue;
+      } else {
+        // For other algorithms (legacy format)
+        const prevStepNode = steps[currentStep - 1] as TreeNodeType;
+        isActiveEdge = prevStepNode?.value === node.parentValue;
+      }
+    }
   
     return (
       <group key={node.value}>        {/* Render current node */}

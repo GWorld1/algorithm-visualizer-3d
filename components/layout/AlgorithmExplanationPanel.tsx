@@ -344,10 +344,42 @@ const AlgorithmExplanationPanel = () => {
               {/* Current step description */}
               <div className="flex-1 min-h-0">
                 {currentDescription ? (
-                  <div className="bg-blue-900/50 border border-blue-700 rounded-lg p-3 h-full overflow-y-auto">
+                  <div className="bg-blue-900/50 border border-blue-700 rounded-lg p-3 h-full overflow-y-auto space-y-3">
                     <p className="text-sm text-blue-200 font-medium">
                       {currentDescription}
                     </p>
+
+                    {/* Show queue/stack state for BFS/DFS */}
+                    {(algorithmType === 'bfs' || algorithmType === 'dfs') && steps && steps.length > 0 && (
+                      (() => {
+                        const currentStepData = steps[currentStep];
+                        if (currentStepData && typeof currentStepData === 'object' && 'queueState' in currentStepData) {
+                          const queueState = (currentStepData as any).queueState;
+                          const stackState = (currentStepData as any).stackState;
+
+                          if (algorithmType === 'bfs' && queueState) {
+                            return (
+                              <div className="bg-blue-800/30 border border-blue-600 rounded p-2">
+                                <div className="text-xs text-blue-300 font-medium mb-1">Queue State:</div>
+                                <div className="text-xs text-blue-200">
+                                  {queueState.length > 0 ? `[${queueState.join(', ')}]` : 'Empty'}
+                                </div>
+                              </div>
+                            );
+                          } else if (algorithmType === 'dfs' && stackState) {
+                            return (
+                              <div className="bg-purple-800/30 border border-purple-600 rounded p-2">
+                                <div className="text-xs text-purple-300 font-medium mb-1">Stack State:</div>
+                                <div className="text-xs text-purple-200">
+                                  {stackState.length > 0 ? `[${stackState.join(', ')}]` : 'Empty'}
+                                </div>
+                              </div>
+                            );
+                          }
+                        }
+                        return null;
+                      })()
+                    )}
                   </div>
                 ) : (
                   <div className="bg-gray-800 border border-gray-600 rounded-lg p-3 h-full flex items-center justify-center">

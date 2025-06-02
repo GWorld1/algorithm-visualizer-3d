@@ -12,6 +12,7 @@ import { LinkedListStep } from '@/lib/linkedListAlgorithms';
 import { AlgorithmType } from '@/types/AlgorithmType';
 import { BSTStep } from '@/lib/bstAlgorithms';
 import { DijkstraStep } from '@/lib/graphAlgorithms';
+import { TraversalStep } from '@/lib/treeAlgorithms';
 
 
 type AnimationSettings = {
@@ -35,9 +36,9 @@ type AlgorithmState = {
   tree: TreeNode;
   updateTree: (newTree: TreeNode) => void;
   currentStep: number;
-  steps: TreeNode[] | WeightedTreeNode[] | ArrayElementState[] | LinkedListStep[] | BSTStep[] | DijkstraStep[];
+  steps: TreeNode[] | WeightedTreeNode[] | ArrayElementState[] | LinkedListStep[] | BSTStep[] | DijkstraStep[] | TraversalStep[];
   isPlaying: boolean;
-  setSteps: (steps: TreeNode[] | WeightedTreeNode[] | ArrayElementState[] | LinkedListStep[] | BSTStep[] | DijkstraStep[]) => void;
+  setSteps: (steps: TreeNode[] | WeightedTreeNode[] | ArrayElementState[] | LinkedListStep[] | BSTStep[] | DijkstraStep[] | TraversalStep[]) => void;
   play: () => void;
   pause: () => void;
   restart: () => void;
@@ -108,7 +109,7 @@ export const useAlgorithmStore = create<AlgorithmState>((set) => ({
   },
   currentStep: 0,  steps: [],
   isPlaying: false,
-  setSteps: (steps: TreeNode[] | WeightedTreeNode[] | ArrayElementState[] | LinkedListStep[] | BSTStep[] | DijkstraStep[]) => set({ 
+  setSteps: (steps: TreeNode[] | WeightedTreeNode[] | ArrayElementState[] | LinkedListStep[] | BSTStep[] | DijkstraStep[] | TraversalStep[]) => set({
     steps,
     currentStep: 0, // Reset current step when setting new steps
     isPlaying: false // Ensure animation is paused when setting new steps

@@ -100,14 +100,14 @@ const LinkedList = () => {
   // Add legend
   const Legend = () => (
     <group position={[-5, 3, 0]}>
-      <Text position={[0, 0, 0]} fontSize={0.2} color="black">
+      <Text position={[0, 0, 0]} fontSize={0.2} color="white">
         Current Node
       </Text>
       <mesh position={[1, 0, 0]} scale={0.2}>
         <sphereGeometry />
         <meshStandardMaterial color={NODE_COLORS.current} />
       </mesh>
-      <Text position={[0, -0.4, 0]} fontSize={0.2} color="black">
+      <Text position={[0, -0.4, 0]} fontSize={0.2} color="white">
         Target Found
       </Text>
       <mesh position={[1, -0.4, 0]} scale={0.2}>

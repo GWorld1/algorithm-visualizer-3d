@@ -28,7 +28,7 @@ const QuadPanelLayout = () => {
 
   // Desktop quad-panel layout
   return (
-    <div className="h-screen w-full overflow-hidden bg-gray-900 flex flex-col">
+    <div className="h-screen w-full overflow-hidden bg-gradient-to-r from-slate-900 to-slate-800 flex flex-col">
       {/* Header with title */}
       {/* <header className="relative z-10 px-4 py-3 flex-shrink-0">
         <h1 className="text-2xl lg:text-3xl font-semibold text-white">3D Algorithm Visualizer</h1>

@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useAlgorithmStore } from '@/store/useAlgorithmStore';
 import DataGenerators from '@/components/data/DataGenerators';
+import BSTGenerator from '@/components/data/BSTGenerator';
 import { Settings, Database, TreePine, Link, Network } from 'lucide-react';
 import { DataStructureType } from '@/types/DataStructure';
 import { AlgorithmType } from '@/types/AlgorithmType';
@@ -14,7 +15,6 @@ const DataCustomizationPanel = () => {
   // Algorithm options for each data structure
   const algorithmOptions = {
     binaryTree: [
-      { value: 'create', label: 'Create BST' },
       { value: 'bfs', label: 'BFS' },
       { value: 'dfs', label: 'DFS' },
       { value: 'bstInsert', label: 'Insert Node' },
@@ -92,9 +92,13 @@ const DataCustomizationPanel = () => {
           </div>
 
           {/* Data Generation Section */}
-          {/* <div className="flex-1 min-h-0 overflow-y-auto">
-            <DataGenerators />
-          </div> */}
+          <div className="flex-1 min-h-0 overflow-y-auto">
+            {dataStructure === 'binaryTree' ? (
+              <BSTGenerator />
+            ) : (
+              <DataGenerators />
+            )}
+          </div>
         </CardContent>
       </Card>
     </div>

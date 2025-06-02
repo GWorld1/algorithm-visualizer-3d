@@ -12,16 +12,13 @@ import { useArrayStore } from "@/store/useArrayStore";
 import { BFSExplanation, BubbleSortExplanation, DFSExplanation, DijkstraExplanation, InsertionSortExplanation, MergeSortExplanation, QuickSortExplanation, SelectionSortExplanation,LinkedListInsertExplanation,
   LinkedListDeleteExplanation,  LinkedListSearchExplanation,
   LinkedListCreateExplanation,
-  CreateBSTExplanation,
   BSTSearchExplanation,
   BSTInsertExplanation } from "./AlgorithmExplanation";
 import { useLinkedListStore } from "@/store/useLinkedListStore";
-import { generateRandomBST } from "@/lib/nodeManipulation";
 import { generateBSTInsertSteps, generateBSTSearchSteps } from "@/lib/bstAlgorithms";
 
 
 export const Controls = () => {
-  const [treeSize, setTreeSize] = useState<string>('');
   const [insertValue, setInsertValue] = useState<string>('');
   const [searchValue, setSearchValue] = useState<string>('');
   const {
@@ -58,7 +55,6 @@ export const Controls = () => {
   // Algorithm options for each data structure
   const algorithmOptions = {
     binaryTree: [
-      { value: 'create', label: 'Create BST' },
       { value: 'bfs', label: 'BFS' },
       { value: 'dfs', label: 'DFS' },
       { value: 'bstInsert', label: 'Insert Node' },
@@ -286,21 +282,7 @@ useEffect(() => {
     }
   };
 
-  // Add BST creation handler
-  const handleRandomTree = () => {
-    const size = parseInt(treeSize);
-    if (!isNaN(size) && size > 0) {
-      const newTree = generateRandomBST(size);
-      if (newTree) {
-        updateTree(newTree);
-        useAlgorithmStore.setState(state => ({
-          ...state,
-          currentStep: 0,
-          steps: [newTree]
-        }));
-      }
-    }
-  };
+
 
   const getAlgorithmExplanation = () => {
     switch (algorithmType) {
@@ -328,8 +310,7 @@ useEffect(() => {
         return <LinkedListInsertExplanation />;
       case 'deleteNode':
         return <LinkedListDeleteExplanation />;
-      case 'create':
-        return <CreateBSTExplanation />;
+
       case 'bstInsert':
         return <BSTInsertExplanation />;
       case 'bstSearch':
@@ -368,25 +349,7 @@ useEffect(() => {
         }
       </select>
 
-      {/* Add BST creation controls */}
-      {dataStructure === 'binaryTree' && algorithmType === 'create' && (
-        <div className="flex items-center gap-2 mr-2">
-          <input
-            type="number"
-            value={treeSize}
-            onChange={(e) => setTreeSize(e.target.value)}
-            placeholder="Enter tree size"
-            className="w-32 px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            min="1"
-          />
-          <button
-            onClick={handleRandomTree}
-            className="text-blue-600 bg-blue-100 px-4 py-2 rounded-full font-semibold text-sm flex items-center gap-2"
-          >
-            Generate
-          </button>
-        </div>
-      )}
+
 
       {/* Add node insertion input */}
       {dataStructure === 'binaryTree' && algorithmType === 'bstInsert' && (

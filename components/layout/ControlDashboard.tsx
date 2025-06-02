@@ -22,13 +22,12 @@ import { bubbleSort, insertionSort, mergeSort, quickSort, selectionSort } from "
 import { generateBFSSteps, generateDFSSteps } from "@/lib/treeAlgorithms";
 import { dijkstra } from "@/lib/graphAlgorithms";
 import { generateBSTInsertSteps, generateBSTSearchSteps } from "@/lib/bstAlgorithms";
-import { generateRandomBST } from "@/lib/nodeManipulation";
 import { createLinkedList, searchLinkedList, insertNode, deleteNode } from "@/lib/linkedListAlgorithms";
 
 const ControlDashboard = () => {
-  const [treeSize, setTreeSize] = useState<string>('');
   const [insertValue, setInsertValue] = useState<string>('');
   const [searchValue, setSearchValue] = useState<string>('');
+  const [isGeneratingSteps, setIsGeneratingSteps] = useState(false);
 
   const {
     isPlaying,
@@ -44,7 +43,8 @@ const ControlDashboard = () => {
     setAlgorithmType,
     tree,
     weightedTree,
-    updateTree
+    updateTree,
+    updateWeightedTree
   } = useAlgorithmStore();
 
   const { elements } = useArrayStore();
@@ -52,7 +52,6 @@ const ControlDashboard = () => {
   // Algorithm options for each data structure
   const algorithmOptions = {
     binaryTree: [
-      { value: 'create', label: 'Create BST' },
       { value: 'bfs', label: 'BFS' },
       { value: 'dfs', label: 'DFS' },
       { value: 'bstInsert', label: 'Insert Node' },
@@ -83,146 +82,199 @@ const ControlDashboard = () => {
   const activeCurrentStep = dataStructure === 'linkedList' ? linkedListStep : currentStep;
   const activeSteps = dataStructure === 'linkedList' ? linkedListSteps : steps;
 
-  // Algorithm execution logic
-  const startAlgorithm = () => {
-    if (dataStructure === 'linkedList') {
-      // Handle linked list algorithms
-      const { linkedList, setSteps, setIsPlaying, setLinkedList } = useLinkedListStore.getState();
+  // Function to generate algorithm steps automatically
+  const generateAlgorithmSteps = async () => {
+    if (isGeneratingSteps) return;
 
-      switch (algorithmType) {
-        case 'createLinkedList':
-          const elements = [1, 10, 9]; // Default elements, could be made configurable
-          const steps = createLinkedList(elements);
-          setSteps(steps);
-          setIsPlaying(true);
-          if (steps.length > 0) {
-            setLinkedList(steps[steps.length - 1].list!);
-          }
-          break;
-        case 'searchLinkedList':
-          if (!linkedList) {
-            alert('Please create a linked list first');
-            return;
-          }
-          const searchVal = parseInt(searchValue);
-          if (isNaN(searchVal)) {
-            alert('Please enter a valid search value');
-            return;
-          }
-          const searchSteps = searchLinkedList(linkedList, searchVal);
-          setSteps(searchSteps);
-          setIsPlaying(true);
-          setSearchValue('');
-          break;
-        case 'insertNode':
-          if (!linkedList) {
-            alert('Please create a linked list first');
-            return;
-          }
-          const insertAfter = parseInt(searchValue); // Reusing searchValue for insert after
-          const newValue = parseInt(insertValue);
-          if (isNaN(insertAfter) || isNaN(newValue)) {
-            alert('Please enter valid values for insertion');
-            return;
-          }
-          const insertSteps = insertNode(linkedList, insertAfter, newValue);
-          setSteps(insertSteps);
-          setIsPlaying(true);
-          setSearchValue('');
-          setInsertValue('');
-          break;
-        case 'deleteNode':
-          if (!linkedList) {
-            alert('Please create a linked list first');
-            return;
-          }
-          const deleteVal = parseInt(searchValue);
-          if (isNaN(deleteVal)) {
-            alert('Please enter a valid value to delete');
-            return;
-          }
-          const deleteSteps = deleteNode(linkedList, deleteVal);
-          setSteps(deleteSteps);
-          setIsPlaying(true);
-          setSearchValue('');
-          break;
+    setIsGeneratingSteps(true);
+
+    try {
+      if (dataStructure === 'linkedList') {
+        // Handle linked list algorithms
+        const { linkedList, setSteps } = useLinkedListStore.getState();
+
+        switch (algorithmType) {
+          case 'createLinkedList':
+            const elements = [1, 10, 9]; // Default elements
+            const steps = createLinkedList(elements);
+            setSteps(steps);
+            if (steps.length > 0) {
+              useLinkedListStore.getState().setLinkedList(steps[steps.length - 1].list!);
+            }
+            break;
+          case 'searchLinkedList':
+            if (!linkedList) return;
+            const searchVal = linkedList.value; // Use first node value as default
+            const searchSteps = searchLinkedList(linkedList, searchVal);
+            setSteps(searchSteps);
+            setSearchValue(searchVal.toString());
+            break;
+          case 'insertNode':
+            if (!linkedList) return;
+            const insertAfter = linkedList.value; // Use first node value as default
+            const newValue = Math.floor(Math.random() * 100); // Random new value
+            const insertSteps = insertNode(linkedList, insertAfter, newValue);
+            setSteps(insertSteps);
+            setSearchValue(insertAfter.toString());
+            setInsertValue(newValue.toString());
+            break;
+          case 'deleteNode':
+            if (!linkedList) return;
+            const deleteVal = linkedList.value; // Use first node value as default
+            const deleteSteps = deleteNode(linkedList, deleteVal);
+            setSteps(deleteSteps);
+            setSearchValue(deleteVal.toString());
+            break;
+        }
+        return;
       }
-      return;
-    }
 
-    let steps;
-    switch (algorithmType) {
-      case 'dijkstra':
-        if (!weightedTree) return;
-        if (!weightedTree.isSource) {
-          alert('Please select a source node first');
+      // Handle other data structures
+      let steps;
+      switch (algorithmType) {
+        case 'dijkstra':
+          if (!weightedTree) return;
+          if (!weightedTree.isSource) {
+            // Auto-select the first node as source if none selected
+            const firstNode = weightedTree;
+            firstNode.isSource = true;
+            updateWeightedTree(firstNode);
+            return; // This will trigger another generation via the updateWeightedTree logic
+          }
+          steps = dijkstra(weightedTree, weightedTree.value);
+          break;
+        case 'bfs':
+          if (!tree) return;
+          steps = generateBFSSteps(tree);
+          break;
+        case 'dfs':
+          if (!tree) return;
+          steps = generateDFSSteps(tree);
+          break;
+        case 'bubbleSort':
+          steps = bubbleSort(elements);
+          break;
+        case 'quickSort':
+          steps = quickSort(elements);
+          break;
+        case 'insertionSort':
+          steps = insertionSort(elements);
+          break;
+        case 'selectionSort':
+          steps = selectionSort(elements);
+          break;
+        case 'mergeSort':
+          steps = mergeSort(elements);
+          break;
+        case 'bstSearch':
+          if (!tree) return;
+          const defaultSearchValue = tree.value; // Use root value as default
+          steps = generateBSTSearchSteps(tree, defaultSearchValue);
+          setSearchValue(defaultSearchValue.toString());
+          break;
+        case 'bstInsert':
+          if (!tree) return;
+          // Generate a random value that's not already in the tree
+          const getRandomInsertValue = (node: TreeNode): number => {
+            const existingValues = new Set<number>();
+            const collectValues = (n: TreeNode) => {
+              existingValues.add(n.value);
+              if (n.left) collectValues(n.left);
+              if (n.right) collectValues(n.right);
+            };
+            collectValues(node);
+
+            let randomValue;
+            do {
+              randomValue = Math.floor(Math.random() * 100);
+            } while (existingValues.has(randomValue));
+
+            return randomValue;
+          };
+
+          const defaultInsertValue = getRandomInsertValue(tree);
+          steps = generateBSTInsertSteps(tree, defaultInsertValue);
+          setInsertValue(defaultInsertValue.toString());
+          break;
+        default:
           return;
-        }
-        steps = dijkstra(weightedTree, weightedTree.value);
-        break;
-      case 'bfs':
-        if (!tree) return;
-        steps = generateBFSSteps(tree);
-        break;
-      case 'dfs':
-        if (!tree) return;
-        steps = generateDFSSteps(tree);
-        break;
-      case 'bubbleSort':
-        steps = bubbleSort(elements);
-        break;
-      case 'quickSort':
-        steps = quickSort(elements);
-        break;
-      case 'insertionSort':
-        steps = insertionSort(elements);
-        break;
-      case 'selectionSort':
-        steps = selectionSort(elements);
-        break;
-      case 'mergeSort':
-        steps = mergeSort(elements);
-        break;
-      case 'create':
-        const size = parseInt(treeSize);
-        if (isNaN(size) || size <= 0) {
-          alert("Please enter a valid tree size");
-          return;
-        }
-        const newTree = generateRandomBST(size);
-        updateTree(newTree);
-        setTreeSize('');
-        return;
-      case 'bstSearch':
-        if (!tree) return;
-        const searchValueInt = parseInt(searchValue);
-        if (isNaN(searchValueInt)) {
-          alert("Please enter a valid number to search");
-          return;
-        }
-        steps = generateBSTSearchSteps(tree, searchValueInt);
-        useAlgorithmStore.getState().setSteps(steps);
-        play();
-        setSearchValue('');
-        return;
-      case 'bstInsert':
-        if (!tree) return;
-        const value = parseInt(insertValue);
-        if (isNaN(value)) {
-          alert("Please enter a valid number");
-          return;
-        }
-        steps = generateBSTInsertSteps(tree, value);
-        useAlgorithmStore.getState().setSteps(steps);
-        play();
-        setInsertValue('');
-        return;
-      default:
-        return;
+      }
+
+      if (steps) {
+        useAlgorithmStore.getState().setSteps(steps as TreeNode[] | WeightedTreeNode[]);
+      }
+    } catch (error) {
+      console.error('Error generating algorithm steps:', error);
+    } finally {
+      setIsGeneratingSteps(false);
     }
-    useAlgorithmStore.getState().setSteps(steps as TreeNode[] | WeightedTreeNode[]);
-    play();
   };
+
+  // Function to handle parameter changes and regenerate steps
+  const handleParameterChange = (paramType: 'insert' | 'search', value: string) => {
+    if (paramType === 'insert') {
+      setInsertValue(value);
+      if (algorithmType === 'bstInsert' && tree && value.trim() !== '') {
+        const numValue = parseInt(value);
+        if (!isNaN(numValue)) {
+          const steps = generateBSTInsertSteps(tree, numValue);
+          useAlgorithmStore.getState().setSteps(steps);
+        }
+      } else if (algorithmType === 'insertNode' && value.trim() !== '') {
+        const numValue = parseInt(value);
+        if (!isNaN(numValue) && searchValue.trim() !== '') {
+          const insertAfter = parseInt(searchValue);
+          if (!isNaN(insertAfter)) {
+            const { linkedList, setSteps } = useLinkedListStore.getState();
+            if (linkedList) {
+              const insertSteps = insertNode(linkedList, insertAfter, numValue);
+              setSteps(insertSteps);
+            }
+          }
+        }
+      }
+    } else if (paramType === 'search') {
+      setSearchValue(value);
+      if (algorithmType === 'bstSearch' && tree && value.trim() !== '') {
+        const numValue = parseInt(value);
+        if (!isNaN(numValue)) {
+          const steps = generateBSTSearchSteps(tree, numValue);
+          useAlgorithmStore.getState().setSteps(steps);
+        }
+      } else if ((algorithmType === 'searchLinkedList' || algorithmType === 'deleteNode') && value.trim() !== '') {
+        const numValue = parseInt(value);
+        if (!isNaN(numValue)) {
+          const { linkedList, setSteps } = useLinkedListStore.getState();
+          if (linkedList) {
+            if (algorithmType === 'searchLinkedList') {
+              const searchSteps = searchLinkedList(linkedList, numValue);
+              setSteps(searchSteps);
+            } else if (algorithmType === 'deleteNode') {
+              const deleteSteps = deleteNode(linkedList, numValue);
+              setSteps(deleteSteps);
+            }
+          }
+        }
+      } else if (algorithmType === 'insertNode' && value.trim() !== '' && insertValue.trim() !== '') {
+        const insertAfter = parseInt(value);
+        const newValue = parseInt(insertValue);
+        if (!isNaN(insertAfter) && !isNaN(newValue)) {
+          const { linkedList, setSteps } = useLinkedListStore.getState();
+          if (linkedList) {
+            const insertSteps = insertNode(linkedList, insertAfter, newValue);
+            setSteps(insertSteps);
+          }
+        }
+      }
+    }
+  };
+
+  // Auto-generate steps when algorithm type changes
+  useEffect(() => {
+    generateAlgorithmSteps();
+  }, [algorithmType, dataStructure, tree, weightedTree, elements]);
+
+
 
   const handlePlayPause = () => {
     if (isActivelyPlaying) {
@@ -362,22 +414,13 @@ const ControlDashboard = () => {
                 </select>
 
                 {/* Input fields for algorithms that need parameters */}
-                {(algorithmType === 'create') && (
-                  <input
-                    type="number"
-                    placeholder="Tree size"
-                    value={treeSize}
-                    onChange={(e) => setTreeSize(e.target.value)}
-                    className="text-xs border border-gray-600 rounded px-2 py-1 w-20 bg-gray-800 text-white placeholder-gray-400"
-                  />
-                )}
 
                 {(algorithmType === 'bstInsert' || algorithmType === 'insertNode') && (
                   <input
                     type="number"
                     placeholder="Value"
                     value={insertValue}
-                    onChange={(e) => setInsertValue(e.target.value)}
+                    onChange={(e) => handleParameterChange('insert', e.target.value)}
                     className="text-xs border border-gray-600 rounded px-2 py-1 w-16 bg-gray-800 text-white placeholder-gray-400"
                   />
                 )}
@@ -388,19 +431,18 @@ const ControlDashboard = () => {
                     type="number"
                     placeholder={algorithmType === 'insertNode' ? 'After' : 'Search'}
                     value={searchValue}
-                    onChange={(e) => setSearchValue(e.target.value)}
+                    onChange={(e) => handleParameterChange('search', e.target.value)}
                     className="text-xs border border-gray-600 rounded px-2 py-1 w-16 bg-gray-800 text-white placeholder-gray-400"
                   />
                 )}
 
-                <Button
-                  variant="default"
-                  size="sm"
-                  onClick={startAlgorithm}
-                  className="h-8 px-3 text-xs"
-                >
-                  Start
-                </Button>
+                {/* Steps generation status indicator */}
+                {isGeneratingSteps && (
+                  <div className="text-xs text-gray-400 flex items-center gap-1">
+                    <div className="w-3 h-3 border border-gray-400 border-t-transparent rounded-full animate-spin"></div>
+                    Generating...
+                  </div>
+                )}
               </div>
 
               {/* Playback Controls */}

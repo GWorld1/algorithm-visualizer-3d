@@ -28,6 +28,7 @@ export const Controls = () => {
     setAlgorithmType,
     play: playMainAnimation,
     pause: pauseMainAnimation,
+    restart: restartMainAnimation,
     reset: resetMainAnimation,
     isPlaying: isPlayingMain,
     tree,
@@ -199,11 +200,9 @@ useEffect(() => {
   // Also update the reset function to ensure it properly clears the linked list
   const resetAnimation = () => {
     if (dataStructure === 'linkedList') {
-      resetLinkedListAnimation();
-      // Also clear the linked list itself when resetting
-     // useLinkedListStore.getState().setLinkedList(null);
+      useLinkedListStore.getState().resetLinkedListAnimation();
     } else {
-      resetMainAnimation();
+      restartMainAnimation();
     }
   };
 

@@ -40,6 +40,7 @@ type AlgorithmState = {
   setSteps: (steps: TreeNode[] | WeightedTreeNode[] | ArrayElementState[] | LinkedListStep[] | BSTStep[] | DijkstraStep[]) => void;
   play: () => void;
   pause: () => void;
+  restart: () => void;
   reset: () => void;
   
 };
@@ -114,9 +115,17 @@ export const useAlgorithmStore = create<AlgorithmState>((set) => ({
   }),
   play: () => set({ isPlaying: true }),
   pause: () => set({ isPlaying: false }),
+  restart: () => {
+    set({
+      currentStep: 0,
+      isPlaying: false
+      // Keep steps intact for restart functionality
+    });
+    useLinkedListStore.getState().resetLinkedListAnimation();
+  },
   reset: () => {
-    set({ 
-      currentStep: 0, 
+    set({
+      currentStep: 0,
       isPlaying: false,
       steps: [] // Clear the steps when resetting
     });

@@ -35,6 +35,7 @@ const ControlDashboard = () => {
     steps,
     play,
     pause,
+    restart,
     reset,
     animationSettings,
     updateAnimationSettings,
@@ -320,9 +321,9 @@ const ControlDashboard = () => {
 
   const handleReset = () => {
     if (dataStructure === 'linkedList') {
-      useLinkedListStore.getState().reset();
+      useLinkedListStore.getState().resetLinkedListAnimation();
     } else {
-      reset();
+      restart();
     }
   };
 

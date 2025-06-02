@@ -318,7 +318,7 @@ const AlgorithmExplanationPanel = () => {
   const isExecuting = activeSteps.length > 0 && (activeIsPlaying || activeCurrentStep >= 0);
 
   return (
-    <div className="h-24 bg-white/95 backdrop-blur-sm border-b border-white/30 shadow-sm relative z-10 transition-all duration-300">
+    <div className="h-30 bg-gray-900/95 backdrop-blur-sm border-b border-gray-700 shadow-sm relative z-10 transition-all duration-300">
       <Card className="border-0 rounded-none bg-transparent h-full">
         <CardContent className="p-4 h-full overflow-hidden">
           {isExecuting ? (
@@ -327,14 +327,14 @@ const AlgorithmExplanationPanel = () => {
               {/* Header with algorithm name and step counter */}
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
-                  <Lightbulb className="w-5 h-5 text-yellow-500 flex-shrink-0" />
-                  <h2 className="text-lg font-semibold">{algorithmInfo.name}</h2>
+                  <Lightbulb className="w-5 h-5 text-yellow-400 flex-shrink-0" />
+                  <h2 className="text-lg font-semibold text-white">{algorithmInfo.name}</h2>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                  <span className="text-sm text-gray-300 bg-gray-800 px-2 py-1 rounded">
                     Step {activeCurrentStep + 1} of {activeSteps.length}
                   </span>
-                  <div className="flex items-center gap-1 text-xs text-gray-500">
+                  <div className="flex items-center gap-1 text-xs text-gray-400">
                     <Activity className="w-3 h-3" />
                     <span>Executing</span>
                   </div>
@@ -344,14 +344,14 @@ const AlgorithmExplanationPanel = () => {
               {/* Current step description */}
               <div className="flex-1 min-h-0">
                 {currentDescription ? (
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 h-full overflow-y-auto">
-                    <p className="text-sm text-blue-800 font-medium">
+                  <div className="bg-blue-900/50 border border-blue-700 rounded-lg p-3 h-full overflow-y-auto">
+                    <p className="text-sm text-blue-200 font-medium">
                       {currentDescription}
                     </p>
                   </div>
                 ) : (
-                  <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 h-full flex items-center justify-center">
-                    <p className="text-sm text-gray-500">
+                  <div className="bg-gray-800 border border-gray-600 rounded-lg p-3 h-full flex items-center justify-center">
+                    <p className="text-sm text-gray-400">
                       Step description not available
                     </p>
                   </div>
@@ -364,10 +364,10 @@ const AlgorithmExplanationPanel = () => {
               {/* Header with algorithm name and complexity */}
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
-                  <Lightbulb className="w-5 h-5 text-yellow-500 flex-shrink-0" />
-                  <h2 className="text-lg font-semibold">{algorithmInfo.name}</h2>
+                  <Lightbulb className="w-5 h-5 text-yellow-400 flex-shrink-0" />
+                  <h2 className="text-lg font-semibold text-white">{algorithmInfo.name}</h2>
                 </div>
-                <div className="flex items-center gap-3 text-xs text-gray-500">
+                <div className="flex items-center gap-3 text-xs text-gray-400">
                   <div className="flex items-center gap-1">
                     <Clock className="w-3 h-3" />
                     <span>Time: {complexity.time}</span>
@@ -382,17 +382,17 @@ const AlgorithmExplanationPanel = () => {
               {/* Algorithm description and key points */}
               <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-2 gap-4">
                 <div>
-                  {/* <h3 className="text-sm font-semibold mb-2">Description</h3> */}
-                  <p className="text-sm text-gray-600 leading-relaxed">
+                  <h3 className="text-sm font-semibold mb-2 text-gray-100">Description</h3>
+                  <p className="text-sm text-gray-300 leading-relaxed">
                     {algorithmInfo.description}
                   </p>
                 </div>
                 {/* <div>
-                  <h3 className="text-sm font-semibold mb-2">Key Points</h3>
+                  <h3 className="text-sm font-semibold mb-2 text-gray-100">Key Points</h3>
                   <ul className="space-y-1">
                     {algorithmInfo.keyPoints.slice(0, 3).map((point, index) => (
-                      <li key={index} className="text-sm text-gray-600 flex items-start gap-2">
-                        <span className="w-1 h-1 bg-gray-400 rounded-full mt-2 flex-shrink-0" />
+                      <li key={index} className="text-sm text-gray-300 flex items-start gap-2">
+                        <span className="w-1 h-1 bg-gray-500 rounded-full mt-2 flex-shrink-0" />
                         {point}
                       </li>
                     ))}

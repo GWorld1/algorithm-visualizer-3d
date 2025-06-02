@@ -13,8 +13,7 @@ import {
   SkipBack,
   RotateCcw,
   Clock,
-  Activity,
-  ChevronDown
+  Activity
 } from 'lucide-react';
 import { AlgorithmType } from '@/types/AlgorithmType';
 import { TreeNode } from '@/types/Treenode';
@@ -341,7 +340,7 @@ const ControlDashboard = () => {
   }, [isPlaying, isLinkedListPlaying, currentStep, linkedListStep, steps.length, linkedListSteps.length, animationSettings.stepDuration]);
 
   return (
-    <div className="h-full bg-white/90 backdrop-blur-sm">
+    <div className="h-full bg-gray-900/95 backdrop-blur-sm">
       <Card className="h-full border-0 rounded-none bg-transparent">
         <CardContent className="p-3 lg:p-4 h-full">
           <div className="flex items-center justify-between h-full gap-4 overflow-x-auto">
@@ -353,7 +352,7 @@ const ControlDashboard = () => {
                 <select
                   value={algorithmType}
                   onChange={(e) => setAlgorithmType(e.target.value as AlgorithmType)}
-                  className="text-xs border rounded px-2 py-1 bg-white"
+                  className="text-xs border border-gray-600 rounded px-2 py-1 bg-gray-800 text-white"
                 >
                   {algorithmOptions[dataStructure].map((option) => (
                     <option key={option.value} value={option.value}>
@@ -369,7 +368,7 @@ const ControlDashboard = () => {
                     placeholder="Tree size"
                     value={treeSize}
                     onChange={(e) => setTreeSize(e.target.value)}
-                    className="text-xs border rounded px-2 py-1 w-20 bg-white"
+                    className="text-xs border border-gray-600 rounded px-2 py-1 w-20 bg-gray-800 text-white placeholder-gray-400"
                   />
                 )}
 
@@ -379,7 +378,7 @@ const ControlDashboard = () => {
                     placeholder="Value"
                     value={insertValue}
                     onChange={(e) => setInsertValue(e.target.value)}
-                    className="text-xs border rounded px-2 py-1 w-16 bg-white"
+                    className="text-xs border border-gray-600 rounded px-2 py-1 w-16 bg-gray-800 text-white placeholder-gray-400"
                   />
                 )}
 
@@ -390,7 +389,7 @@ const ControlDashboard = () => {
                     placeholder={algorithmType === 'insertNode' ? 'After' : 'Search'}
                     value={searchValue}
                     onChange={(e) => setSearchValue(e.target.value)}
-                    className="text-xs border rounded px-2 py-1 w-16 bg-white"
+                    className="text-xs border border-gray-600 rounded px-2 py-1 w-16 bg-gray-800 text-white placeholder-gray-400"
                   />
                 )}
 
@@ -407,21 +406,25 @@ const ControlDashboard = () => {
               {/* Playback Controls */}
               <div className="flex items-center gap-1 ml-2">
                 <Button
-                  variant="ghost"
+                  variant="outline"
                   size="sm"
                   onClick={handleStepBackward}
                   disabled={activeCurrentStep <= 0}
-                  className="h-8 w-8 p-0"
+                  className="h-8 w-8 p-0 bg-gray-800 border-gray-600 text-gray-300 hover:bg-gray-700 hover:text-white disabled:opacity-50 disabled:bg-gray-800 disabled:text-gray-500"
                 >
                   <SkipBack className="w-3 h-3" />
                 </Button>
 
                 <Button
-                  variant={isActivelyPlaying ? "secondary" : "ghost"}
+                  variant="outline"
                   size="sm"
                   onClick={handlePlayPause}
                   disabled={activeSteps.length === 0}
-                  className="h-8 w-8 p-0"
+                  className={`h-8 w-8 p-0 border-gray-600 disabled:opacity-50 ${
+                    isActivelyPlaying
+                      ? 'bg-yellow-600 text-white hover:bg-yellow-700 border-yellow-600'
+                      : 'bg-blue-600 text-white hover:bg-blue-700 border-blue-600'
+                  } ${activeSteps.length === 0 ? 'bg-gray-800 text-gray-500' : ''}`}
                 >
                   {isActivelyPlaying ? (
                     <Pause className="w-3 h-3" />
@@ -431,20 +434,20 @@ const ControlDashboard = () => {
                 </Button>
 
                 <Button
-                  variant="ghost"
+                  variant="outline"
                   size="sm"
                   onClick={handleStepForward}
                   disabled={activeCurrentStep >= activeSteps.length - 1}
-                  className="h-8 w-8 p-0"
+                  className="h-8 w-8 p-0 bg-gray-800 border-gray-600 text-gray-300 hover:bg-gray-700 hover:text-white disabled:opacity-50 disabled:bg-gray-800 disabled:text-gray-500"
                 >
                   <SkipForward className="w-3 h-3" />
                 </Button>
 
                 <Button
-                  variant="ghost"
+                  variant="outline"
                   size="sm"
                   onClick={handleReset}
-                  className="h-8 w-8 p-0"
+                  className="h-8 w-8 p-0 bg-gray-800 border-gray-600 text-gray-300 hover:bg-gray-700 hover:text-white"
                 >
                   <RotateCcw className="w-3 h-3" />
                 </Button>
@@ -452,8 +455,8 @@ const ControlDashboard = () => {
 
               {/* Speed Control */}
               <div className="flex items-center gap-2 ml-2">
-                <Clock className="w-3 h-3 text-gray-500" />
-                <span className="text-xs text-gray-600 hidden lg:block">Speed</span>
+                <Clock className="w-3 h-3 text-gray-400" />
+                <span className="text-xs text-gray-300 hidden lg:block">Speed</span>
                 <div className="w-16 lg:w-20">
                   <Slider
                     value={[animationSettings.stepDuration]}
@@ -464,7 +467,7 @@ const ControlDashboard = () => {
                     className="w-full"
                   />
                 </div>
-                <span className="text-xs text-gray-500 min-w-[30px]">
+                <span className="text-xs text-gray-400 min-w-[30px]">
                   {(animationSettings.stepDuration / 1000).toFixed(1)}s
                 </span>
               </div>
@@ -473,22 +476,22 @@ const ControlDashboard = () => {
             {/* Center Section - Progress and Algorithm Info */}
             <div className="flex items-center gap-3 lg:gap-6 flex-1 justify-center">
               <div className="text-center min-w-0">
-                <div className="text-xs text-gray-600">Algorithm</div>
-                <div className="text-sm font-semibold truncate max-w-[120px]">{getAlgorithmDisplayName()}</div>
+                <div className="text-xs text-gray-400">Algorithm</div>
+                <div className="text-sm font-semibold text-white truncate max-w-[120px]">{getAlgorithmDisplayName()}</div>
               </div>
 
               <div className="text-center">
-                <div className="text-xs text-gray-600">Progress</div>
-                <div className="text-sm font-semibold">
+                <div className="text-xs text-gray-400">Progress</div>
+                <div className="text-sm font-semibold text-white">
                   {activeSteps.length > 0 ? `${activeCurrentStep + 1} / ${activeSteps.length}` : '0 / 0'}
                 </div>
               </div>
 
               <div className="w-24 lg:w-32">
-                <div className="text-xs text-gray-600 mb-1">Step Progress</div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
+                <div className="text-xs text-gray-400 mb-1">Step Progress</div>
+                <div className="w-full bg-gray-700 rounded-full h-2">
                   <div
-                    className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                    className="bg-blue-500 h-2 rounded-full transition-all duration-300"
                     style={{
                       width: activeSteps.length > 0
                         ? `${((activeCurrentStep + 1) / activeSteps.length) * 100}%`
@@ -502,19 +505,19 @@ const ControlDashboard = () => {
             {/* Right Section - Performance Metrics */}
             <div className="flex items-center gap-3 lg:gap-4 flex-shrink-0">
               <div className="text-center">
-                <div className="text-xs text-gray-600 flex items-center gap-1">
+                <div className="text-xs text-gray-400 flex items-center gap-1">
                   <Activity className="w-3 h-3" />
                   <span className="hidden lg:inline">Time</span>
                 </div>
-                <div className="text-sm font-mono font-semibold">{complexity.time}</div>
+                <div className="text-sm font-mono font-semibold text-white">{complexity.time}</div>
               </div>
 
               <div className="text-center">
-                <div className="text-xs text-gray-600">
+                <div className="text-xs text-gray-400">
                   <span className="hidden lg:inline">Space</span>
                   <span className="lg:hidden">Mem</span>
                 </div>
-                <div className="text-sm font-mono font-semibold">{complexity.space}</div>
+                <div className="text-sm font-mono font-semibold text-white">{complexity.space}</div>
               </div>
             </div>
           </div>

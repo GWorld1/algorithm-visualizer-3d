@@ -28,7 +28,7 @@ const QuadPanelLayout = () => {
 
   // Desktop quad-panel layout
   return (
-    <div className="h-screen w-full overflow-hidden bg-gradient-to-r from-violet-200 to-pink-200 flex flex-col">
+    <div className="h-screen w-full overflow-hidden bg-gray-900 flex flex-col">
       {/* Header with title */}
       {/* <header className="relative z-10 px-4 py-3 flex-shrink-0">
         <h1 className="text-2xl lg:text-3xl font-semibold text-white">3D Algorithm Visualizer</h1>
@@ -49,22 +49,22 @@ const QuadPanelLayout = () => {
           </div>
 
           {/* Control Dashboard - Fixed height */}
-          <div className="h-[80px] lg:h-[80px] xl:h-[100px] flex-shrink-0 border-t border-white/20">
+          <div className="h-[80px] lg:h-[80px] xl:h-[100px] flex-shrink-0 border-t border-gray-700">
             <ControlDashboard />
           </div>
         </div>
 
         {/* Data Customization Panel - Right sidebar */}
-        <div className="w-[25%] xl:w-[30%] 2xl:w-[25%] border-l border-white/20 flex-shrink-0 min-w-[280px] max-w-[450px]">
+        <div className="w-[25%] xl:w-[30%] 2xl:w-[25%] border-l border-gray-700 flex-shrink-0 min-w-[280px] max-w-[450px]">
           <DataCustomizationPanel />
         </div>
       </div>
 
       {/* Footer */}
       <footer className="absolute bottom-2 right-2 z-20 pointer-events-none">
-        <p className="text-xs text-gray-500 bg-white/80 backdrop-blur-sm rounded px-2 py-1 pointer-events-auto">
+        <p className="text-xs text-gray-400 bg-gray-800/80 backdrop-blur-sm rounded px-2 py-1 pointer-events-auto">
           Created by Gnowa Rickneil |
-          <a href="https://github.com/GWorld1" className="inline-flex items-center ml-1 hover:text-gray-700">
+          <a href="https://github.com/GWorld1" className="inline-flex items-center ml-1 hover:text-gray-300">
             <img src="/github-icon.svg" alt="Github" className="w-3 h-3" />
           </a>
         </p>

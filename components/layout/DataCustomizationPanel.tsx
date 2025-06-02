@@ -6,6 +6,7 @@ import { useAlgorithmStore } from '@/store/useAlgorithmStore';
 import DataGenerators from '@/components/data/DataGenerators';
 import BSTGenerator from '@/components/data/BSTGenerator';
 import ArrayGenerator from '@/components/data/ArrayGenerator';
+import LinkedListGenerator from '@/components/data/LinkedListGenerator';
 import { Settings, Database, TreePine, Link, Network } from 'lucide-react';
 import { DataStructureType } from '@/types/DataStructure';
 import { AlgorithmType } from '@/types/AlgorithmType';
@@ -65,7 +66,7 @@ const DataCustomizationPanel = () => {
           </CardTitle>
         </CardHeader>
 
-        <CardContent className="px-4 pb-4 flex-1 min-h-0 overflow-hidden">
+        <CardContent className="px-4 pb-4 flex-1 min-h-0 flex flex-col">
           {/* Data Structure Selection */}
           <div className="mb-4 flex-shrink-0">
             <h3 className="text-sm font-semibold mb-2 text-gray-100">Data Structure</h3>
@@ -93,11 +94,13 @@ const DataCustomizationPanel = () => {
           </div>
 
           {/* Data Generation Section */}
-          <div className="flex-1 min-h-0 overflow-y-auto">
+          <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden">
             {dataStructure === 'binaryTree' ? (
               <BSTGenerator />
             ) : dataStructure === 'array' ? (
               <ArrayGenerator />
+            ) : dataStructure === 'linkedList' ? (
+              <LinkedListGenerator />
             ) : (
               <DataGenerators />
             )}

@@ -48,7 +48,7 @@ const LinkedListNode = ({
       <Text
         position={[0, 0.7, 0]}
         fontSize={0.3}
-        color="black"
+        color="white"
         anchorX="center"
         anchorY="middle"
       >
@@ -88,8 +88,8 @@ const LinkedList = () => {
               new Vector3(node.x ?? 0, node.y ?? 0, 0),
               new Vector3(node.next.x ?? 0, node.next.y ?? 0, 0)
             ]}
-            color="gray"
-            lineWidth={2}
+            color="#9CA3AF"
+            lineWidth={3}
           />
         )}
         {node.next && renderList(node.next)}
@@ -114,21 +114,21 @@ const LinkedList = () => {
         <sphereGeometry />
         <meshStandardMaterial color={NODE_COLORS.target} />
       </mesh>
-      <Text position={[0, -0.8, 0]} fontSize={0.2} color="black">
+      <Text position={[0, -0.8, 0]} fontSize={0.2} color="white">
         To Delete
       </Text>
       <mesh position={[1, -0.8, 0]} scale={0.2}>
         <sphereGeometry />
         <meshStandardMaterial color={NODE_COLORS.deleted} />
       </mesh>
-      <Text position={[0, -1.2, 0]} fontSize={0.2} color="black">
+      <Text position={[0, -1.2, 0]} fontSize={0.2} color="white">
         New Node
       </Text>
       <mesh position={[1, -1.2, 0]} scale={0.2}>
         <sphereGeometry />
         <meshStandardMaterial color={NODE_COLORS.new} />
       </mesh>
-      <Text position={[0, -1.6, 0]} fontSize={0.2} color="black">
+      <Text position={[0, -1.6, 0]} fontSize={0.2} color="white">
         Traversed
       </Text>
       <mesh position={[1, -1.6, 0]} scale={0.2}>
@@ -146,7 +146,7 @@ const LinkedList = () => {
         <Text
           position={[0, -2, 0]}
           fontSize={0.3}
-          color="black"
+          color="white"
           anchorX="center"
           anchorY="middle"
         >

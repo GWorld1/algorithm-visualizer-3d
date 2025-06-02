@@ -166,36 +166,7 @@ export const Controls = () => {
     }
   };
 
-  // Replace the existing animation useEffect with this unified version
-useEffect(() => {
-  let interval: NodeJS.Timeout;
-  
-  if (isPlaying) {
-    if (dataStructure === 'linkedList' && linkedListCurrentStep < linkedListSteps.length - 1) {
-      interval = setInterval(() => {
-        useLinkedListStore.setState(state => ({
-          currentStep: Math.min(state.currentStep + 1, state.steps.length - 1)
-        }));
-      }, animationSettings.stepDuration);
-    } else if (dataStructure !== 'linkedList' && currentStep < steps.length - 1) {
-      interval = setInterval(() => {
-        useAlgorithmStore.setState(state => ({
-          currentStep: Math.min(state.currentStep + 1, state.steps.length - 1)
-        }));
-      }, animationSettings.stepDuration);
-    }
-  }
-
-  return () => clearInterval(interval);
-}, [
-  isPlaying, 
-  dataStructure, 
-  currentStep, 
-  steps, 
-  linkedListCurrentStep, 
-  linkedListSteps, 
-  animationSettings.stepDuration
-]);
+  // Animation logic is now handled by ControlDashboard to avoid conflicts
 
   // Also update the reset function to ensure it properly clears the linked list
   const resetAnimation = () => {
@@ -217,13 +188,18 @@ useEffect(() => {
   // Handle algorithm change
 const handleAlgorithmChange = (value: AlgorithmType) => {
   setAlgorithmType(value);
-  
-  // Reset any existing steps and state
+
+  // Reset any existing steps and state for all data structures
   if (dataStructure === 'linkedList') {
     // Clear any existing steps but keep the current linked list
-    useLinkedListStore.getState().setSteps([]);
-    useLinkedListStore.getState().setCurrentStep(0);
-    useLinkedListStore.getState().setIsPlaying(false);
+    const linkedListStore = useLinkedListStore.getState();
+    linkedListStore.setSteps([]);
+    linkedListStore.setCurrentStep(0);
+    linkedListStore.setIsPlaying(false);
+  } else {
+    // Reset main algorithm store
+    useAlgorithmStore.getState().setSteps([]);
+    useAlgorithmStore.setState({ currentStep: 0, isPlaying: false });
   }
 };
 
@@ -242,30 +218,7 @@ const handleAlgorithmChange = (value: AlgorithmType) => {
     }
   };
 
-  
-useEffect(() => {
-  let interval: NodeJS.Timeout;
-  
-  // Handle main animation
-  if (isPlayingMain && !isPlayingLinkedList && currentStep < steps.length - 1) {
-    interval = setInterval(() => {
-      useAlgorithmStore.setState(state => ({
-        currentStep: Math.min(state.currentStep + 1, state.steps.length - 1)
-      }));
-    }, animationSettings.stepDuration);
-  }
-  
-  // Handle linked list animation
-  if (isPlayingLinkedList && linkedListCurrentStep < linkedListSteps.length - 1) {
-    interval = setInterval(() => {
-      useLinkedListStore.setState(state => ({
-        currentStep: Math.min(state.currentStep + 1, state.steps.length - 1)
-      }));
-    }, animationSettings.stepDuration);
-  }
-
-  return () => clearInterval(interval);
-}, [isPlaying, isPlayingLinkedList, currentStep, steps, linkedListCurrentStep, linkedListSteps, animationSettings.stepDuration, isPlayingMain]);
+  // Removed duplicate animation logic - handled by ControlDashboard
 
 
 

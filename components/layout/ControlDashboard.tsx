@@ -272,7 +272,22 @@ const ControlDashboard = () => {
 
   // Auto-generate steps when algorithm type changes
   useEffect(() => {
-    generateAlgorithmSteps();
+    // Clear any existing animations before generating new steps
+    if (dataStructure === 'linkedList') {
+      const linkedListStore = useLinkedListStore.getState();
+      linkedListStore.setIsPlaying(false);
+      linkedListStore.setSteps([]);
+      linkedListStore.setCurrentStep(0);
+    } else {
+      useAlgorithmStore.setState({ isPlaying: false, steps: [], currentStep: 0 });
+    }
+
+    // Generate new steps after a brief delay to ensure cleanup is complete
+    const timeoutId = setTimeout(() => {
+      generateAlgorithmSteps();
+    }, 100);
+
+    return () => clearTimeout(timeoutId);
   }, [algorithmType, dataStructure, tree, weightedTree, elements]);
 
 
@@ -367,22 +382,35 @@ const ControlDashboard = () => {
   useEffect(() => {
     let interval: NodeJS.Timeout;
 
-    // Handle main animation
-    if (isPlaying && !isLinkedListPlaying && currentStep < steps.length - 1) {
-      interval = setInterval(() => {
-        useAlgorithmStore.setState(state => ({
-          currentStep: Math.min(state.currentStep + 1, state.steps.length - 1)
-        }));
-      }, animationSettings.stepDuration);
-    }
-
-    // Handle linked list animation
-    if (isLinkedListPlaying && linkedListStep < linkedListSteps.length - 1) {
-      interval = setInterval(() => {
-        useLinkedListStore.setState(state => ({
-          currentStep: Math.min(state.currentStep + 1, state.steps.length - 1)
-        }));
-      }, animationSettings.stepDuration);
+    // Only run one animation at a time based on current data structure
+    if (dataStructure === 'linkedList') {
+      // Handle linked list animation
+      if (isLinkedListPlaying && linkedListStep < linkedListSteps.length - 1) {
+        interval = setInterval(() => {
+          useLinkedListStore.setState(state => {
+            const nextStep = Math.min(state.currentStep + 1, state.steps.length - 1);
+            // Auto-pause when reaching the end
+            if (nextStep === state.steps.length - 1) {
+              return { currentStep: nextStep, isPlaying: false };
+            }
+            return { currentStep: nextStep };
+          });
+        }, animationSettings.stepDuration);
+      }
+    } else {
+      // Handle main animation for other data structures
+      if (isPlaying && currentStep < steps.length - 1) {
+        interval = setInterval(() => {
+          useAlgorithmStore.setState(state => {
+            const nextStep = Math.min(state.currentStep + 1, state.steps.length - 1);
+            // Auto-pause when reaching the end
+            if (nextStep === state.steps.length - 1) {
+              return { currentStep: nextStep, isPlaying: false };
+            }
+            return { currentStep: nextStep };
+          });
+        }, animationSettings.stepDuration);
+      }
     }
 
     return () => {
@@ -390,7 +418,7 @@ const ControlDashboard = () => {
         clearInterval(interval);
       }
     };
-  }, [isPlaying, isLinkedListPlaying, currentStep, linkedListStep, steps.length, linkedListSteps.length, animationSettings.stepDuration]);
+  }, [dataStructure, isPlaying, isLinkedListPlaying, currentStep, linkedListStep, steps.length, linkedListSteps.length, animationSettings.stepDuration]);
 
   return (
     <div className="h-full bg-gray-900/95 backdrop-blur-sm">

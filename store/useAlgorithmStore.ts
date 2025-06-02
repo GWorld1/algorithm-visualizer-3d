@@ -60,17 +60,43 @@ export const useAlgorithmStore = create<AlgorithmState>((set) => ({
   algorithmType: 'bfs',
   dataStructure: 'binaryTree',
   setDataStructure: (dataStructure: DataStructureType) => {
-    set({ dataStructure, currentStep: 0 });
-    useAlgorithmStore.getState().reset();
-    useLinkedListStore.getState().reset(); // Reset linked list store
+    // Stop any running animations before switching
+    const currentState = useAlgorithmStore.getState();
+    const linkedListState = useLinkedListStore.getState();
+
+    // Stop animations
+    if (currentState.isPlaying) {
+      set({ isPlaying: false });
+    }
+    if (linkedListState.isPlaying) {
+      linkedListState.setIsPlaying(false);
+    }
+
+    // Reset states
+    set({ dataStructure, currentStep: 0, steps: [], isPlaying: false });
+    useLinkedListStore.getState().reset();
   },
   setAlgorithmType: (algorithmType) => {
+    // Stop any running animations before switching algorithms
+    const currentState = useAlgorithmStore.getState();
+    const linkedListState = useLinkedListStore.getState();
+
+    if (currentState.isPlaying) {
+      set({ isPlaying: false });
+    }
+    if (linkedListState.isPlaying) {
+      linkedListState.setIsPlaying(false);
+    }
+
     set({
       algorithmType,
       currentStep: 0,
       steps: [], // Reset steps when changing algorithm type
       isPlaying: false // Ensure animation is stopped when changing algorithm
     });
+
+    // Reset linked list steps but keep the list structure
+    linkedListState.resetSteps();
   },
   tree: calculateTreeLayout(sampleTree),
   updateTree: (newTree) =>  {

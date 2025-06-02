@@ -36,18 +36,21 @@ export const useLinkedListStore = create<LinkedListState>((set) => ({
   setCurrentStep: (step) => set({ currentStep: step }),
   setIsPlaying: (playing) => set({ isPlaying: playing }),
   setAnimationSpeed: (speed) => set({ animationSpeed: speed }),
-  reset: () => set({ 
-    currentStep: 0, 
-    isPlaying: false, 
+  reset: () => set({
+    currentStep: 0,
+    isPlaying: false,
     steps: [],
-  //  linkedList: null,
+    // Keep linkedList intact for algorithm switching
   }),
   resetSteps: () => set({
-    currentStep:0
+    currentStep: 0,
+    steps: [],
+    isPlaying: false
   }),
   resetLinkedListAnimation: () => set({
-    currentStep:0,
+    currentStep: 0,
     isPlaying: false
+    // Keep steps and linkedList intact for restart functionality
   }),
   goToNextStep: () => {
     set((state) => ({

@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { useAlgorithmStore } from '@/store/useAlgorithmStore';
 import DataGenerators from '@/components/data/DataGenerators';
 import BSTGenerator from '@/components/data/BSTGenerator';
+import ArrayGenerator from '@/components/data/ArrayGenerator';
 import { Settings, Database, TreePine, Link, Network } from 'lucide-react';
 import { DataStructureType } from '@/types/DataStructure';
 import { AlgorithmType } from '@/types/AlgorithmType';
@@ -95,6 +96,8 @@ const DataCustomizationPanel = () => {
           <div className="flex-1 min-h-0 overflow-y-auto">
             {dataStructure === 'binaryTree' ? (
               <BSTGenerator />
+            ) : dataStructure === 'array' ? (
+              <ArrayGenerator />
             ) : (
               <DataGenerators />
             )}

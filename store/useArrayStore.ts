@@ -4,6 +4,7 @@ type ArrayState = {
   elements: number[];
   insert: (index: number, value: number) => void;
   remove: (index: number) => void;
+  setElements: (elements: number[]) => void;
 };
 
 export const useArrayStore = create<ArrayState>((set) => ({
@@ -19,5 +20,8 @@ export const useArrayStore = create<ArrayState>((set) => ({
     set((state) => ({
       elements: state.elements.filter((_, i) => i !== index)
     }));
+  },
+  setElements: (elements) => {
+    set({ elements: [...elements] });
   }
 }));

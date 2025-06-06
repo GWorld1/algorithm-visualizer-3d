@@ -1,6 +1,6 @@
 "use client"
-import { useState } from 'react';
-import { Canvas } from '@react-three/fiber';
+import { useState, useRef } from 'react';
+import { Canvas, useThree } from '@react-three/fiber';
 import { OrbitControls, Grid, Environment, GizmoHelper, GizmoViewport } from '@react-three/drei';
 import { useAlgorithmStore } from '@/store/useAlgorithmStore';
 import { Card } from '@/components/ui/card';
@@ -29,6 +29,35 @@ const LinkedList = dynamic(() => import('@/components/LinkedListVisualization'),
   ssr: false,
 });
 
+// Camera controller component that runs inside the Canvas
+const CameraController = ({ onResetRef }: { onResetRef: React.MutableRefObject<(() => void) | null> }) => {
+  const { camera } = useThree();
+  const controlsRef = useRef<any>(null);
+
+  // Expose reset function to parent component
+  onResetRef.current = () => {
+    // Reset camera position
+    camera.position.set(0, 0, 15);
+    camera.lookAt(0, 0, 0);
+
+    // Reset controls target and update
+    if (controlsRef.current) {
+      controlsRef.current.target.set(0, 0, 0);
+      controlsRef.current.update();
+    }
+  };
+
+  return (
+    <OrbitControls
+      ref={controlsRef}
+      minDistance={10}
+      maxDistance={30}
+      enablePan={true}
+      enableZoom={true}
+    />
+  );
+};
+
 const ViewportPanel = () => {
   const {
     dataStructure,
@@ -37,6 +66,7 @@ const ViewportPanel = () => {
   } = useAlgorithmStore();
 
   const [showNavigationGuide, setShowNavigationGuide] = useState(false);
+  const resetCameraRef = useRef<(() => void) | null>(null);
 
   const renderDataStructure = () => {
     switch (dataStructure) {
@@ -79,12 +109,7 @@ const ViewportPanel = () => {
         {renderDataStructure()}
 
         {/* Camera Controls */}
-        <OrbitControls 
-          minDistance={10}
-          maxDistance={30}
-          enablePan={true}
-          enableZoom={true}
-        />
+        <CameraController onResetRef={resetCameraRef} />
       </Canvas>
 
       {/* Floating Controls - Semi-transparent overlay */}
@@ -117,8 +142,9 @@ const ViewportPanel = () => {
               variant="ghost"
               size="sm"
               onClick={() => {
-                // Reset camera position - this would need to be implemented
-                console.log('Reset camera position');
+                if (resetCameraRef.current) {
+                  resetCameraRef.current();
+                }
               }}
               className="justify-start text-xs"
             >

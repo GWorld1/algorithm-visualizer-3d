@@ -342,7 +342,7 @@ const AlgorithmExplanationPanel = () => {
               </div>
 
               {/* Current step description */}
-              <div className="flex-1 min-h-0">
+              <div className="flex-1 md:max-w-[500px] min-h-0">
                 {currentDescription ? (
                   <div className="bg-blue-900/50 border border-blue-700 rounded-lg p-3 h-full overflow-y-auto space-y-3">
                     <p className="text-sm text-blue-200 font-medium">

@@ -233,11 +233,18 @@ const CustomNode: React.FC<NodeProps<CustomNodeData>> = ({ data, selected }) => 
             type="target"
             position={Position.Left}
             id={input.id}
+            title={`Input: ${input.label} (${input.type})`}
+            className="transition-all duration-200 hover:scale-125 hover:shadow-lg"
             style={{
               top: `${20 + index * 20}px`,
               background: input.type === 'execution' ? '#10B981' : '#6366F1',
-              width: 8,
-              height: 8
+              border: '2px solid rgba(255, 255, 255, 0.2)',
+              width: 10,
+              height: 10,
+              borderRadius: '50%',
+              boxShadow: input.type === 'execution'
+                ? '0 0 8px rgba(16, 185, 129, 0.4)'
+                : '0 0 8px rgba(99, 102, 241, 0.4)'
             }}
           />
         ))}
@@ -249,11 +256,18 @@ const CustomNode: React.FC<NodeProps<CustomNodeData>> = ({ data, selected }) => 
             type="source"
             position={Position.Right}
             id={output.id}
+            title={`Output: ${output.label} (${output.type})`}
+            className="transition-all duration-200 hover:scale-125 hover:shadow-lg"
             style={{
               top: `${20 + index * 20}px`,
               background: output.type === 'execution' ? '#10B981' : '#6366F1',
-              width: 8,
-              height: 8
+              border: '2px solid rgba(255, 255, 255, 0.2)',
+              width: 10,
+              height: 10,
+              borderRadius: '50%',
+              boxShadow: output.type === 'execution'
+                ? '0 0 8px rgba(16, 185, 129, 0.4)'
+                : '0 0 8px rgba(99, 102, 241, 0.4)'
             }}
           />
         ))}

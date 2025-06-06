@@ -258,8 +258,10 @@ export const useVisualScriptingStore = create<VisualScriptingState>((set, get) =
 
       // Also update the main algorithm store
       import('@/store/useAlgorithmStore').then(({ useAlgorithmStore }) => {
-        useAlgorithmStore.getState().setSteps(steps);
-        useAlgorithmStore.getState().setAlgorithmType('customVisualScript');
+        const algorithmStore = useAlgorithmStore.getState();
+        algorithmStore.setSteps(steps);
+        algorithmStore.setAlgorithmType('customVisualScript');
+        algorithmStore.setDataStructure('array'); // Ensure array visualization is used
       });
     });
 

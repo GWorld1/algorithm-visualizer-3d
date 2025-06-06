@@ -298,6 +298,14 @@ const ControlDashboard = () => {
 
 
   const handlePlayPause = () => {
+    console.log('🎮 Play/Pause clicked:', {
+      isActivelyPlaying,
+      dataStructure,
+      algorithmType,
+      currentStep,
+      totalSteps: steps.length
+    });
+
     if (isActivelyPlaying) {
       if (dataStructure === 'linkedList') {
         useLinkedListStore.getState().setIsPlaying(false);
@@ -314,6 +322,14 @@ const ControlDashboard = () => {
   };
 
   const handleStepForward = () => {
+    console.log('⏭️ Step Forward clicked:', {
+      dataStructure,
+      algorithmType,
+      currentStep,
+      totalSteps: steps.length,
+      canStepForward: currentStep < steps.length - 1
+    });
+
     if (dataStructure === 'linkedList') {
       const store = useLinkedListStore.getState();
       if (store.currentStep < store.steps.length - 1) {
@@ -321,7 +337,9 @@ const ControlDashboard = () => {
       }
     } else {
       if (currentStep < steps.length - 1) {
-        useAlgorithmStore.setState({ currentStep: currentStep + 1 });
+        const newStep = currentStep + 1;
+        console.log(`📈 Stepping from ${currentStep} to ${newStep}`);
+        useAlgorithmStore.setState({ currentStep: newStep });
       }
     }
   };

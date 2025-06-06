@@ -23,9 +23,10 @@ import { useArrayStore } from '@/store/useArrayStore';
 import { ScriptNode } from '@/types/VisualScripting';
 import NodePalette from './NodePalette';
 import CustomNode from './CustomNode';
+import TutorialOverlay from './TutorialOverlay';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Play, Save, Trash2, Eye, EyeOff } from 'lucide-react';
+import { Play, Save, Trash2, Eye, EyeOff, HelpCircle } from 'lucide-react';
 
 // Custom node types for React Flow
 const nodeTypes = {
@@ -35,6 +36,7 @@ const nodeTypes = {
 const VisualScriptingEditor: React.FC = () => {
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
   const [reactFlowInstance, setReactFlowInstance] = React.useState<ReactFlowInstance | null>(null);
+  const [showTutorial, setShowTutorial] = React.useState(false);
 
   const {
     nodes: storeNodes,
@@ -95,7 +97,29 @@ const VisualScriptingEditor: React.FC = () => {
   }, [storeConnections]);
 
   const onConnect: OnConnect = useCallback((params: Connection) => {
+    console.log('🔗 Attempting to connect:', params);
+
     if (params.source && params.target && params.sourceHandle && params.targetHandle) {
+      // Basic validation: prevent self-connections
+      if (params.source === params.target) {
+        console.warn('❌ Cannot connect node to itself');
+        return;
+      }
+
+      // Check if connection already exists
+      const existingConnection = storeConnections.find(conn =>
+        conn.source === params.source &&
+        conn.sourceHandle === params.sourceHandle &&
+        conn.target === params.target &&
+        conn.targetHandle === params.targetHandle
+      );
+
+      if (existingConnection) {
+        console.warn('❌ Connection already exists');
+        return;
+      }
+
+      console.log('✅ Creating connection');
       addConnection({
         source: params.source,
         target: params.target,
@@ -103,7 +127,7 @@ const VisualScriptingEditor: React.FC = () => {
         targetHandle: params.targetHandle
       });
     }
-  }, [addConnection]);
+  }, [addConnection, storeConnections]);
 
   const onDragOver = useCallback((event: React.DragEvent) => {
     event.preventDefault();
@@ -132,28 +156,47 @@ const VisualScriptingEditor: React.FC = () => {
   );
 
   const { elements } = useArrayStore();
-  const { setSteps, setAlgorithmType } = useAlgorithmStore();
+  const { setSteps, setAlgorithmType, setDataStructure } = useAlgorithmStore();
 
   const handleValidateAndCompile = () => {
     const validation = validateScript();
+    console.log('🔍 Script validation result:', validation);
+    console.log('📊 Current array elements:', elements);
+    console.log('🔗 Store nodes:', storeNodes);
+    console.log('🔗 Store connections:', storeConnections);
+
     if (validation.isValid) {
       // Execute the algorithm with current array data
       import('@/lib/visualScriptingInterpreter').then(({ VisualScriptingInterpreter }) => {
+        console.log('🚀 Starting visual script execution...');
         const interpreter = new VisualScriptingInterpreter(storeNodes, storeConnections, elements);
         const steps = interpreter.execute();
+
+        console.log('✅ Generated steps:', steps);
+        console.log('📝 Step details:');
+        steps.forEach((step, index) => {
+          console.log(`  Step ${index + 1}:`, {
+            description: step.description,
+            action: step.action,
+            highlightedElements: step.highlightedElements,
+            dataStructureState: step.dataStructureState,
+            metadata: step.metadata
+          });
+        });
 
         // Update the main algorithm store
         setSteps(steps);
         setAlgorithmType('customVisualScript');
+        setDataStructure('array'); // Ensure array visualization is used
 
-        console.log('Visual script executed successfully:', steps);
-        alert(`Algorithm executed successfully! Generated ${steps.length} steps.`);
+        console.log('🎯 Algorithm store updated with steps');
+        alert(`Algorithm executed successfully! Generated ${steps.length} steps. Check console for details.`);
       }).catch(error => {
-        console.error('Error executing visual script:', error);
+        console.error('❌ Error executing visual script:', error);
         alert('Error executing visual script: ' + error.message);
       });
     } else {
-      console.error('Validation errors:', validation.errors);
+      console.error('❌ Validation errors:', validation.errors);
       alert('Script has errors:\n' + validation.errors.join('\n'));
     }
   };
@@ -191,6 +234,15 @@ const VisualScriptingEditor: React.FC = () => {
             >
               {showNodePalette ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               {showNodePalette ? 'Hide' : 'Show'} Palette
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowTutorial(true)}
+              className="text-purple-400 hover:text-purple-300"
+            >
+              <HelpCircle className="w-4 h-4 mr-1" />
+              Tutorial
             </Button>
           </div>
 
@@ -241,6 +293,13 @@ const VisualScriptingEditor: React.FC = () => {
               fitView
               className="bg-gray-900"
               style={{ backgroundColor: '#111827' }}
+              connectionLineStyle={{ stroke: '#9CA3AF', strokeWidth: 2 }}
+              connectionLineType="smoothstep"
+              snapToGrid={true}
+              snapGrid={[20, 20]}
+              defaultViewport={{ x: 0, y: 0, zoom: 1 }}
+              minZoom={0.5}
+              maxZoom={2}
             >
               <Controls className="bg-gray-800 border-gray-600" />
               <Background color="#374151" gap={20} />
@@ -248,6 +307,12 @@ const VisualScriptingEditor: React.FC = () => {
           </ReactFlowProvider>
         </div>
       </div>
+
+      {/* Tutorial Overlay */}
+      <TutorialOverlay
+        isVisible={showTutorial}
+        onClose={() => setShowTutorial(false)}
+      />
     </div>
   );
 };

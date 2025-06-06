@@ -3,20 +3,25 @@ import { useAlgorithmStore } from '@/store/useAlgorithmStore';
 import { Card, CardContent } from '@/components/ui/card';
 import { Lightbulb } from 'lucide-react';
 import { BSTStep } from '@/lib/bstAlgorithms';
+import { CustomAlgorithmStep } from '@/types/VisualScripting';
 
 const StepDescription = () => {
   const { currentStep, steps, algorithmType } = useAlgorithmStore();
-  // Only show for sorting algorithms and BST operations
-  if (!['bubbleSort', 'quickSort', 'insertionSort', 'selectionSort', 'mergeSort', 'bstInsert', 'bstSearch'].includes(algorithmType)) {
+  // Only show for sorting algorithms, BST operations, and custom visual scripts
+  if (!['bubbleSort', 'quickSort', 'insertionSort', 'selectionSort', 'mergeSort', 'bstInsert', 'bstSearch', 'customVisualScript'].includes(algorithmType)) {
     return null;
   }
 
   let description = '';
-  
+
   // Handle different step formats based on algorithm type
   if (algorithmType === 'bstInsert' || algorithmType === 'bstSearch') {
     const bstStep = steps[currentStep] as unknown as BSTStep;
     description = bstStep?.description || '';
+  } else if (algorithmType === 'customVisualScript') {
+    // For custom visual scripts
+    const customStep = steps[currentStep] as CustomAlgorithmStep;
+    description = customStep?.description || '';
   } else {
     // For sorting algorithms
     description = (steps[currentStep] as any)?.description || '';

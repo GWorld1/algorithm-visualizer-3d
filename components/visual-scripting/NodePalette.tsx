@@ -51,6 +51,42 @@ const NodePalette: React.FC = () => {
     setExpandedCategory(expandedCategory === categoryId ? '' : categoryId);
   };
 
+  const loadSimpleTestTemplate = () => {
+    clearAll();
+
+    // Create a simple test: Start → Array Access → Array Highlight → End
+    addNode('start', { x: 100, y: 200 });
+    addNode('array-access', { x: 300, y: 200 });
+    addNode('array-highlight', { x: 500, y: 200 });
+    addNode('end', { x: 700, y: 200 });
+
+    // Add connections after a brief delay to ensure nodes are created
+    setTimeout(() => {
+      const { addConnection } = useVisualScriptingStore.getState();
+
+      addConnection({
+        source: 'start-1',
+        sourceHandle: 'exec-out',
+        target: 'array-access-1',
+        targetHandle: 'exec-in'
+      });
+
+      addConnection({
+        source: 'array-access-1',
+        sourceHandle: 'exec-out',
+        target: 'array-highlight-1',
+        targetHandle: 'exec-in'
+      });
+
+      addConnection({
+        source: 'array-highlight-1',
+        sourceHandle: 'exec-out',
+        target: 'end-1',
+        targetHandle: 'exec-in'
+      });
+    }, 100);
+  };
+
   const loadLinearSearchTemplate = () => {
     clearAll();
 
@@ -257,6 +293,14 @@ const NodePalette: React.FC = () => {
           <div className="mt-4">
             <div className="text-xs font-medium text-gray-300 mb-2">Quick Templates</div>
             <div className="space-y-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full justify-start text-xs text-blue-400 hover:text-white hover:bg-gray-700 border border-blue-500/30"
+                onClick={() => loadSimpleTestTemplate()}
+              >
+                🧪 Simple Test (Debug)
+              </Button>
               <Button
                 variant="ghost"
                 size="sm"

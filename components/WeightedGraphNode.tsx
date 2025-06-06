@@ -25,83 +25,6 @@ const WeightedTreeNode = ({
   const [showMenu, setShowMenu] = useState(false);
   const { updateWeightedTree, weightedTree, algorithmType } = useAlgorithmStore();
 
-  const restructureGraphWithNewRoot = (graph: WeightedTreeNodeType, newRootValue: number) => {
-    // First collect all nodes and their edges
-    const nodes = new Map<number, WeightedTreeNodeType>();
-    const edges = new Map<number, { target: number; weight: number }[]>();
-    
-    const collectNodes = (node: WeightedTreeNodeType, visited = new Set<number>()) => {
-      if (visited.has(node.value)) return;
-      visited.add(node.value);
-      
-      nodes.set(node.value, {
-        ...node,
-        edges: {},
-        isSource: node.value === newRootValue
-      });
-      
-      // Store all edges for this node
-      const nodeEdges: { target: number; weight: number }[] = [];
-      Object.values(node.edges).forEach(edge => {
-        nodeEdges.push({ target: edge.node.value, weight: edge.weight });
-        collectNodes(edge.node, visited);
-      });
-      edges.set(node.value, nodeEdges);
-    };
-    
-    collectNodes(graph);
-    
-    // Create new graph with bidirectional edges
-    const buildNewGraph = (value: number, visited = new Set<number>()): WeightedTreeNodeType => {
-      if (visited.has(value)) return nodes.get(value)!;
-      visited.add(value);
-      
-      const newNode: WeightedTreeNodeType = {
-        value,
-        isSource: value === newRootValue,
-        edges: {}
-      };
-      
-      // Add all connected edges
-      edges.forEach((targetEdges, sourceValue) => {
-        if (sourceValue === value) {
-          // Outgoing edges
-          targetEdges.forEach((edge, index) => {
-            if (!visited.has(edge.target)) {
-              newNode.edges[`edge${index + 1}`] = {
-                node: buildNewGraph(edge.target, visited),
-                weight: edge.weight
-              };
-            }
-          });
-        }
-        
-        // Add reverse edges for bidirectional traversal
-        targetEdges.forEach((edge, index) => {
-          if (edge.target === value && !visited.has(sourceValue)) {
-            newNode.edges[`reverseEdge${index + 1}`] = {
-              node: buildNewGraph(sourceValue, visited),
-              weight: edge.weight
-            };
-          }
-        });
-      });
-      
-      return newNode;
-    };
-    
-    // Start building from new root
-    const newRoot = buildNewGraph(newRootValue);
-    return calculateWeightedTreeLayout(newRoot);
-  };
-
-  const handleSetAsSource = () => {
-    if (!weightedTree) return;
-    const restructuredTree = restructureGraphWithNewRoot(weightedTree, node.value);
-    updateWeightedTree(restructuredTree);
-    setShowMenu(false);
-  };
-
   const springProps = useSpring({
     scale: hovered ? [0.6, 0.6, 0.6] : [0.5, 0.5, 0.5],
     color: node.isSource ? '#8B5CF6' : // Purple for source node
@@ -197,14 +120,6 @@ const WeightedTreeNode = ({
       {showMenu && (
         <Html position={[1, 0, 0]}>
           <div className="bg-white p-2 rounded shadow-lg">
-            {algorithmType === 'dijkstra' && (
-              <button
-                className="block w-full text-left px-2 py-1 hover:bg-purple-100 text-purple-600"
-                onClick={handleSetAsSource}
-              >
-                Set as Source
-              </button>
-            )}
             <button
               className="block w-full text-left px-2 py-1 hover:bg-gray-100"
               onClick={handleAddConnection}

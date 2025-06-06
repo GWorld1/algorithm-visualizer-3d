@@ -1,10 +1,11 @@
 "use client"
+import { useState } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Grid, Environment, GizmoHelper, GizmoViewport } from '@react-three/drei';
 import { useAlgorithmStore } from '@/store/useAlgorithmStore';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Grid3X3, Eye, EyeOff, RotateCcw } from 'lucide-react';
+import { Grid3X3, Eye, EyeOff, RotateCcw, HelpCircle, Mouse, Move, ZoomIn, RotateCw, ChevronUp, ChevronDown } from 'lucide-react';
 import dynamic from 'next/dynamic';
 
 // Dynamic imports for 3D components
@@ -29,11 +30,13 @@ const LinkedList = dynamic(() => import('@/components/LinkedListVisualization'),
 });
 
 const ViewportPanel = () => {
-  const { 
-    dataStructure, 
+  const {
+    dataStructure,
     animationSettings: { showGrid, showLabels },
-    updateAnimationSettings 
+    updateAnimationSettings
   } = useAlgorithmStore();
+
+  const [showNavigationGuide, setShowNavigationGuide] = useState(false);
 
   const renderDataStructure = () => {
     switch (dataStructure) {
@@ -100,7 +103,7 @@ const ViewportPanel = () => {
               {showGrid ? 'Hide Grid' : 'Show Grid'}
             </Button>
             
-            <Button
+            {/* <Button
               variant="ghost"
               size="sm"
               onClick={() => updateAnimationSettings({ showLabels: !showLabels })}
@@ -108,7 +111,7 @@ const ViewportPanel = () => {
             >
               {showLabels ? <EyeOff className="w-3 h-3 mr-2" /> : <Eye className="w-3 h-3 mr-2" />}
               {showLabels ? 'Hide Labels' : 'Show Labels'}
-            </Button>
+            </Button> */}
             
             <Button
               variant="ghost"
@@ -133,6 +136,47 @@ const ViewportPanel = () => {
           <div className="text-sm font-semibold capitalize text-gray-800">
             {dataStructure.replace(/([A-Z])/g, ' $1').trim()}
           </div>
+        </div>
+      </Card>
+
+      {/* Navigation Guide */}
+      <Card className="absolute bottom-4 right-4 bg-gray-900/95 backdrop-blur-sm border-gray-700/50 z-10 shadow-lg">
+        <div className="p-3">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <HelpCircle className="w-4 h-4 text-blue-400" />
+              <span className="text-sm font-semibold text-white">Navigation</span>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowNavigationGuide(!showNavigationGuide)}
+              className="h-6 w-6 p-0 text-gray-400 hover:text-white"
+            >
+              {showNavigationGuide ? <ChevronDown className="w-3 h-3" /> : <ChevronUp className="w-3 h-3" />}
+            </Button>
+          </div>
+
+          {showNavigationGuide && (
+            <div className="space-y-2 text-xs text-gray-300">
+              <div className="flex items-center gap-2">
+                <Mouse className="w-3 h-3 text-blue-400" />
+                <span>Left drag: Rotate view</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Move className="w-3 h-3 text-green-400" />
+                <span>Right drag: Pan view</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <ZoomIn className="w-3 h-3 text-yellow-400" />
+                <span>Scroll: Zoom in/out</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <RotateCw className="w-3 h-3 text-purple-400" />
+                <span>Touch: Pinch to zoom</span>
+              </div>
+            </div>
+          )}
         </div>
       </Card>
     </div>

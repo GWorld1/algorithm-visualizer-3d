@@ -21,21 +21,52 @@ const WeightedTree = () => {
 
   const isNodeInShortestPath = (nodeValue: number): boolean => {
     if (!currentDijkstraStep) return false;
-    const currentNode = currentDijkstraStep.currentNode;
-    const path = currentDijkstraStep.paths.get(currentNode.value);
-    return path?.includes(nodeValue) ?? false;
+
+    // A node is in the shortest path tree if:
+    // 1. It has a finite distance (has been reached)
+    // 2. It has been visited (not in unvisited set)
+    const distance = currentDijkstraStep.distances.get(nodeValue);
+    const isReached = distance !== undefined && distance < Infinity;
+    const isVisited = !currentDijkstraStep.unvisited.has(nodeValue);
+
+    return isReached && isVisited;
   };
 
   const isEdgeInShortestPath = (node1Value: number, node2Value: number): boolean => {
     if (!currentDijkstraStep) return false;
-    const currentNode = currentDijkstraStep.currentNode;
-    const path = currentDijkstraStep.paths.get(currentNode.value);
-    if (!path) return false;
-    
-    // Check if these nodes are adjacent in the path
-    const index1 = path.indexOf(node1Value);
-    const index2 = path.indexOf(node2Value);
-    return index1 !== -1 && index2 !== -1 && Math.abs(index1 - index2) === 1;
+
+    // An edge is in the shortest path tree if both nodes are visited and
+    // the edge is part of the shortest path to one of the nodes
+    const node1Visited = !currentDijkstraStep.unvisited.has(node1Value);
+    const node2Visited = !currentDijkstraStep.unvisited.has(node2Value);
+
+    if (!node1Visited || !node2Visited) return false;
+
+    // Check if this edge is part of any shortest path
+    for (const [targetNode, path] of currentDijkstraStep.paths.entries()) {
+      if (path.length < 2) continue;
+
+      // Check if these nodes are consecutive in this specific path
+      for (let i = 0; i < path.length - 1; i++) {
+        const current = path[i];
+        const next = path[i + 1];
+        if ((current === node1Value && next === node2Value) ||
+            (current === node2Value && next === node1Value)) {
+          return true;
+        }
+      }
+    }
+    return false;
+  };
+
+  const isCurrentlyBeingProcessed = (nodeValue: number): boolean => {
+    if (!currentDijkstraStep) return false;
+    return currentDijkstraStep.currentNode.value === nodeValue;
+  };
+
+  const isVisited = (nodeValue: number): boolean => {
+    if (!currentDijkstraStep) return false;
+    return !currentDijkstraStep.unvisited.has(nodeValue);
   };
 
   const getNodeDistance = (nodeValue: number): number | undefined => {
@@ -103,16 +134,23 @@ const WeightedTree = () => {
         })}
 
         {/* Render Nodes */}
-        {Array.from(nodes.values()).map(node => (
-          <WeightedTreeNode
-            key={node.value}
-            node={node}
-            position={new Vector3(node.x ?? 0, node.y ?? 0, node.z ?? 0)}
-            isActive={isNodeInShortestPath(node.value)}
-            distance={getNodeDistance(node.value)}
-            isCurrentNode={currentDijkstraStep?.currentNode.value === node.value}
-          />
-        ))}
+        {Array.from(nodes.values()).map(node => {
+          const nodeValue = node.value;
+          const isCurrentNode = isCurrentlyBeingProcessed(nodeValue);
+          const isInShortestPath = isNodeInShortestPath(nodeValue);
+          const nodeIsVisited = isVisited(nodeValue);
+
+          return (
+            <WeightedTreeNode
+              key={node.value}
+              node={node}
+              position={new Vector3(node.x ?? 0, node.y ?? 0, node.z ?? 0)}
+              isActive={isInShortestPath && !isCurrentNode}
+              distance={getNodeDistance(node.value)}
+              isCurrentNode={isCurrentNode}
+            />
+          );
+        })}
       </group>
     );
   };

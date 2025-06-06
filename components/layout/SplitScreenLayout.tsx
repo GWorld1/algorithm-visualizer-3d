@@ -9,10 +9,12 @@ import { Button } from '@/components/ui/button';
 import { X, Maximize2 } from 'lucide-react';
 
 const SplitScreenLayout = () => {
-  const { setVisualScriptingMode } = useUIStore();
+  const { setVisualScriptingMode, setActiveDataTab } = useUIStore();
 
   const handleExitSplitScreen = () => {
     setVisualScriptingMode(false);
+    // Optionally reset to generator tab when exiting split-screen
+    setActiveDataTab('generator');
   };
 
   // Handle keyboard shortcuts

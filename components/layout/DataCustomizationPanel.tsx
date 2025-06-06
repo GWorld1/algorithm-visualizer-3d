@@ -1,5 +1,5 @@
 "use client"
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useAlgorithmStore } from '@/store/useAlgorithmStore';
@@ -12,11 +12,10 @@ import WeightedGraphGenerator from '@/components/data/WeightedGraphGenerator';
 import { Settings, Database, TreePine, Link, Network, Code, Maximize2 } from 'lucide-react';
 import { DataStructureType } from '@/types/DataStructure';
 import { AlgorithmType } from '@/types/AlgorithmType';
-import VisualScriptingEditor from '@/components/visual-scripting/VisualScriptingEditor';
 
 const DataCustomizationPanel = () => {
   const { dataStructure, setDataStructure, setAlgorithmType } = useAlgorithmStore();
-  const { setVisualScriptingMode } = useUIStore();
+  const { isVisualScriptingMode, setVisualScriptingMode } = useUIStore();
   const [activeTab, setActiveTab] = useState<'generator' | 'scripting'>('generator');
 
   // Algorithm options for each data structure
@@ -61,11 +60,9 @@ const DataCustomizationPanel = () => {
     setAlgorithmType(firstAlgorithm as AlgorithmType);
   };
 
-  // Handle Visual Scripting tab click
+  // Handle Visual Scripting tab click - tab selection triggers automatic split-screen via useEffect
   const handleVisualScriptingTabClick = () => {
     setActiveTab('scripting');
-    // Optionally auto-enter split-screen mode
-    // setVisualScriptingMode(true);
   };
 
   // Handle generator tab click - exit split-screen mode if active
@@ -73,6 +70,16 @@ const DataCustomizationPanel = () => {
     setActiveTab('generator');
     setVisualScriptingMode(false);
   };
+
+  // Auto-transition to split-screen when Visual Scripting tab is active
+  useEffect(() => {
+    if (activeTab === 'scripting' && !isVisualScriptingMode) {
+      const timer = setTimeout(() => {
+        setVisualScriptingMode(true);
+      }, 150);
+      return () => clearTimeout(timer);
+    }
+  }, [activeTab, isVisualScriptingMode, setVisualScriptingMode]);
 
   return (
     <div className="h-full bg-gray-900/95 backdrop-blur-sm flex flex-col min-h-0">
@@ -162,26 +169,22 @@ const DataCustomizationPanel = () => {
               </div>
             </>
           ) : (
-            /* Visual Scripting Tab */
-            <div className="flex-1 min-h-0 flex flex-col">
-              {/* Split-screen mode button */}
-              <div className="flex-shrink-0 mb-3">
-                <Button
-                  onClick={() => setVisualScriptingMode(true)}
-                  className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white text-sm font-medium shadow-lg transition-all duration-200 transform hover:scale-[1.02]"
-                  size="sm"
-                >
-                  <Maximize2 className="w-4 h-4 mr-2" />
-                  Open in Split-Screen Mode
-                </Button>
-                <p className="text-xs text-gray-400 mt-1 text-center">
-                  Work with Visual Scripting and 3D Viewport side-by-side
+            /* Visual Scripting Tab - Transitional state before split-screen activation */
+            <div className="flex-1 min-h-0 flex flex-col items-center justify-center">
+              <div className="text-center p-6">
+                <div className="relative">
+                  <Maximize2 className="w-12 h-12 text-purple-400 mx-auto mb-4 animate-pulse" />
+                  <div className="absolute inset-0 w-12 h-12 mx-auto border-2 border-purple-400 rounded-lg animate-ping opacity-20"></div>
+                </div>
+                <h3 className="text-lg font-semibold text-white mb-2">Activating Visual Scripting</h3>
+                <p className="text-gray-400 mb-4 text-sm">
+                  Switching to split-screen layout for optimal workflow...
                 </p>
-              </div>
-
-              {/* Visual Scripting Editor */}
-              <div className="flex-1 min-h-0">
-                <VisualScriptingEditor />
+                <div className="flex items-center justify-center gap-2 text-purple-400">
+                  <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce"></div>
+                  <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                  <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                </div>
               </div>
             </div>
           )}

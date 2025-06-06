@@ -13,6 +13,7 @@ import { AlgorithmType } from '@/types/AlgorithmType';
 import { BSTStep } from '@/lib/bstAlgorithms';
 import { DijkstraStep } from '@/lib/graphAlgorithms';
 import { TraversalStep } from '@/lib/treeAlgorithms';
+import { CustomAlgorithm, CustomAlgorithmStep } from '@/types/VisualScripting';
 
 
 type AnimationSettings = {
@@ -36,9 +37,11 @@ type AlgorithmState = {
   tree: TreeNode;
   updateTree: (newTree: TreeNode) => void;
   currentStep: number;
-  steps: TreeNode[] | WeightedTreeNode[] | ArrayElementState[] | LinkedListStep[] | BSTStep[] | DijkstraStep[] | TraversalStep[];
+  steps: TreeNode[] | WeightedTreeNode[] | ArrayElementState[] | LinkedListStep[] | BSTStep[] | DijkstraStep[] | TraversalStep[] | CustomAlgorithmStep[];
   isPlaying: boolean;
-  setSteps: (steps: TreeNode[] | WeightedTreeNode[] | ArrayElementState[] | LinkedListStep[] | BSTStep[] | DijkstraStep[] | TraversalStep[]) => void;
+  customAlgorithm: CustomAlgorithm | null;
+  setSteps: (steps: TreeNode[] | WeightedTreeNode[] | ArrayElementState[] | LinkedListStep[] | BSTStep[] | DijkstraStep[] | TraversalStep[] | CustomAlgorithmStep[]) => void;
+  setCustomAlgorithm: (algorithm: CustomAlgorithm | null) => void;
   play: () => void;
   pause: () => void;
   restart: () => void;
@@ -135,11 +138,13 @@ export const useAlgorithmStore = create<AlgorithmState>((set) => ({
   },
   currentStep: 0,  steps: [],
   isPlaying: false,
-  setSteps: (steps: TreeNode[] | WeightedTreeNode[] | ArrayElementState[] | LinkedListStep[] | BSTStep[] | DijkstraStep[] | TraversalStep[]) => set({
+  customAlgorithm: null,
+  setSteps: (steps: TreeNode[] | WeightedTreeNode[] | ArrayElementState[] | LinkedListStep[] | BSTStep[] | DijkstraStep[] | TraversalStep[] | CustomAlgorithmStep[]) => set({
     steps,
     currentStep: 0, // Reset current step when setting new steps
     isPlaying: false // Ensure animation is paused when setting new steps
   }),
+  setCustomAlgorithm: (algorithm: CustomAlgorithm | null) => set({ customAlgorithm: algorithm }),
   play: () => set({ isPlaying: true }),
   pause: () => set({ isPlaying: false }),
   restart: () => {

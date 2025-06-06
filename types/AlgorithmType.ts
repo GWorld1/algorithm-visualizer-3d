@@ -1,6 +1,6 @@
-export type AlgorithmType = 
-  'bfs' 
-  | 'dfs' 
+export type AlgorithmType =
+  'bfs'
+  | 'dfs'
   | 'dijkstra'
   | 'traverse'
   | 'reverse'
@@ -15,4 +15,5 @@ export type AlgorithmType =
   | 'deleteNode'
   | 'create'
   | 'bstInsert'
-  | 'bstSearch';
+  | 'bstSearch'
+  | 'customVisualScript';

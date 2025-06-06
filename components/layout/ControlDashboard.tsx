@@ -66,7 +66,8 @@ const ControlDashboard = () => {
       { value: 'quickSort', label: 'Quick Sort' },
       { value: 'insertionSort', label: 'Insertion Sort' },
       { value: 'selectionSort', label: 'Selection Sort' },
-      { value: 'mergeSort', label: 'Merge Sort' }
+      { value: 'mergeSort', label: 'Merge Sort' },
+      { value: 'customVisualScript', label: 'Custom Script' }
     ],
     linkedList: [
       { value: 'createLinkedList', label: 'Create Linked List' },
@@ -167,6 +168,10 @@ const ControlDashboard = () => {
         case 'mergeSort':
           steps = mergeSort(elements);
           break;
+        case 'customVisualScript':
+          // Custom visual script execution is handled by the visual scripting editor
+          console.log('Custom visual script selected - use Visual Scripting tab to create and run algorithms');
+          return;
         case 'bstSearch':
           if (!tree) return;
           const defaultSearchValue = tree.value; // Use root value as default
@@ -358,6 +363,7 @@ const ControlDashboard = () => {
       searchLinkedList: 'Search Linked List',
       insertLinkedList: 'Insert Node',
       deleteLinkedList: 'Delete Node',
+      customVisualScript: 'Custom Visual Script',
     };
     return names[algorithmType] || algorithmType;
   };
@@ -372,6 +378,7 @@ const ControlDashboard = () => {
       bfs: { time: 'O(V + E)', space: 'O(V)' },
       dfs: { time: 'O(V + E)', space: 'O(V)' },
       dijkstra: { time: 'O(V²)', space: 'O(V)' },
+      customVisualScript: { time: 'Custom', space: 'Custom' },
     };
     return complexities[algorithmType] || { time: 'N/A', space: 'N/A' };
   };

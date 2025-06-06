@@ -8,12 +8,14 @@ import BSTGenerator from '@/components/data/BSTGenerator';
 import ArrayGenerator from '@/components/data/ArrayGenerator';
 import LinkedListGenerator from '@/components/data/LinkedListGenerator';
 import WeightedGraphGenerator from '@/components/data/WeightedGraphGenerator';
-import { Settings, Database, TreePine, Link, Network } from 'lucide-react';
+import { Settings, Database, TreePine, Link, Network, Code } from 'lucide-react';
 import { DataStructureType } from '@/types/DataStructure';
 import { AlgorithmType } from '@/types/AlgorithmType';
+import VisualScriptingEditor from '@/components/visual-scripting/VisualScriptingEditor';
 
 const DataCustomizationPanel = () => {
   const { dataStructure, setDataStructure, setAlgorithmType } = useAlgorithmStore();
+  const [activeTab, setActiveTab] = useState<'generator' | 'scripting'>('generator');
 
   // Algorithm options for each data structure
   const algorithmOptions = {
@@ -68,46 +70,88 @@ const DataCustomizationPanel = () => {
         </CardHeader>
 
         <CardContent className="px-4 pb-4 flex-1 min-h-0 flex flex-col">
-          {/* Data Structure Selection */}
+          {/* Tab Navigation */}
           <div className="mb-4 flex-shrink-0">
-            <h3 className="text-sm font-semibold mb-2 text-gray-100">Data Structure</h3>
-            <div className="grid grid-cols-2 gap-2">
-              {dataStructureOptions.map((option) => {
-                const Icon = option.icon;
-                return (
-                  <Button
-                    key={option.value}
-                    variant={dataStructure === option.value ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => handleDataStructureChange(option.value)}
-                    className={`flex flex-col items-center gap-1 h-auto py-2 text-xs ${
-                      dataStructure === option.value
-                        ? 'bg-blue-600 text-white border-blue-600'
-                        : 'bg-gray-800 text-gray-300 border-gray-600 hover:bg-gray-700'
-                    }`}
-                  >
-                    <Icon className="w-4 h-4" />
-                    <span className="text-xs">{option.label}</span>
-                  </Button>
-                );
-              })}
+            <div className="flex gap-1 p-1 bg-gray-800 rounded-lg">
+              <Button
+                variant={activeTab === 'generator' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setActiveTab('generator')}
+                className={`flex-1 text-xs ${
+                  activeTab === 'generator'
+                    ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                    : 'text-gray-300 hover:text-white hover:bg-gray-700'
+                }`}
+              >
+                <Database className="w-3 h-3 mr-1" />
+                Data Generator
+              </Button>
+              <Button
+                variant={activeTab === 'scripting' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setActiveTab('scripting')}
+                className={`flex-1 text-xs ${
+                  activeTab === 'scripting'
+                    ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                    : 'text-gray-300 hover:text-white hover:bg-gray-700'
+                }`}
+              >
+                <Code className="w-3 h-3 mr-1" />
+                Visual Scripting
+              </Button>
             </div>
           </div>
 
-          {/* Data Generation Section */}
-          <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden">
-            {dataStructure === 'binaryTree' ? (
-              <BSTGenerator />
-            ) : dataStructure === 'array' ? (
-              <ArrayGenerator />
-            ) : dataStructure === 'linkedList' ? (
-              <LinkedListGenerator />
-            ) : dataStructure === 'weightedGraph' ? (
-              <WeightedGraphGenerator />
-            ) : (
-              <DataGenerators />
-            )}
-          </div>
+          {/* Tab Content */}
+          {activeTab === 'generator' ? (
+            <>
+              {/* Data Structure Selection */}
+              <div className="mb-4 flex-shrink-0">
+                <h3 className="text-sm font-semibold mb-2 text-gray-100">Data Structure</h3>
+                <div className="grid grid-cols-2 gap-2">
+                  {dataStructureOptions.map((option) => {
+                    const Icon = option.icon;
+                    return (
+                      <Button
+                        key={option.value}
+                        variant={dataStructure === option.value ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => handleDataStructureChange(option.value)}
+                        className={`flex flex-col items-center gap-1 h-auto py-2 text-xs ${
+                          dataStructure === option.value
+                            ? 'bg-blue-600 text-white border-blue-600'
+                            : 'bg-gray-800 text-gray-300 border-gray-600 hover:bg-gray-700'
+                        }`}
+                      >
+                        <Icon className="w-4 h-4" />
+                        <span className="text-xs">{option.label}</span>
+                      </Button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Data Generation Section */}
+              <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden">
+                {dataStructure === 'binaryTree' ? (
+                  <BSTGenerator />
+                ) : dataStructure === 'array' ? (
+                  <ArrayGenerator />
+                ) : dataStructure === 'linkedList' ? (
+                  <LinkedListGenerator />
+                ) : dataStructure === 'weightedGraph' ? (
+                  <WeightedGraphGenerator />
+                ) : (
+                  <DataGenerators />
+                )}
+              </div>
+            </>
+          ) : (
+            /* Visual Scripting Tab */
+            <div className="flex-1 min-h-0">
+              <VisualScriptingEditor />
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

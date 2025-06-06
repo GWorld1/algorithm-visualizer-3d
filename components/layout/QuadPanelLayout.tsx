@@ -6,9 +6,10 @@ import DataCustomizationPanel from './DataCustomizationPanel';
 import ControlDashboard from './ControlDashboard';
 import AlgorithmExplanationPanel from './AlgorithmExplanationPanel';
 import ResponsiveLayout from './ResponsiveLayout';
+import SplitScreenLayout from './SplitScreenLayout';
 
 const QuadPanelLayout = () => {
-  const { isMobileView, setMobileView } = useUIStore();
+  const { isMobileView, isVisualScriptingMode, setMobileView } = useUIStore();
 
   // Handle responsive behavior - only use mobile layout for screens smaller than 768px
   useEffect(() => {
@@ -24,6 +25,11 @@ const QuadPanelLayout = () => {
   // Mobile layout
   if (isMobileView) {
     return <ResponsiveLayout />;
+  }
+
+  // Split-screen layout for Visual Scripting
+  if (isVisualScriptingMode) {
+    return <SplitScreenLayout />;
   }
 
   // Desktop quad-panel layout

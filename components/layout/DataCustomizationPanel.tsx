@@ -3,18 +3,20 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useAlgorithmStore } from '@/store/useAlgorithmStore';
+import { useUIStore } from '@/store/useUIStore';
 import DataGenerators from '@/components/data/DataGenerators';
 import BSTGenerator from '@/components/data/BSTGenerator';
 import ArrayGenerator from '@/components/data/ArrayGenerator';
 import LinkedListGenerator from '@/components/data/LinkedListGenerator';
 import WeightedGraphGenerator from '@/components/data/WeightedGraphGenerator';
-import { Settings, Database, TreePine, Link, Network, Code } from 'lucide-react';
+import { Settings, Database, TreePine, Link, Network, Code, Maximize2 } from 'lucide-react';
 import { DataStructureType } from '@/types/DataStructure';
 import { AlgorithmType } from '@/types/AlgorithmType';
 import VisualScriptingEditor from '@/components/visual-scripting/VisualScriptingEditor';
 
 const DataCustomizationPanel = () => {
   const { dataStructure, setDataStructure, setAlgorithmType } = useAlgorithmStore();
+  const { setVisualScriptingMode } = useUIStore();
   const [activeTab, setActiveTab] = useState<'generator' | 'scripting'>('generator');
 
   // Algorithm options for each data structure
@@ -59,6 +61,19 @@ const DataCustomizationPanel = () => {
     setAlgorithmType(firstAlgorithm as AlgorithmType);
   };
 
+  // Handle Visual Scripting tab click
+  const handleVisualScriptingTabClick = () => {
+    setActiveTab('scripting');
+    // Optionally auto-enter split-screen mode
+    // setVisualScriptingMode(true);
+  };
+
+  // Handle generator tab click - exit split-screen mode if active
+  const handleGeneratorTabClick = () => {
+    setActiveTab('generator');
+    setVisualScriptingMode(false);
+  };
+
   return (
     <div className="h-full bg-gray-900/95 backdrop-blur-sm flex flex-col min-h-0">
       <Card className="h-full border-0 rounded-none bg-transparent flex flex-col min-h-0">
@@ -76,7 +91,7 @@ const DataCustomizationPanel = () => {
               <Button
                 variant={activeTab === 'generator' ? 'default' : 'ghost'}
                 size="sm"
-                onClick={() => setActiveTab('generator')}
+                onClick={handleGeneratorTabClick}
                 className={`flex-1 text-xs ${
                   activeTab === 'generator'
                     ? 'bg-blue-600 hover:bg-blue-700 text-white'
@@ -89,7 +104,7 @@ const DataCustomizationPanel = () => {
               <Button
                 variant={activeTab === 'scripting' ? 'default' : 'ghost'}
                 size="sm"
-                onClick={() => setActiveTab('scripting')}
+                onClick={handleVisualScriptingTabClick}
                 className={`flex-1 text-xs ${
                   activeTab === 'scripting'
                     ? 'bg-blue-600 hover:bg-blue-700 text-white'
@@ -148,8 +163,26 @@ const DataCustomizationPanel = () => {
             </>
           ) : (
             /* Visual Scripting Tab */
-            <div className="flex-1 min-h-0">
-              <VisualScriptingEditor />
+            <div className="flex-1 min-h-0 flex flex-col">
+              {/* Split-screen mode button */}
+              <div className="flex-shrink-0 mb-3">
+                <Button
+                  onClick={() => setVisualScriptingMode(true)}
+                  className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white text-sm font-medium shadow-lg transition-all duration-200 transform hover:scale-[1.02]"
+                  size="sm"
+                >
+                  <Maximize2 className="w-4 h-4 mr-2" />
+                  Open in Split-Screen Mode
+                </Button>
+                <p className="text-xs text-gray-400 mt-1 text-center">
+                  Work with Visual Scripting and 3D Viewport side-by-side
+                </p>
+              </div>
+
+              {/* Visual Scripting Editor */}
+              <div className="flex-1 min-h-0">
+                <VisualScriptingEditor />
+              </div>
             </div>
           )}
         </CardContent>

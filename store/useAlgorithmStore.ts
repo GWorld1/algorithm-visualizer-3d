@@ -91,12 +91,22 @@ export const useAlgorithmStore = create<AlgorithmState>((set) => ({
       linkedListState.setIsPlaying(false);
     }
 
-    set({
-      algorithmType,
-      currentStep: 0,
-      steps: [], // Reset steps when changing algorithm type
-      isPlaying: false // Ensure animation is stopped when changing algorithm
-    });
+    // For custom visual scripts, don't reset steps as they will be set separately
+    if (algorithmType === 'customVisualScript') {
+      console.log('🎨 Setting algorithm type to customVisualScript without resetting steps');
+      set({
+        algorithmType,
+        currentStep: 0,
+        isPlaying: false
+      });
+    } else {
+      set({
+        algorithmType,
+        currentStep: 0,
+        steps: [], // Reset steps when changing algorithm type
+        isPlaying: false // Ensure animation is stopped when changing algorithm
+      });
+    }
 
     // Reset linked list steps but keep the list structure
     linkedListState.resetSteps();
@@ -139,11 +149,19 @@ export const useAlgorithmStore = create<AlgorithmState>((set) => ({
   currentStep: 0,  steps: [],
   isPlaying: false,
   customAlgorithm: null,
-  setSteps: (steps: TreeNode[] | WeightedTreeNode[] | ArrayElementState[] | LinkedListStep[] | BSTStep[] | DijkstraStep[] | TraversalStep[] | CustomAlgorithmStep[]) => set({
-    steps,
-    currentStep: 0, // Reset current step when setting new steps
-    isPlaying: false // Ensure animation is paused when setting new steps
-  }),
+  setSteps: (steps: TreeNode[] | WeightedTreeNode[] | ArrayElementState[] | LinkedListStep[] | BSTStep[] | DijkstraStep[] | TraversalStep[] | CustomAlgorithmStep[]) => {
+    console.log('🔧 useAlgorithmStore.setSteps called with:', {
+      stepsCount: steps.length,
+      stepType: steps.length > 0 ? (steps[0] as any).constructor?.name || typeof steps[0] : 'empty',
+      currentAlgorithmType: useAlgorithmStore.getState().algorithmType
+    });
+
+    set({
+      steps,
+      currentStep: 0, // Reset current step when setting new steps
+      isPlaying: false // Ensure animation is paused when setting new steps
+    });
+  },
   setCustomAlgorithm: (algorithm: CustomAlgorithm | null) => set({ customAlgorithm: algorithm }),
   play: () => set({ isPlaying: true }),
   pause: () => set({ isPlaying: false }),

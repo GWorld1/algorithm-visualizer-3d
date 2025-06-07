@@ -277,6 +277,12 @@ const ControlDashboard = () => {
 
   // Auto-generate steps when algorithm type changes
   useEffect(() => {
+    // Skip auto-generation for custom visual scripts - they handle their own step generation
+    if (algorithmType === 'customVisualScript') {
+      console.log('🎨 Skipping auto-generation for custom visual script');
+      return;
+    }
+
     // Clear any existing animations before generating new steps
     if (dataStructure === 'linkedList') {
       const linkedListStore = useLinkedListStore.getState();

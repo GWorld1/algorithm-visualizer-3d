@@ -185,9 +185,23 @@ const VisualScriptingEditor: React.FC = () => {
         });
 
         // Update the main algorithm store
-        setSteps(steps);
+        console.log('🎯 Setting algorithm type to customVisualScript...');
         setAlgorithmType('customVisualScript');
         setDataStructure('array'); // Ensure array visualization is used
+
+        console.log('🎯 Setting steps in algorithm store...');
+        setSteps(steps);
+
+        // Verify the steps were set correctly
+        setTimeout(() => {
+          const currentState = useAlgorithmStore.getState();
+          console.log('🔍 Algorithm store state after setting steps:', {
+            algorithmType: currentState.algorithmType,
+            dataStructure: currentState.dataStructure,
+            stepsCount: currentState.steps.length,
+            currentStep: currentState.currentStep
+          });
+        }, 200);
 
         console.log('🎯 Algorithm store updated with steps');
         alert(`Algorithm executed successfully! Generated ${steps.length} steps. Check console for details.`);

@@ -5,25 +5,13 @@ import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { useArrayStore } from '@/store/useArrayStore';
 
-const getColorForState = (state: string) => {
-  switch (state) {
-    case 'comparing':
-      return '#fbbf24'; // Yellow
-    case 'swapping':
-      return '#ef4444'; // Red
-    case 'sorted':
-      return '#22c55e'; // Green
-    default:
-      return '#4682b4'; // Steel blue - better contrast for dark theme
-  }
-};
-
 interface ArrayElementProps {
   value: number;
   index: number;
   state: string;
   targetPosition: number;
   isSwapping: boolean;
+  highlightColor?: string;
 }
 
 const ArrayElement: React.FC<ArrayElementProps> = ({
@@ -31,7 +19,8 @@ const ArrayElement: React.FC<ArrayElementProps> = ({
   index,
   state,
   targetPosition,
-  isSwapping
+  isSwapping,
+  highlightColor
 }) => {
   const { elements } = useArrayStore();
   const meshRef = useRef<THREE.Mesh>(null);
@@ -120,6 +109,21 @@ const ArrayElement: React.FC<ArrayElementProps> = ({
       }
     }
   });
+
+  // Replace getColorForState with support for highlightColor
+  const getColorForState = (state: string) => {
+    if (state === 'comparing' && highlightColor) return highlightColor;
+    switch (state) {
+      case 'comparing':
+        return '#fbbf24'; // Yellow
+      case 'swapping':
+        return '#ef4444'; // Red
+      case 'sorted':
+        return '#22c55e'; // Green
+      default:
+        return '#4682b4'; // Steel blue - better contrast for dark theme
+    }
+  };
 
   return (
     <mesh ref={meshRef}>

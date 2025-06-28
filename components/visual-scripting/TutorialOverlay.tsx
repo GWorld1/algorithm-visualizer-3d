@@ -37,6 +37,12 @@ const tutorialSteps: TutorialStep[] = [
     action: "Practice connecting nodes to create a flow."
   },
   {
+    title: "Execution vs Data Handles",
+    content: "\n• Green handles: Execution flow (only one connection allowed per handle)\n• Blue handles: Data flow (multiple connections allowed)\n\nExecution handles control the order of operations. Data handles pass values.\n\nIf you see a warning when connecting, check for existing connections on that handle.",
+    highlight: "handles",
+    action: "Hover over handles to see tooltips about their type and rules."
+  },
+  {
     title: "Running Your Algorithm",
     content: "Once your algorithm is complete:\n1. Click the 'Run' button in the toolbar\n2. Your algorithm will execute on the current array\n3. Use the animation controls to step through execution\n4. Watch the 3D visualization update in real-time",
     highlight: "run-button",

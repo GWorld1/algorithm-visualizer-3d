@@ -103,6 +103,7 @@ const VisualScriptingEditor: React.FC = () => {
       // Basic validation: prevent self-connections
       if (params.source === params.target) {
         console.warn('❌ Cannot connect node to itself');
+        alert('Cannot connect a node to itself.');
         return;
       }
 
@@ -113,10 +114,33 @@ const VisualScriptingEditor: React.FC = () => {
         conn.target === params.target &&
         conn.targetHandle === params.targetHandle
       );
-
       if (existingConnection) {
         console.warn('❌ Connection already exists');
+        alert('This connection already exists.');
         return;
+      }
+
+      // Prevent multiple execution connections from the same source handle or to the same target handle
+      // Only for execution-type handles (by convention: handle id starts with 'exec')
+      const isExecutionSource = params.sourceHandle.startsWith('exec');
+      const isExecutionTarget = params.targetHandle.startsWith('exec');
+      if (isExecutionSource) {
+        const hasSourceConflict = storeConnections.some(conn =>
+          conn.source === params.source && conn.sourceHandle === params.sourceHandle
+        );
+        if (hasSourceConflict) {
+          alert('Only one connection is allowed from this execution output.');
+          return;
+        }
+      }
+      if (isExecutionTarget) {
+        const hasTargetConflict = storeConnections.some(conn =>
+          conn.target === params.target && conn.targetHandle === params.targetHandle
+        );
+        if (hasTargetConflict) {
+          alert('Only one connection is allowed to this execution input.');
+          return;
+        }
       }
 
       console.log('✅ Creating connection');

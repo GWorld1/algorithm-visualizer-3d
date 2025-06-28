@@ -27,6 +27,7 @@ const DynamicArray = () => {
         value,
         state: 'default',
         position: index,
+        highlightColor: undefined
       }));
     }
 
@@ -34,10 +35,14 @@ const DynamicArray = () => {
     if (algorithmType === 'customVisualScript' && 'dataStructureState' in currentStepData) {
       const customStep = currentStepData as CustomAlgorithmStep;
       const arrayState = customStep.dataStructureState as ArrayElementState[];
+      const highlightColor = customStep.action === 'highlight' && customStep.metadata?.color
+        ? customStep.metadata.color
+        : undefined;
 
       // Apply highlighting and state changes based on action and highlightedElements
       const processedState = arrayState.map((element, index) => {
         let state = element.state;
+        let color = undefined;
 
         // Apply action-specific states
         if (customStep.highlightedElements.includes(index)) {
@@ -50,6 +55,7 @@ const DynamicArray = () => {
               break;
             case 'highlight':
               state = 'comparing'; // Use comparing color for highlighting
+              color = highlightColor;
               break;
             default:
               state = 'comparing';
@@ -59,7 +65,8 @@ const DynamicArray = () => {
 
         return {
           ...element,
-          state
+          state,
+          highlightColor: color
         };
       });
 
@@ -76,6 +83,7 @@ const DynamicArray = () => {
       value,
       state: 'default',
       position: index,
+      highlightColor: undefined
     }));
   };
 
@@ -91,6 +99,7 @@ const DynamicArray = () => {
           state={element.state}
           targetPosition={element.position}
           isSwapping={element.state === 'swapping'}
+          highlightColor={element.highlightColor}
         />
       ))}
     </group>

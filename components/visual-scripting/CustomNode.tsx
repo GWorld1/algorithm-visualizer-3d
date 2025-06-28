@@ -233,7 +233,7 @@ const CustomNode: React.FC<NodeProps<CustomNodeData>> = ({ data, selected }) => 
             type="target"
             position={Position.Left}
             id={input.id}
-            title={`Input: ${input.label} (${input.type})`}
+            title={`Input: ${input.label} (${input.type})\n${input.type === 'execution' ? 'Execution flow: only one connection allowed.' : 'Data flow: can have multiple connections.'}`}
             className="transition-all duration-200 hover:scale-125 hover:shadow-lg"
             style={{
               top: `${20 + index * 20}px`,
@@ -256,7 +256,7 @@ const CustomNode: React.FC<NodeProps<CustomNodeData>> = ({ data, selected }) => 
             type="source"
             position={Position.Right}
             id={output.id}
-            title={`Output: ${output.label} (${output.type})`}
+            title={`Output: ${output.label} (${output.type})\n${output.type === 'execution' ? 'Execution flow: only one connection allowed.' : 'Data flow: can have multiple connections.'}`}
             className="transition-all duration-200 hover:scale-125 hover:shadow-lg"
             style={{
               top: `${20 + index * 20}px`,

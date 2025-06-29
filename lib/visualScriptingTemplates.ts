@@ -91,10 +91,12 @@ export const nodeTemplates: NodeTemplate[] = [
       isValid: true
     },
     inputs: [
+      { id: 'exec-in', type: 'execution', label: 'Previous' },
       { id: 'array-in', type: 'array', label: 'Array' },
       { id: 'index-in', type: 'number', label: 'Index' }
     ],
     outputs: [
+      { id: 'exec-out', type: 'execution', label: 'Next' },
       { id: 'value-out', type: 'number', label: 'Value' }
     ]
   },

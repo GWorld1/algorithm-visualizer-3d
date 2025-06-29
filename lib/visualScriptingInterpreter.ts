@@ -143,15 +143,33 @@ export class VisualScriptingInterpreter {
         nodeId: node.id
       });
       this.context.variables.set(loopVariable, loopStart);
-      this.addStep(`Starting loop: ${loopVariable} = ${loopStart} to ${loopEnd}`, 'custom');
+      this.addStep(`Starting loop: ${loopVariable} = ${loopStart} to ${loopEnd}`, 'custom', {
+        loopStart: true,
+        loopVariable: loopVariable,
+        loopRange: `${loopStart} to ${loopEnd}`
+      });
 
       // Execute loop body if we have iterations to do
       if (loopStart < loopEnd) {
+        // Add step for first iteration
+        this.addStep(
+          `Loop iteration ${loopStart}: ${loopVariable} = ${loopStart}`,
+          'custom',
+          {
+            loopIteration: true,
+            loopVariable: loopVariable,
+            loopValue: loopStart,
+            iterationNumber: loopStart
+          }
+        );
         this.currentNodeId = this.getNextNode(node.id, 'exec-out');
       } else {
         // Empty loop, go directly to complete
         this.context.loopStack = this.context.loopStack.filter(loop => loop.nodeId !== node.id);
-        this.addStep(`Loop completed (no iterations)`, 'custom');
+        this.addStep(`Loop completed (no iterations)`, 'custom', {
+          loopComplete: true,
+          loopVariable: loopVariable
+        });
         this.currentNodeId = this.getNextNode(node.id, 'exec-complete');
       }
     } else {
@@ -160,12 +178,27 @@ export class VisualScriptingInterpreter {
       this.context.variables.set(loopVariable, existingLoop.current);
 
       if (existingLoop.current < existingLoop.end) {
-        this.addStep(`Loop iteration: ${loopVariable} = ${existingLoop.current}`, 'custom');
+        // Add detailed step for each iteration
+        this.addStep(
+          `Loop iteration ${existingLoop.current}: ${loopVariable} = ${existingLoop.current}`,
+          'custom',
+          {
+            loopIteration: true,
+            loopVariable: loopVariable,
+            loopValue: existingLoop.current,
+            iterationNumber: existingLoop.current
+          }
+        );
+        // Re-execute loop body for this iteration
         this.currentNodeId = this.getNextNode(node.id, 'exec-out');
       } else {
         // Loop complete
         this.context.loopStack = this.context.loopStack.filter(loop => loop.nodeId !== node.id);
-        this.addStep(`Loop completed`, 'custom');
+        this.addStep(`Loop completed: processed ${existingLoop.end - loopStart} iterations`, 'custom', {
+          loopComplete: true,
+          loopVariable: loopVariable,
+          totalIterations: existingLoop.end - loopStart
+        });
         this.currentNodeId = this.getNextNode(node.id, 'exec-complete');
       }
     }
@@ -212,14 +245,41 @@ export class VisualScriptingInterpreter {
 
     if (index >= 0 && index < targetArray.length) {
       const value = targetArray[index];
-      this.addStep(`Accessed array[${index}] = ${value}`, 'traverse', {
-        indices: [index]
-      });
+
+      // Check if we're in a loop context for enhanced step description
+      const currentLoop = this.context.loopStack.length > 0 ?
+        this.context.loopStack[this.context.loopStack.length - 1] : null;
+
+      const loopContext = currentLoop ?
+        ` (Loop iteration ${currentLoop.current}: ${currentLoop.variable} = ${currentLoop.current})` : '';
+
+      this.addStep(
+        `Accessed array[${index}] = ${value}${loopContext}`,
+        'traverse',
+        {
+          indices: [index],
+          value: value,
+          isLoopIteration: currentLoop !== null,
+          loopVariable: currentLoop?.variable,
+          loopValue: currentLoop?.current,
+          iterationNumber: currentLoop?.current
+        }
+      );
 
       // Store the result for potential data flow usage
       this.context.variables.set(`__array_access_${node.id}`, value);
     } else {
-      this.addStep(`Array access failed: index ${index} out of bounds`, 'custom');
+      const currentLoop = this.context.loopStack.length > 0 ?
+        this.context.loopStack[this.context.loopStack.length - 1] : null;
+      const loopContext = currentLoop ?
+        ` (Loop iteration ${currentLoop.current})` : '';
+
+      this.addStep(`Array access failed: index ${index} out of bounds${loopContext}`, 'custom', {
+        error: true,
+        isLoopIteration: currentLoop !== null,
+        loopVariable: currentLoop?.variable,
+        loopValue: currentLoop?.current
+      });
     }
 
     // Continue execution flow if this node is still in execution path
@@ -391,9 +451,20 @@ export class VisualScriptingInterpreter {
       // Get the most recent loop
       const currentLoop = this.context.loopStack[this.context.loopStack.length - 1];
 
+      // Add step showing loop body completion for current iteration
+      this.addStep(
+        `Completed loop body for ${currentLoop.variable} = ${currentLoop.current}`,
+        'custom',
+        {
+          loopBodyComplete: true,
+          loopVariable: currentLoop.variable,
+          loopValue: currentLoop.current,
+          iterationNumber: currentLoop.current
+        }
+      );
+
       // Return to the loop node to continue iteration
       this.currentNodeId = currentLoop.nodeId;
-      this.addStep(`Returning to loop: ${currentLoop.variable}`, 'custom');
     }
   }
 

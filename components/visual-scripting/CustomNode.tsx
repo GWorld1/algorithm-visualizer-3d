@@ -36,6 +36,9 @@ interface CustomNodeData {
   onUpdate: (data: any) => void;
   onDelete: () => void;
   onSelect: () => void;
+  isConnecting?: boolean;
+  connectingHandle?: string;
+  compatibleHandles?: string[];
   [key: string]: any;
 }
 
@@ -221,6 +224,104 @@ const CustomNode: React.FC<NodeProps<CustomNodeData>> = ({ data, selected }) => 
     }
   };
 
+  const getHandleStyle = (handleType: string, handleId: string, isInput: boolean) => {
+    const isExecution = handleType === 'execution';
+    const baseColor = isExecution ? '#10B981' : '#6366F1';
+    const isCompatible = data.compatibleHandles?.includes(handleId);
+    const isConnecting = data.isConnecting && data.connectingHandle;
+
+    let background = baseColor;
+    let border = '2px solid rgba(255, 255, 255, 0.2)';
+    let boxShadow = isExecution
+      ? '0 0 8px rgba(16, 185, 129, 0.4)'
+      : '0 0 8px rgba(99, 102, 241, 0.4)';
+    let scale = 1;
+
+    if (isConnecting) {
+      if (isCompatible) {
+        // Compatible handle - highlight in green
+        background = '#22C55E';
+        border = '3px solid #16A34A';
+        boxShadow = '0 0 12px rgba(34, 197, 94, 0.8)';
+        scale = 1.3;
+      } else if (data.connectingHandle !== handleId) {
+        // Incompatible handle - dim it
+        background = '#6B7280';
+        border = '2px solid rgba(107, 114, 128, 0.3)';
+        boxShadow = 'none';
+        scale = 0.8;
+      }
+    }
+
+    return {
+      background,
+      border,
+      boxShadow,
+      width: 12,
+      height: 12,
+      borderRadius: '50%',
+      transform: `scale(${scale})`,
+      transition: 'all 0.2s ease-in-out',
+      zIndex: isCompatible ? 10 : 1
+    };
+  };
+
+  const getHandleTooltip = (handle: any, isInput: boolean) => {
+    const direction = isInput ? 'Input' : 'Output';
+    const flowType = handle.type === 'execution' ? 'Execution Flow' : 'Data Flow';
+    const connectionRule = handle.type === 'execution'
+      ? 'Only one connection allowed'
+      : 'Multiple connections allowed';
+
+    let description = '';
+    let examples = '';
+
+    switch (handle.id) {
+      case 'exec-in':
+        description = 'Connect from previous step in algorithm';
+        examples = 'Example: Start → For Loop';
+        break;
+      case 'exec-out':
+        description = 'Connect to next step to execute';
+        examples = 'Example: For Loop → Array Access';
+        break;
+      case 'exec-complete':
+        description = 'Connect to step after loop completes';
+        examples = 'Example: For Loop → End';
+        break;
+      case 'index-out':
+        description = 'Current loop index value (0, 1, 2, ...)';
+        examples = 'Connect to: Array Access (Index input)';
+        break;
+      case 'array-out':
+        description = 'Array being processed';
+        examples = 'Connect to: Array Access (Array input)';
+        break;
+      case 'array-in':
+        description = 'Array to access elements from';
+        examples = 'Connect from: For Loop (Array output)';
+        break;
+      case 'index-in':
+        description = 'Index position to access in array';
+        examples = 'Connect from: For Loop (Current Index)';
+        break;
+      case 'value-out':
+        description = 'Value retrieved from array at index';
+        examples = 'Connect to: Variable Set, Array Compare, etc.';
+        break;
+      default:
+        description = `${handle.label} - ${handle.type} type`;
+    }
+
+    const compatibilityInfo = data.isConnecting && data.compatibleHandles?.includes(handle.id)
+      ? '\n\n✅ COMPATIBLE - You can connect here!'
+      : data.isConnecting && !data.compatibleHandles?.includes(handle.id)
+      ? '\n\n❌ INCOMPATIBLE - Cannot connect here'
+      : '';
+
+    return `${direction}: ${handle.label}\n${flowType} (${handle.type})\n${connectionRule}\n\n${description}\n${examples}${compatibilityInfo}`;
+  };
+
   const renderHandles = () => {
     if (!template) return null;
 
@@ -228,48 +329,62 @@ const CustomNode: React.FC<NodeProps<CustomNodeData>> = ({ data, selected }) => 
       <>
         {/* Input Handles */}
         {template.inputs.map((input, index) => (
-          <Handle
-            key={`input-${input.id}`}
-            type="target"
-            position={Position.Left}
-            id={input.id}
-            title={`Input: ${input.label} (${input.type})\n${input.type === 'execution' ? 'Execution flow: only one connection allowed.' : 'Data flow: can have multiple connections.'}`}
-            className="transition-all duration-200 hover:scale-125 hover:shadow-lg"
-            style={{
-              top: `${20 + index * 20}px`,
-              background: input.type === 'execution' ? '#10B981' : '#6366F1',
-              border: '2px solid rgba(255, 255, 255, 0.2)',
-              width: 10,
-              height: 10,
-              borderRadius: '50%',
-              boxShadow: input.type === 'execution'
-                ? '0 0 8px rgba(16, 185, 129, 0.4)'
-                : '0 0 8px rgba(99, 102, 241, 0.4)'
-            }}
-          />
+          <div key={`input-container-${input.id}`} className="relative">
+            <Handle
+              key={`input-${input.id}`}
+              type="target"
+              position={Position.Left}
+              id={input.id}
+              title={getHandleTooltip(input, true)}
+              className="transition-all duration-200 hover:scale-125 hover:shadow-lg cursor-pointer"
+              style={{
+                top: `${20 + index * 25}px`,
+                ...getHandleStyle(input.type, input.id, true)
+              }}
+            />
+            {/* Handle Label */}
+            <div
+              className="absolute text-xs text-gray-300 pointer-events-none select-none"
+              style={{
+                top: `${20 + index * 25 - 2}px`,
+                left: '-8px',
+                transform: 'translateX(-100%)',
+                whiteSpace: 'nowrap'
+              }}
+            >
+              {input.label}
+            </div>
+          </div>
         ))}
 
         {/* Output Handles */}
         {template.outputs.map((output, index) => (
-          <Handle
-            key={`output-${output.id}`}
-            type="source"
-            position={Position.Right}
-            id={output.id}
-            title={`Output: ${output.label} (${output.type})\n${output.type === 'execution' ? 'Execution flow: only one connection allowed.' : 'Data flow: can have multiple connections.'}`}
-            className="transition-all duration-200 hover:scale-125 hover:shadow-lg"
-            style={{
-              top: `${20 + index * 20}px`,
-              background: output.type === 'execution' ? '#10B981' : '#6366F1',
-              border: '2px solid rgba(255, 255, 255, 0.2)',
-              width: 10,
-              height: 10,
-              borderRadius: '50%',
-              boxShadow: output.type === 'execution'
-                ? '0 0 8px rgba(16, 185, 129, 0.4)'
-                : '0 0 8px rgba(99, 102, 241, 0.4)'
-            }}
-          />
+          <div key={`output-container-${output.id}`} className="relative">
+            <Handle
+              key={`output-${output.id}`}
+              type="source"
+              position={Position.Right}
+              id={output.id}
+              title={getHandleTooltip(output, false)}
+              className="transition-all duration-200 hover:scale-125 hover:shadow-lg cursor-pointer"
+              style={{
+                top: `${20 + index * 25}px`,
+                ...getHandleStyle(output.type, output.id, false)
+              }}
+            />
+            {/* Handle Label */}
+            <div
+              className="absolute text-xs text-gray-300 pointer-events-none select-none"
+              style={{
+                top: `${20 + index * 25 - 2}px`,
+                right: '-8px',
+                transform: 'translateX(100%)',
+                whiteSpace: 'nowrap'
+              }}
+            >
+              {output.label}
+            </div>
+          </div>
         ))}
       </>
     );

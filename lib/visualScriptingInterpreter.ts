@@ -13,6 +13,10 @@ export class VisualScriptingInterpreter {
   private context: ExecutionContext;
   private steps: CustomAlgorithmStep[];
   private currentNodeId: string | null;
+  private loopReturnStack: Array<{
+    loopNodeId: string;
+    returnToLoop: boolean;
+  }>;
 
   constructor(nodes: ScriptNode[], connections: Connection[], inputArray: number[]) {
     this.nodes = new Map(nodes.map(node => [node.id, node]));
@@ -27,6 +31,7 @@ export class VisualScriptingInterpreter {
     };
     this.steps = [];
     this.currentNodeId = null;
+    this.loopReturnStack = [];
   }
 
   public execute(): CustomAlgorithmStep[] {
@@ -61,6 +66,9 @@ export class VisualScriptingInterpreter {
   }
 
   private executeNode(node: ScriptNode): void {
+    // Check if we should return to a loop after executing this node
+    const shouldReturnToLoop = this.checkLoopReturn(node);
+
     switch (node.type) {
       case 'start':
         this.executeStart(node);
@@ -104,6 +112,11 @@ export class VisualScriptingInterpreter {
       default:
         throw new Error(`Unknown node type: ${node.type}`);
     }
+
+    // Handle loop return after node execution
+    if (shouldReturnToLoop) {
+      this.handleLoopReturn();
+    }
   }
 
   private executeStart(node: ScriptNode): void {
@@ -117,10 +130,10 @@ export class VisualScriptingInterpreter {
 
   private executeForLoop(node: ScriptNode): void {
     const { loopStart = 0, loopEnd = 10, loopVariable = 'i' } = node.data;
-    
+
     // Check if we're already in this loop
     const existingLoop = this.context.loopStack.find(loop => loop.nodeId === node.id);
-    
+
     if (!existingLoop) {
       // Start new loop
       this.context.loopStack.push({
@@ -131,12 +144,21 @@ export class VisualScriptingInterpreter {
       });
       this.context.variables.set(loopVariable, loopStart);
       this.addStep(`Starting loop: ${loopVariable} = ${loopStart} to ${loopEnd}`, 'custom');
-      this.currentNodeId = this.getNextNode(node.id, 'exec-out');
+
+      // Execute loop body if we have iterations to do
+      if (loopStart < loopEnd) {
+        this.currentNodeId = this.getNextNode(node.id, 'exec-out');
+      } else {
+        // Empty loop, go directly to complete
+        this.context.loopStack = this.context.loopStack.filter(loop => loop.nodeId !== node.id);
+        this.addStep(`Loop completed (no iterations)`, 'custom');
+        this.currentNodeId = this.getNextNode(node.id, 'exec-complete');
+      }
     } else {
-      // Continue existing loop
+      // Continue existing loop - this happens when we return from loop body
       existingLoop.current++;
       this.context.variables.set(loopVariable, existingLoop.current);
-      
+
       if (existingLoop.current < existingLoop.end) {
         this.addStep(`Loop iteration: ${loopVariable} = ${existingLoop.current}`, 'custom');
         this.currentNodeId = this.getNextNode(node.id, 'exec-out');
@@ -177,16 +199,30 @@ export class VisualScriptingInterpreter {
   }
 
   private executeArrayAccess(node: ScriptNode): void {
+    // Array access is now a data-only operation, but we still need to handle it in execution flow
+    // This method should ideally not be called in a pure data flow model
     const { arrayIndex1 = 0 } = node.data;
-    const index = this.resolveValue(arrayIndex1);
-    
-    if (index >= 0 && index < this.context.currentArray.length) {
-      const value = this.context.currentArray[index];
+
+    // Try to resolve index from data flow connections first
+    const index = this.resolveValue(arrayIndex1, node.id, 'index-in');
+
+    // Get array from data flow or use current array
+    const arrayValue = this.resolveValue(this.context.currentArray, node.id, 'array-in');
+    const targetArray = Array.isArray(arrayValue) ? arrayValue : this.context.currentArray;
+
+    if (index >= 0 && index < targetArray.length) {
+      const value = targetArray[index];
       this.addStep(`Accessed array[${index}] = ${value}`, 'traverse', {
         indices: [index]
       });
+
+      // Store the result for potential data flow usage
+      this.context.variables.set(`__array_access_${node.id}`, value);
+    } else {
+      this.addStep(`Array access failed: index ${index} out of bounds`, 'custom');
     }
-    
+
+    // Continue execution flow if this node is still in execution path
     this.currentNodeId = this.getNextNode(node.id, 'exec-out');
   }
 
@@ -309,7 +345,24 @@ export class VisualScriptingInterpreter {
     return connection ? connection.target : null;
   }
 
-  private resolveValue(value: any): any {
+  private resolveValue(value: any, nodeId?: string, inputHandle?: string): any {
+    // First check if this is a data flow connection
+    if (nodeId && inputHandle) {
+      const dataConnection = this.connections.find(conn =>
+        conn.target === nodeId &&
+        conn.targetHandle === inputHandle &&
+        !conn.sourceHandle.startsWith('exec')
+      );
+
+      if (dataConnection) {
+        const dataValue = this.getDataValue(dataConnection.source, dataConnection.sourceHandle);
+        if (dataValue !== null) {
+          return dataValue;
+        }
+      }
+    }
+
+    // Fallback to variable resolution or literal value
     if (typeof value === 'string' && this.context.variables.has(value)) {
       return this.context.variables.get(value);
     }
@@ -318,5 +371,57 @@ export class VisualScriptingInterpreter {
 
   private isValidIndex(index: number): boolean {
     return index >= 0 && index < this.context.currentArray.length;
+  }
+
+  private checkLoopReturn(node: ScriptNode): boolean {
+    // Check if this node is at the end of a loop body and should return to loop
+    if (this.context.loopStack.length === 0) return false;
+
+    // Find if this node has no outgoing execution connections (end of path)
+    const hasOutgoingExecution = this.connections.some(conn =>
+      conn.source === node.id && conn.sourceHandle.startsWith('exec')
+    );
+
+    // If no outgoing execution and we're in a loop, we should return
+    return !hasOutgoingExecution && this.context.loopStack.length > 0;
+  }
+
+  private handleLoopReturn(): void {
+    if (this.context.loopStack.length > 0) {
+      // Get the most recent loop
+      const currentLoop = this.context.loopStack[this.context.loopStack.length - 1];
+
+      // Return to the loop node to continue iteration
+      this.currentNodeId = currentLoop.nodeId;
+      this.addStep(`Returning to loop: ${currentLoop.variable}`, 'custom');
+    }
+  }
+
+  private getDataValue(nodeId: string, outputHandle: string): any {
+    // Helper method to get data values from nodes for data flow connections
+    const node = this.nodes.get(nodeId);
+    if (!node) return null;
+
+    switch (node.type) {
+      case 'for-loop':
+        if (outputHandle === 'index-out') {
+          const loop = this.context.loopStack.find(l => l.nodeId === nodeId);
+          return loop ? loop.current : 0;
+        }
+        if (outputHandle === 'array-out') {
+          return this.context.currentArray;
+        }
+        break;
+      case 'array-access':
+        if (outputHandle === 'value-out') {
+          return this.context.variables.get(`__array_access_${nodeId}`) || 0;
+        }
+        break;
+      case 'variable-get':
+        const varName = node.data.variableName || 'variable';
+        return this.context.variables.get(varName) || 0;
+    }
+
+    return null;
   }
 }

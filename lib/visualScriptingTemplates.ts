@@ -47,12 +47,14 @@ export const nodeTemplates: NodeTemplate[] = [
       isValid: true
     },
     inputs: [
-      { id: 'exec-in', type: 'execution', label: 'Previous' }
+      { id: 'exec-in', type: 'execution', label: 'Previous' },
+      { id: 'array-in', type: 'array', label: 'Array (optional)' }
     ],
     outputs: [
       { id: 'exec-out', type: 'execution', label: 'Loop Body' },
       { id: 'exec-complete', type: 'execution', label: 'Complete' },
-      { id: 'index-out', type: 'number', label: 'Index' }
+      { id: 'index-out', type: 'number', label: 'Current Index' },
+      { id: 'array-out', type: 'array', label: 'Array' }
     ]
   },
   {

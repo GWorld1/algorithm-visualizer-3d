@@ -1,10 +1,21 @@
 "use client"
+import { useState } from 'react';
 import { useAlgorithmStore } from '@/store/useAlgorithmStore';
 import { useLinkedListStore } from '@/store/useLinkedListStore';
 import { Card, CardContent } from '@/components/ui/card';
-import { Lightbulb, Activity, Clock } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog';
+import { Lightbulb, Activity, Clock, Info } from 'lucide-react';
 
 const AlgorithmExplanationPanel = () => {
+  const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
+
   const {
     algorithmType,
     currentStep,
@@ -329,6 +340,15 @@ const AlgorithmExplanationPanel = () => {
                 <div className="flex items-center gap-2">
                   <Lightbulb className="w-5 h-5 text-yellow-400 flex-shrink-0" />
                   <h2 className="text-lg font-semibold text-white">{algorithmInfo.name}</h2>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6 text-gray-400 hover:text-white hover:bg-gray-700"
+                    onClick={() => setIsInfoModalOpen(true)}
+                    title="Algorithm Information"
+                  >
+                    <Info className="w-4 h-4" />
+                  </Button>
                 </div>
                 <div className="flex items-center gap-3">
                   <span className="text-sm text-gray-300 bg-gray-800 px-2 py-1 rounded">
@@ -398,6 +418,15 @@ const AlgorithmExplanationPanel = () => {
                 <div className="flex items-center gap-2">
                   <Lightbulb className="w-5 h-5 text-yellow-400 flex-shrink-0" />
                   <h2 className="text-lg font-semibold text-white">{algorithmInfo.name}</h2>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6 text-gray-400 hover:text-white hover:bg-gray-700"
+                    onClick={() => setIsInfoModalOpen(true)}
+                    title="Algorithm Information"
+                  >
+                    <Info className="w-4 h-4" />
+                  </Button>
                 </div>
                 <div className="flex items-center gap-3 text-xs text-gray-400">
                   <div className="flex items-center gap-1">
@@ -435,6 +464,93 @@ const AlgorithmExplanationPanel = () => {
           )}
         </CardContent>
       </Card>
+
+      {/* Algorithm Information Modal */}
+      <Dialog open={isInfoModalOpen} onOpenChange={setIsInfoModalOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-gray-800 border-gray-600 text-white">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-white">
+              <Info className="w-5 h-5 text-blue-400" />
+              {algorithmInfo.name} - Algorithm Information
+            </DialogTitle>
+            <DialogDescription className="text-gray-300">
+              Detailed information about the {algorithmInfo.name} algorithm including complexity, characteristics, and implementation details.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-6">
+            {/* Description Section */}
+            <div>
+              <h3 className="text-lg font-semibold mb-3 text-white flex items-center gap-2">
+                <Lightbulb className="w-5 h-5 text-yellow-400" />
+                Description
+              </h3>
+              <p className="text-gray-300 leading-relaxed">
+                {algorithmInfo.description}
+              </p>
+            </div>
+
+            {/* Complexity Information */}
+            <div>
+              <h3 className="text-lg font-semibold mb-3 text-white flex items-center gap-2">
+                <Clock className="w-5 h-5 text-green-400" />
+                Complexity Analysis
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="bg-gray-700 border border-gray-600 rounded-lg p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Clock className="w-4 h-4 text-blue-400" />
+                    <span className="font-medium text-white">Time Complexity</span>
+                  </div>
+                  <p className="text-2xl font-mono text-blue-300">{complexity.time}</p>
+                </div>
+                <div className="bg-gray-700 border border-gray-600 rounded-lg p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Activity className="w-4 h-4 text-purple-400" />
+                    <span className="font-medium text-white">Space Complexity</span>
+                  </div>
+                  <p className="text-2xl font-mono text-purple-300">{complexity.space}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Key Points */}
+            <div>
+              <h3 className="text-lg font-semibold mb-3 text-white flex items-center gap-2">
+                <Activity className="w-5 h-5 text-orange-400" />
+                Key Characteristics
+              </h3>
+              <ul className="space-y-2">
+                {algorithmInfo.keyPoints.map((point, index) => (
+                  <li key={index} className="text-gray-300 flex items-start gap-3">
+                    <span className="w-2 h-2 bg-orange-400 rounded-full mt-2 flex-shrink-0" />
+                    {point}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Pseudocode */}
+            {algorithmInfo.pseudocode.length > 0 && (
+              <div>
+                <h3 className="text-lg font-semibold mb-3 text-white flex items-center gap-2">
+                  <Activity className="w-5 h-5 text-cyan-400" />
+                  Pseudocode
+                </h3>
+                <div className="bg-gray-900 border border-gray-600 rounded-lg p-4 overflow-x-auto">
+                  <pre className="text-sm text-gray-300 font-mono">
+                    {algorithmInfo.pseudocode.map((line, index) => (
+                      <div key={index} className="leading-relaxed">
+                        {line}
+                      </div>
+                    ))}
+                  </pre>
+                </div>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

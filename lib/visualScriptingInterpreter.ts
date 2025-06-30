@@ -281,10 +281,26 @@ export class VisualScriptingInterpreter {
     // Store result for potential data flow usage
     this.context.variables.set(`__condition_result_${node.id}`, result);
 
-    if (result) {
-      this.currentNodeId = this.getNextNode(node.id, 'exec-true');
+    // Determine which execution output to follow based on result
+    const targetHandle = result ? 'exec-true' : 'exec-false';
+
+    // Check if the target execution output has an outgoing connection
+    const hasTargetConnection = this.connections.some(conn =>
+      conn.source === node.id && conn.sourceHandle === targetHandle
+    );
+
+    if (hasTargetConnection) {
+      // Follow the connected branch normally
+      this.currentNodeId = this.getNextNode(node.id, targetHandle);
     } else {
-      this.currentNodeId = this.getNextNode(node.id, 'exec-false');
+      // No connection on this branch - check if we're in a loop and should return
+      if (this.context.loopStack.length > 0) {
+        // We're in a loop and this branch has no connection, so return to loop
+        this.handleLoopReturn();
+      } else {
+        // Not in a loop, set to null to end execution
+        this.currentNodeId = null;
+      }
     }
   }
 

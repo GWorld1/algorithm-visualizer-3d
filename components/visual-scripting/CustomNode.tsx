@@ -106,12 +106,34 @@ const CustomNode: React.FC<NodeProps<CustomNodeData>> = ({ data, selected }) => 
 
       case 'if-condition':
         return (
-          <Input
-            placeholder="Condition"
-            value={data.condition || ''}
-            onChange={(e) => handleInputChange('condition', e.target.value)}
-            className="h-6 text-xs bg-gray-800 border-gray-600"
-          />
+          <div className="space-y-2">
+            <select
+              value={data.comparisonOperator || '=='}
+              onChange={(e) => handleInputChange('comparisonOperator', e.target.value)}
+              className="w-full h-6 text-xs bg-gray-800 border border-gray-600 rounded px-2 text-white"
+            >
+              <option value="==">Equal (==)</option>
+              <option value="!=">Not Equal (!=)</option>
+              <option value=">">Greater Than (&gt;)</option>
+              <option value="<">Less Than (&lt;)</option>
+              <option value=">=">Greater Equal (&gt;=)</option>
+              <option value="<=">Less Equal (&lt;=)</option>
+            </select>
+            <div className="grid grid-cols-2 gap-2">
+              <Input
+                placeholder="Left Value"
+                value={data.leftValue || ''}
+                onChange={(e) => handleInputChange('leftValue', e.target.value)}
+                className="h-6 text-xs bg-gray-800 border-gray-600"
+              />
+              <Input
+                placeholder="Right Value"
+                value={data.rightValue || ''}
+                onChange={(e) => handleInputChange('rightValue', e.target.value)}
+                className="h-6 text-xs bg-gray-800 border-gray-600"
+              />
+            </div>
+          </div>
         );
 
       case 'array-access':

@@ -60,21 +60,25 @@ export const nodeTemplates: NodeTemplate[] = [
   {
     type: 'if-condition',
     label: 'If Condition',
-    description: 'Conditional execution based on a boolean expression',
+    description: 'Conditional execution based on comparison of two values',
     category: 'control',
     icon: 'GitBranch',
     defaultData: {
       label: 'If Condition',
-      condition: 'true',
+      comparisonOperator: '==',
+      leftValue: 0,
+      rightValue: 0,
       isValid: true
     },
     inputs: [
       { id: 'exec-in', type: 'execution', label: 'Previous' },
-      { id: 'condition-in', type: 'boolean', label: 'Condition' }
+      { id: 'left-in', type: 'any', label: 'Left Value' },
+      { id: 'right-in', type: 'any', label: 'Right Value' }
     ],
     outputs: [
       { id: 'exec-true', type: 'execution', label: 'True' },
-      { id: 'exec-false', type: 'execution', label: 'False' }
+      { id: 'exec-false', type: 'execution', label: 'False' },
+      { id: 'result-out', type: 'boolean', label: 'Result' }
     ]
   },
 
@@ -172,7 +176,7 @@ export const nodeTemplates: NodeTemplate[] = [
   {
     type: 'variable-set',
     label: 'Set Variable',
-    description: 'Set a variable to a specific value',
+    description: 'Set a variable to a specific value from data flow or static input',
     category: 'variable',
     icon: 'Equal',
     defaultData: {
@@ -186,7 +190,8 @@ export const nodeTemplates: NodeTemplate[] = [
       { id: 'value-in', type: 'any', label: 'Value' }
     ],
     outputs: [
-      { id: 'exec-out', type: 'execution', label: 'Next' }
+      { id: 'exec-out', type: 'execution', label: 'Next' },
+      { id: 'value-out', type: 'any', label: 'Value' }
     ]
   },
   {

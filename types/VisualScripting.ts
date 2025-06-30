@@ -44,24 +44,27 @@ export interface ScriptNodeData {
   label: string;
   // Control Flow
   condition?: string;
+  comparisonOperator?: string;
+  leftValue?: any;
+  rightValue?: any;
   loopStart?: number;
   loopEnd?: number;
   loopVariable?: string;
-  
+
   // Array Operations
   arrayIndex1?: number;
   arrayIndex2?: number;
   highlightColor?: string;
   highlightDuration?: number;
-  
+
   // Variables
   variableName?: string;
   variableValue?: any;
-  
+
   // Visualization
   description?: string;
   pauseDuration?: number;
-  
+
   // Validation
   isValid?: boolean;
   errorMessage?: string;

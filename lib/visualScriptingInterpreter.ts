@@ -205,25 +205,82 @@ export class VisualScriptingInterpreter {
   }
 
   private executeIfCondition(node: ScriptNode): void {
-    const { condition = 'true' } = node.data;
-    
-    // Simple condition evaluation (can be enhanced)
+    const {
+      comparisonOperator = '==',
+      leftValue = 0,
+      rightValue = 0
+    } = node.data;
+
     let result = false;
-    try {
-      // Replace variables in condition
-      let evaluatedCondition = condition;
-      for (const [varName, varValue] of this.context.variables.entries()) {
-        evaluatedCondition = evaluatedCondition.replace(new RegExp(`\\b${varName}\\b`, 'g'), String(varValue));
-      }
-      
-      // Simple evaluation (unsafe but for demo purposes)
-      result = eval(evaluatedCondition);
-    } catch (error) {
-      console.warn('Condition evaluation error:', error);
+    let leftVal: any;
+    let rightVal: any;
+
+    // Check if we have data flow connections for left and right values
+    const hasLeftConnection = this.connections.some(conn =>
+      conn.target === node.id && conn.targetHandle === 'left-in'
+    );
+    const hasRightConnection = this.connections.some(conn =>
+      conn.target === node.id && conn.targetHandle === 'right-in'
+    );
+
+    // Get left and right values (from data flow or default values)
+    leftVal = hasLeftConnection ?
+      this.resolveValue(leftValue, node.id, 'left-in') :
+      this.resolveValue(leftValue);
+    rightVal = hasRightConnection ?
+      this.resolveValue(rightValue, node.id, 'right-in') :
+      this.resolveValue(rightValue);
+
+    // Perform comparison based on operator
+    switch (comparisonOperator) {
+      case '==':
+        result = leftVal == rightVal;
+        break;
+      case '!=':
+        result = leftVal != rightVal;
+        break;
+      case '>':
+        result = Number(leftVal) > Number(rightVal);
+        break;
+      case '<':
+        result = Number(leftVal) < Number(rightVal);
+        break;
+      case '>=':
+        result = Number(leftVal) >= Number(rightVal);
+        break;
+      case '<=':
+        result = Number(leftVal) <= Number(rightVal);
+        break;
+      default:
+        console.warn(`Unknown comparison operator: ${comparisonOperator}`);
+        result = false;
     }
 
-    this.addStep(`Condition "${condition}" evaluated to ${result}`, 'custom');
-    
+    // Add loop context if we're in a loop
+    const currentLoop = this.context.loopStack.length > 0 ?
+      this.context.loopStack[this.context.loopStack.length - 1] : null;
+    const loopContext = currentLoop ?
+      ` (Loop iteration ${currentLoop.current}: ${currentLoop.variable} = ${currentLoop.current})` : '';
+
+    const conditionDescription = `Compare: ${leftVal} ${comparisonOperator} ${rightVal} = ${result}`;
+
+    this.addStep(
+      `${conditionDescription}${loopContext}`,
+      'custom',
+      {
+        conditionResult: result,
+        leftValue: leftVal,
+        rightValue: rightVal,
+        operator: comparisonOperator,
+        isLoopIteration: currentLoop !== null,
+        loopVariable: currentLoop?.variable,
+        loopValue: currentLoop?.current
+      }
+    );
+
+    // Store result for potential data flow usage
+    this.context.variables.set(`__condition_result_${node.id}`, result);
+
     if (result) {
       this.currentNodeId = this.getNextNode(node.id, 'exec-true');
     } else {
@@ -338,11 +395,47 @@ export class VisualScriptingInterpreter {
 
   private executeVariableSet(node: ScriptNode): void {
     const { variableName = 'variable', variableValue = 0 } = node.data;
-    const value = this.resolveValue(variableValue);
-    
+
+    // Check if we have a data flow connection for the value
+    const hasValueConnection = this.connections.some(conn =>
+      conn.target === node.id && conn.targetHandle === 'value-in'
+    );
+
+    let value: any;
+    let valueSource = '';
+
+    if (hasValueConnection) {
+      // Get value from data flow connection
+      value = this.resolveValue(variableValue, node.id, 'value-in');
+      valueSource = ' (from data flow)';
+    } else {
+      // Use static value or resolve from variables
+      value = this.resolveValue(variableValue);
+      valueSource = ' (static value)';
+    }
+
+    // Set the variable
     this.context.variables.set(variableName, value);
-    this.addStep(`Set ${variableName} = ${value}`, 'custom');
-    
+
+    // Add loop context if we're in a loop
+    const currentLoop = this.context.loopStack.length > 0 ?
+      this.context.loopStack[this.context.loopStack.length - 1] : null;
+    const loopContext = currentLoop ?
+      ` (Loop iteration ${currentLoop.current}: ${currentLoop.variable} = ${currentLoop.current})` : '';
+
+    this.addStep(
+      `Set ${variableName} = ${value}${valueSource}${loopContext}`,
+      'custom',
+      {
+        variableName: variableName,
+        variableValue: value,
+        valueSource: hasValueConnection ? 'dataFlow' : 'static',
+        isLoopIteration: currentLoop !== null,
+        loopVariable: currentLoop?.variable,
+        loopValue: currentLoop?.current
+      }
+    );
+
     this.currentNodeId = this.getNextNode(node.id, 'exec-out');
   }
 
@@ -488,9 +581,23 @@ export class VisualScriptingInterpreter {
           return this.context.variables.get(`__array_access_${nodeId}`) || 0;
         }
         break;
+      case 'if-condition':
+        if (outputHandle === 'result-out') {
+          return this.context.variables.get(`__condition_result_${nodeId}`) || false;
+        }
+        break;
       case 'variable-get':
-        const varName = node.data.variableName || 'variable';
-        return this.context.variables.get(varName) || 0;
+        if (outputHandle === 'value-out') {
+          const varName = node.data.variableName || 'variable';
+          return this.context.variables.get(varName) || 0;
+        }
+        break;
+      case 'variable-set':
+        if (outputHandle === 'value-out') {
+          const varName = node.data.variableName || 'variable';
+          return this.context.variables.get(varName) || 0;
+        }
+        break;
     }
 
     return null;

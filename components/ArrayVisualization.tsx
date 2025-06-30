@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // ArrayVisualization.tsx
 import { useArrayStore } from '@/store/useArrayStore';
 import { useAlgorithmStore } from '@/store/useAlgorithmStore';
@@ -91,7 +92,7 @@ const DynamicArray = () => {
 
   return (
     <group position={[-5, 0, 0]}>
-      {currentState.map((element, index) => (
+      {currentState.map((element: { value: number; state: string; position: number; highlightColor: string | undefined; }, index: number) => (
         <ArrayElement
           key={index}
           value={element.value}

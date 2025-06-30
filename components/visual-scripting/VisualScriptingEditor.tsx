@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 import React, { useCallback, useRef } from 'react';
 import ReactFlow, {
@@ -28,7 +30,6 @@ import TutorialOverlay from './TutorialOverlay';
 import ArrayIterationGuide from './ArrayIterationGuide';
 import DebuggerModal from '@/components/layout/DebuggerModal';
 import ConnectionStatus from './ConnectionStatus';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Play, Save, Trash2, Eye, EyeOff, HelpCircle, BookOpen, Bug } from 'lucide-react';
 

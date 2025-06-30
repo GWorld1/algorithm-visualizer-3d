@@ -185,7 +185,7 @@ const NodePalette: React.FC = () => {
           loopStart: 1,
           loopEnd: useArrayStore.getState().elements.length,
           loopVariable: 'i',
-          label: 'For i = 1 to array.length'
+          label: `For i = 1 to ${useArrayStore.getState().elements.length}`
         });
       }
 

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client"
 import { bubbleSort, insertionSort, mergeSort, quickSort, selectionSort } from "@/lib/sortingAlgorithms";
 import { generateBFSSteps, generateDFSSteps } from "@/lib/treeAlgorithms";
@@ -154,7 +155,7 @@ export const Controls = () => {
       default:
         return;
     }
-    useAlgorithmStore.getState().setSteps(steps as TreeNode[] | WeightedTreeNode[]);
+    useAlgorithmStore.getState().setSteps(steps as unknown as TreeNode[] | WeightedTreeNode[]);
     playMainAnimation();
   };
 

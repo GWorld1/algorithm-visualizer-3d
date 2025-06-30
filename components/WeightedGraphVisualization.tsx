@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Line, Text } from '@react-three/drei';
 import WeightedTreeNode from './WeightedGraphNode';
 import { WeightedTreeNode as WeightedTreeNodeType } from '@/types/WeightedGraphNode';

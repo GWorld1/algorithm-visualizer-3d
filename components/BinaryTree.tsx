@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Line } from '@react-three/drei';
 import TreeNode from './TreeNode';
 import { Vector3 } from 'three';

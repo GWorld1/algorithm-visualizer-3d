@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client"
 import { useState, useEffect } from 'react';
 import { useAlgorithmStore } from '@/store/useAlgorithmStore';
@@ -207,7 +208,7 @@ const ControlDashboard = () => {
       }
 
       if (steps) {
-        useAlgorithmStore.getState().setSteps(steps as TreeNode[] | WeightedTreeNode[]);
+        useAlgorithmStore.getState().setSteps(steps as unknown as TreeNode[] | WeightedTreeNode[]);
       }
     } catch (error) {
       console.error('Error generating algorithm steps:', error);

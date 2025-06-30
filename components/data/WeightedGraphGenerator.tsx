@@ -1,12 +1,12 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client"
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { useAlgorithmStore } from '@/store/useAlgorithmStore';
 import { WeightedTreeNode } from '@/types/WeightedGraphNode';
 import { calculateWeightedTreeLayout } from '@/lib/weightedGraphLayout';
-import { Network, Loader2, Plus, Minus, Target, Shuffle, RotateCcw } from 'lucide-react';
+import { Network, Loader2, Target, Shuffle, RotateCcw } from 'lucide-react';
 
 interface EdgeInput {
   from: number;

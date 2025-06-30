@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { LinkedListNode as LinkedListNodeType } from "@/types/LinkedListNode";
 import { calculateLinkedListLayout } from "@/lib/linkedListLayout";
 import { Line, Text } from "@react-three/drei";

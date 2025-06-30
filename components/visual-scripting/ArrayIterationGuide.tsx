@@ -150,7 +150,7 @@ const ArrayIterationGuide: React.FC<ArrayIterationGuideProps> = ({ onClose, onCr
             <div className="flex items-start gap-2">
               <Lightbulb className="w-4 h-4 text-yellow-400 mt-0.5" />
               <div className="text-sm text-yellow-200">
-                <strong>Tip:</strong> The loop body executes repeatedly, while "Complete" runs only once when the loop finishes.
+                <strong>Tip:</strong> The loop body executes repeatedly, while &quot;Complete&quot; runs only once when the loop finishes.
               </div>
             </div>
           </div>
@@ -184,7 +184,7 @@ const ArrayIterationGuide: React.FC<ArrayIterationGuideProps> = ({ onClose, onCr
             <div className="flex items-start gap-2">
               <Lightbulb className="w-4 h-4 text-yellow-400 mt-0.5" />
               <div className="text-sm text-yellow-200">
-                <strong>Key Insight:</strong> The loop's "Current Index" output provides 0, 1, 2, 3... which the Array Access node uses to get array[0], array[1], array[2], etc.
+                <strong>Key Insight:</strong> The loop&apos;s &quot;Current Index&quot; output provides 0, 1, 2, 3... which the Array Access node uses to get array[0], array[1], array[2], etc.
               </div>
             </div>
           </div>
@@ -218,7 +218,7 @@ const ArrayIterationGuide: React.FC<ArrayIterationGuideProps> = ({ onClose, onCr
             <div className="flex items-start gap-2">
               <AlertCircle className="w-4 h-4 text-blue-400 mt-0.5" />
               <div className="text-sm text-blue-200">
-                <strong>Important:</strong> Set "End" to match your array length. For a 5-element array, use End = 5.
+                <strong>Important:</strong> Set &quot;End&quot; to match your array length. For a 5-element array, use End = 5.
               </div>
             </div>
           </div>

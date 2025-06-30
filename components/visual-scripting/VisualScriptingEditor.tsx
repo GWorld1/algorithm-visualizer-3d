@@ -26,11 +26,11 @@ import NodePalette from './NodePalette';
 import CustomNode from './CustomNode';
 import TutorialOverlay from './TutorialOverlay';
 import ArrayIterationGuide from './ArrayIterationGuide';
-import ValidationFeedback from './ValidationFeedback';
+import DebuggerModal from '@/components/layout/DebuggerModal';
 import ConnectionStatus from './ConnectionStatus';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Play, Save, Trash2, Eye, EyeOff, HelpCircle, BookOpen } from 'lucide-react';
+import { Play, Save, Trash2, Eye, EyeOff, HelpCircle, BookOpen, Bug } from 'lucide-react';
 
 // Custom node types for React Flow
 const nodeTypes = {
@@ -67,6 +67,7 @@ const VisualScriptingEditor: React.FC = () => {
   const [reactFlowInstance, setReactFlowInstance] = React.useState<ReactFlowInstance | null>(null);
   const [showTutorial, setShowTutorial] = React.useState(false);
   const [showArrayGuide, setShowArrayGuide] = React.useState(false);
+  const [showDebuggerModal, setShowDebuggerModal] = React.useState(false);
   const [currentValidation, setCurrentValidation] = React.useState<ValidationResult>({ isValid: true, errors: [], warnings: [] });
   const [connectionState, setConnectionState] = React.useState<{
     isConnecting: boolean;
@@ -465,88 +466,102 @@ const VisualScriptingEditor: React.FC = () => {
   };
 
   return (
-    <div className="h-full w-full bg-gray-900 text-white flex">
+    <div className="h-full w-full bg-gray-900 text-white flex overflow-hidden">
       {/* Node Palette */}
       {showNodePalette && (
-        <div className="w-64 border-r border-gray-700 flex-shrink-0">
+        <div className="w-64 border-r border-gray-700 flex-shrink-0 overflow-y-auto">
           <NodePalette />
         </div>
       )}
 
-      {/* Validation Feedback Sidebar */}
-      {(!currentValidation.isValid || currentValidation.warnings.length > 0) && (
-        <div className="w-80 border-r border-gray-700 flex-shrink-0 p-4 bg-gray-850 overflow-y-auto">
-          <ValidationFeedback
-            validation={currentValidation}
-            onOpenGuide={() => setShowArrayGuide(true)}
-            onCreateExample={createArrayIterationExample}
-          />
-        </div>
-      )}
+      {/* Main Editor Area - Takes remaining space */}
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+        {/* Toolbar with horizontal scrolling */}
+        <div className="h-12 bg-gray-800 border-b border-gray-700 flex items-center px-4 overflow-x-auto">
+          <div className="flex items-center gap-2 min-w-max">
+            {/* Left side controls */}
+            <div className="flex items-center gap-2 pr-4 border-r border-gray-600">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={toggleNodePalette}
+                className="text-gray-300 hover:text-white whitespace-nowrap"
+              >
+                {showNodePalette ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                {showNodePalette ? 'Hide' : 'Show'} Palette
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowDebuggerModal(true)}
+                className={`whitespace-nowrap ${
+                  (!currentValidation.isValid || currentValidation.warnings.length > 0)
+                    ? 'text-red-400 hover:text-red-300 animate-pulse'
+                    : 'text-gray-400 hover:text-gray-300'
+                }`}
+              >
+                <Bug className="w-4 h-4 mr-1" />
+                Debugger
+                {(!currentValidation.isValid || currentValidation.warnings.length > 0) && (
+                  <span className="ml-1 bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full">
+                    {currentValidation.errors.length + currentValidation.warnings.length}
+                  </span>
+                )}
+              </Button>
+            </div>
 
-      {/* Main Editor Area */}
-      <div className="flex-1 flex flex-col">
-        {/* Toolbar */}
-        <div className="h-12 bg-gray-800 border-b border-gray-700 flex items-center justify-between px-4">
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={toggleNodePalette}
-              className="text-gray-300 hover:text-white"
-            >
-              {showNodePalette ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              {showNodePalette ? 'Hide' : 'Show'} Palette
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowTutorial(true)}
-              className="text-purple-400 hover:text-purple-300"
-            >
-              <HelpCircle className="w-4 h-4 mr-1" />
-              Tutorial
-            </Button>
+            {/* Help controls */}
+            <div className="flex items-center gap-2 pr-4 border-r border-gray-600">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowTutorial(true)}
+                className="text-purple-400 hover:text-purple-300 whitespace-nowrap"
+              >
+                <HelpCircle className="w-4 h-4 mr-1" />
+                Tutorial
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowArrayGuide(true)}
+                className="text-blue-400 hover:text-blue-300 whitespace-nowrap"
+              >
+                <BookOpen className="w-4 h-4 mr-1" />
+                Array Guide
+              </Button>
+            </div>
 
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowArrayGuide(true)}
-              className="text-blue-400 hover:text-blue-300"
-            >
-              <BookOpen className="w-4 h-4 mr-1" />
-              Array Guide
-            </Button>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleValidateAndCompile}
-              className="text-green-400 hover:text-green-300"
-            >
-              <Play className="w-4 h-4 mr-1" />
-              Run
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleSave}
-              className="text-blue-400 hover:text-blue-300"
-            >
-              <Save className="w-4 h-4 mr-1" />
-              Save
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleClear}
-              className="text-red-400 hover:text-red-300"
-            >
-              <Trash2 className="w-4 h-4 mr-1" />
-              Clear
-            </Button>
+            {/* Action controls */}
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleValidateAndCompile}
+                className="text-green-400 hover:text-green-300 whitespace-nowrap"
+              >
+                <Play className="w-4 h-4 mr-1" />
+                Run
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleSave}
+                className="text-blue-400 hover:text-blue-300 whitespace-nowrap"
+              >
+                <Save className="w-4 h-4 mr-1" />
+                Save
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleClear}
+                className="text-red-400 hover:text-red-300 whitespace-nowrap"
+              >
+                <Trash2 className="w-4 h-4 mr-1" />
+                Clear
+              </Button>
+            </div>
           </div>
         </div>
 
@@ -573,7 +588,7 @@ const VisualScriptingEditor: React.FC = () => {
                 strokeWidth: connectionState.isConnecting ? 3 : 2,
                 strokeDasharray: connectionState.isConnecting ? '5,5' : 'none'
               }}
-              connectionLineType="smoothstep"
+              connectionLineType={'smoothstep' as any}
               snapToGrid={true}
               snapGrid={[20, 20]}
               defaultViewport={{ x: 0, y: 0, zoom: 1 }}
@@ -607,6 +622,15 @@ const VisualScriptingEditor: React.FC = () => {
         sourceNode={connectionState.sourceNode}
         sourceHandle={connectionState.sourceHandle}
         sourceType={connectionState.sourceType}
+      />
+
+      {/* Debugger Modal */}
+      <DebuggerModal
+        isOpen={showDebuggerModal}
+        onClose={() => setShowDebuggerModal(false)}
+        validation={currentValidation}
+        onOpenGuide={() => setShowArrayGuide(true)}
+        onCreateExample={createArrayIterationExample}
       />
     </div>
   );

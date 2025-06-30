@@ -234,17 +234,19 @@ export const nodeTemplates: NodeTemplate[] = [
   {
     type: 'update-description',
     label: 'Update Description',
-    description: 'Update the algorithm step description',
+    description: 'Update the algorithm step description with dynamic values',
     category: 'visualization',
     icon: 'MessageSquare',
     defaultData: {
       label: 'Update Description',
       description: 'Algorithm step description',
+      descriptionTemplate: 'Current value: {value}',
       isValid: true
     },
     inputs: [
       { id: 'exec-in', type: 'execution', label: 'Previous' },
-      { id: 'text-in', type: 'any', label: 'Description' }
+      { id: 'text-in', type: 'any', label: 'Description' },
+      { id: 'value-in', type: 'any', label: 'Value' }
     ],
     outputs: [
       { id: 'exec-out', type: 'execution', label: 'Next' }

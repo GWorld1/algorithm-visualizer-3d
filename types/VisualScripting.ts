@@ -63,6 +63,7 @@ export interface ScriptNodeData {
 
   // Visualization
   description?: string;
+  descriptionTemplate?: string;
   pauseDuration?: number;
 
   // Validation

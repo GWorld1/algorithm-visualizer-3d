@@ -475,8 +475,51 @@ export class VisualScriptingInterpreter {
   }
 
   private executeUpdateDescription(node: ScriptNode): void {
-    const { description = 'Step description' } = node.data;
-    this.addStep(description, 'custom');
+    const {
+      description = 'Step description',
+      descriptionTemplate = ''
+    } = node.data;
+
+    let finalDescription = description;
+
+    // Check if we have data flow connections
+    const hasTextConnection = this.connections.some(conn =>
+      conn.target === node.id && conn.targetHandle === 'text-in'
+    );
+    const hasValueConnection = this.connections.some(conn =>
+      conn.target === node.id && conn.targetHandle === 'value-in'
+    );
+
+    if (hasTextConnection) {
+      // Use text from data flow connection
+      finalDescription = this.resolveValue(description, node.id, 'text-in');
+    } else if (hasValueConnection && descriptionTemplate) {
+      // Use template with dynamic value replacement
+      const dynamicValue = this.resolveValue(0, node.id, 'value-in');
+      finalDescription = this.processDescriptionTemplate(descriptionTemplate, dynamicValue);
+    } else if (descriptionTemplate && !hasTextConnection) {
+      // Use template with variable substitution (for backward compatibility)
+      finalDescription = this.processDescriptionTemplate(descriptionTemplate);
+    }
+
+    // Add loop context if we're in a loop
+    const currentLoop = this.context.loopStack.length > 0 ?
+      this.context.loopStack[this.context.loopStack.length - 1] : null;
+    const loopContext = currentLoop ?
+      ` (Loop iteration ${currentLoop.current}: ${currentLoop.variable} = ${currentLoop.current})` : '';
+
+    this.addStep(
+      `${finalDescription}${loopContext}`,
+      'custom',
+      {
+        dynamicDescription: true,
+        hasDataFlow: hasTextConnection || hasValueConnection,
+        isLoopIteration: currentLoop !== null,
+        loopVariable: currentLoop?.variable,
+        loopValue: currentLoop?.current
+      }
+    );
+
     this.currentNodeId = this.getNextNode(node.id, 'exec-out');
   }
 
@@ -486,6 +529,31 @@ export class VisualScriptingInterpreter {
       duration: pauseDuration
     });
     this.currentNodeId = this.getNextNode(node.id, 'exec-out');
+  }
+
+  private processDescriptionTemplate(template: string, dynamicValue?: any): string {
+    let processedTemplate = template;
+
+    if (dynamicValue !== undefined) {
+      // Replace {value} placeholder with the dynamic value
+      processedTemplate = processedTemplate.replace(/\{value\}/g, String(dynamicValue));
+    }
+
+    // Replace variable placeholders with actual variable values
+    for (const [varName, varValue] of this.context.variables.entries()) {
+      const placeholder = new RegExp(`\\{${varName}\\}`, 'g');
+      processedTemplate = processedTemplate.replace(placeholder, String(varValue));
+    }
+
+    // Replace common loop placeholders
+    if (this.context.loopStack.length > 0) {
+      const currentLoop = this.context.loopStack[this.context.loopStack.length - 1];
+      processedTemplate = processedTemplate.replace(/\{i\}/g, String(currentLoop.current));
+      processedTemplate = processedTemplate.replace(/\{index\}/g, String(currentLoop.current));
+      processedTemplate = processedTemplate.replace(/\{iteration\}/g, String(currentLoop.current));
+    }
+
+    return processedTemplate;
   }
 
   private addStep(description: string, action: CustomAlgorithmStep['action'], metadata?: any): void {

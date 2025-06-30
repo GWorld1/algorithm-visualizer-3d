@@ -222,12 +222,23 @@ const CustomNode: React.FC<NodeProps<CustomNodeData>> = ({ data, selected }) => 
 
       case 'update-description':
         return (
-          <Input
-            placeholder="Description"
-            value={data.description || ''}
-            onChange={(e) => handleInputChange('description', e.target.value)}
-            className="h-6 text-xs bg-gray-800 border-gray-600"
-          />
+          <div className="space-y-2">
+            <Input
+              placeholder="Static Description"
+              value={data.description || ''}
+              onChange={(e) => handleInputChange('description', e.target.value)}
+              className="h-6 text-xs bg-gray-800 border-gray-600"
+            />
+            <Input
+              placeholder="Template: Current max: {value}"
+              value={data.descriptionTemplate || ''}
+              onChange={(e) => handleInputChange('descriptionTemplate', e.target.value)}
+              className="h-6 text-xs bg-gray-800 border-gray-600"
+            />
+            <div className="text-xs text-gray-400 px-1">
+              Use &#123;value&#125; for dynamic values from data flow
+            </div>
+          </div>
         );
 
       case 'pause-execution':

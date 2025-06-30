@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { sampleTree } from '@/data/sampleTree';
 import { sampleWeightedTree } from '@/data/sampleWeightTree';
 import { calculateTreeLayout } from '@/lib/treeLayout';

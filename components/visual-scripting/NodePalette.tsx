@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -20,6 +21,7 @@ import {
 import { nodeTemplates, nodeCategories } from '@/lib/visualScriptingTemplates';
 import { NodeType } from '@/types/VisualScripting';
 import { useVisualScriptingStore } from '@/store/useVisualScriptingStore';
+import { useArrayStore } from '@/store/useArrayStore';
 
 // Icon mapping for node types
 const iconMap: Record<string, React.ComponentType<any>> = {
@@ -118,9 +120,9 @@ const NodePalette: React.FC = () => {
       if (forLoopNode) {
         updateNode(forLoopNode.id, {
           loopStart: 0,
-          loopEnd: 'array.length',
+          loopEnd: useArrayStore.getState().elements.length,
           loopVariable: 'i',
-          label: 'For i = 0 to array.length'
+          label: `For i = 0 to ${useArrayStore.getState().elements.length}`
         });
       }
 
@@ -135,7 +137,7 @@ const NodePalette: React.FC = () => {
       const highlightNode = nodes.find(n => n.type === 'array-highlight');
       if (highlightNode) {
         updateNode(highlightNode.id, {
-          arrayIndex1: 'i',
+          arrayIndex1: 0,
           highlightColor: 'green',
           label: 'Highlight Found Element'
         });
@@ -181,7 +183,7 @@ const NodePalette: React.FC = () => {
       if (forLoopNode) {
         updateNode(forLoopNode.id, {
           loopStart: 1,
-          loopEnd: 'array.length',
+          loopEnd: useArrayStore.getState().elements.length,
           loopVariable: 'i',
           label: 'For i = 1 to array.length'
         });
@@ -207,7 +209,7 @@ const NodePalette: React.FC = () => {
       const highlightNode = nodes.find(n => n.type === 'array-highlight');
       if (highlightNode) {
         updateNode(highlightNode.id, {
-          arrayIndex1: 'i',
+          arrayIndex1: 0,
           highlightColor: 'blue',
           label: 'Highlight New Max'
         });

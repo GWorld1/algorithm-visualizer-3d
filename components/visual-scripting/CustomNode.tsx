@@ -86,20 +86,20 @@ const CustomNode: React.FC<NodeProps<CustomNodeData>> = ({ data, selected }) => 
                 placeholder="Start"
                 value={data.loopStart || 0}
                 onChange={(e) => handleInputChange('loopStart', parseInt(e.target.value) || 0)}
-                className="h-6 text-xs bg-gray-800 border-gray-600"
+                className="h-6 text-xs bg-gray-800 border-gray-600 text-white"
               />
               <Input
                 placeholder="End"
                 value={data.loopEnd || 10}
                 onChange={(e) => handleInputChange('loopEnd', parseInt(e.target.value) || 10)}
-                className="h-6 text-xs bg-gray-800 border-gray-600"
+                className="h-6 text-xs bg-gray-800 border-gray-600 text-white"
               />
             </div>
             <Input
               placeholder="Variable (i)"
               value={data.loopVariable || 'i'}
               onChange={(e) => handleInputChange('loopVariable', e.target.value)}
-              className="h-6 text-xs bg-gray-800 border-gray-600"
+              className="h-6 text-xs bg-gray-800 border-gray-600 text-white"
             />
           </div>
         );
@@ -124,13 +124,13 @@ const CustomNode: React.FC<NodeProps<CustomNodeData>> = ({ data, selected }) => 
                 placeholder="Left Value"
                 value={data.leftValue || ''}
                 onChange={(e) => handleInputChange('leftValue', e.target.value)}
-                className="h-6 text-xs bg-gray-800 border-gray-600"
+                className="h-6 text-xs bg-gray-800 border-gray-600 text-white"
               />
               <Input
                 placeholder="Right Value"
                 value={data.rightValue || ''}
                 onChange={(e) => handleInputChange('rightValue', e.target.value)}
-                className="h-6 text-xs bg-gray-800 border-gray-600"
+                className="h-6 text-xs bg-gray-800 border-gray-600 text-white"
               />
             </div>
           </div>
@@ -143,7 +143,7 @@ const CustomNode: React.FC<NodeProps<CustomNodeData>> = ({ data, selected }) => 
             type="number"
             value={data.arrayIndex1 || 0}
             onChange={(e) => handleInputChange('arrayIndex1', parseInt(e.target.value) || 0)}
-            className="h-6 text-xs bg-gray-800 border-gray-600"
+            className="h-6 text-xs bg-gray-800 border-gray-600 text-white"
           />
         );
 
@@ -156,14 +156,14 @@ const CustomNode: React.FC<NodeProps<CustomNodeData>> = ({ data, selected }) => 
               type="number"
               value={data.arrayIndex1 || 0}
               onChange={(e) => handleInputChange('arrayIndex1', parseInt(e.target.value) || 0)}
-              className="h-6 text-xs bg-gray-800 border-gray-600"
+              className="h-6 text-xs bg-gray-800 border-gray-600 text-white"
             />
             <Input
               placeholder="Index 2"
               type="number"
               value={data.arrayIndex2 || 1}
               onChange={(e) => handleInputChange('arrayIndex2', parseInt(e.target.value) || 1)}
-              className="h-6 text-xs bg-gray-800 border-gray-600"
+              className="h-6 text-xs bg-gray-800 border-gray-600 text-white"
             />
           </div>
         );
@@ -176,12 +176,12 @@ const CustomNode: React.FC<NodeProps<CustomNodeData>> = ({ data, selected }) => 
               type="number"
               value={data.arrayIndex1 || 0}
               onChange={(e) => handleInputChange('arrayIndex1', parseInt(e.target.value) || 0)}
-              className="h-6 text-xs bg-gray-800 border-gray-600"
+              className="h-6 text-xs bg-gray-800 border-gray-600 text-white"
             />
             <select
               value={data.highlightColor || 'yellow'}
               onChange={(e) => handleInputChange('highlightColor', e.target.value)}
-              className="h-6 text-xs bg-gray-800 border-gray-600 rounded px-2 w-full"
+              className="h-6 text-xs bg-gray-800 border-gray-600 rounded px-2 w-full text-white"
             >
               <option value="yellow">Yellow</option>
               <option value="red">Red</option>
@@ -198,13 +198,13 @@ const CustomNode: React.FC<NodeProps<CustomNodeData>> = ({ data, selected }) => 
               placeholder="Variable Name"
               value={data.variableName || ''}
               onChange={(e) => handleInputChange('variableName', e.target.value)}
-              className="h-6 text-xs bg-gray-800 border-gray-600"
+              className="h-6 text-xs bg-gray-800 border-gray-600 text-white"
             />
             <Input
               placeholder="Value"
               value={data.variableValue || ''}
               onChange={(e) => handleInputChange('variableValue', e.target.value)}
-              className="h-6 text-xs bg-gray-800 border-gray-600"
+              className="h-6 text-xs bg-gray-800 border-gray-600 text-white"
             />
           </div>
         );
@@ -216,7 +216,7 @@ const CustomNode: React.FC<NodeProps<CustomNodeData>> = ({ data, selected }) => 
             placeholder="Variable Name"
             value={data.variableName || ''}
             onChange={(e) => handleInputChange('variableName', e.target.value)}
-            className="h-6 text-xs bg-gray-800 border-gray-600"
+            className="h-6 text-xs bg-gray-800 border-gray-600 text-white"
           />
         );
 
@@ -227,13 +227,13 @@ const CustomNode: React.FC<NodeProps<CustomNodeData>> = ({ data, selected }) => 
               placeholder="Static Description"
               value={data.description || ''}
               onChange={(e) => handleInputChange('description', e.target.value)}
-              className="h-6 text-xs bg-gray-800 border-gray-600"
+              className="h-6 text-xs bg-gray-800 border-gray-600 text-white"
             />
             <Input
               placeholder="Template: Current max: {value}"
               value={data.descriptionTemplate || ''}
               onChange={(e) => handleInputChange('descriptionTemplate', e.target.value)}
-              className="h-6 text-xs bg-gray-800 border-gray-600"
+              className="h-6 text-xs bg-gray-800 border-gray-600 text-white"
             />
             <div className="text-xs text-gray-400 px-1">
               Use &#123;value&#125; for dynamic values from data flow
@@ -248,7 +248,7 @@ const CustomNode: React.FC<NodeProps<CustomNodeData>> = ({ data, selected }) => 
             type="number"
             value={data.pauseDuration || 1000}
             onChange={(e) => handleInputChange('pauseDuration', parseInt(e.target.value) || 1000)}
-            className="h-6 text-xs bg-gray-800 border-gray-600"
+            className="h-6 text-xs bg-gray-800 border-gray-600 text-white"
           />
         );
 
@@ -259,7 +259,7 @@ const CustomNode: React.FC<NodeProps<CustomNodeData>> = ({ data, selected }) => 
 
   const getHandleStyle = (handleType: string, handleId: string, isInput: boolean) => {
     const isExecution = handleType === 'execution';
-    const baseColor = isExecution ? '#10B981' : '#6366F1';
+    const baseColor = isExecution ? '#10B981' : '#1F23FF';
     const isCompatible = data.compatibleHandles?.includes(handleId);
     const isConnecting = data.isConnecting && data.connectingHandle;
 
@@ -267,7 +267,7 @@ const CustomNode: React.FC<NodeProps<CustomNodeData>> = ({ data, selected }) => 
     let border = '2px solid rgba(255, 255, 255, 0.2)';
     let boxShadow = isExecution
       ? '0 0 8px rgba(16, 185, 129, 0.4)'
-      : '0 0 8px rgba(99, 102, 241, 0.4)';
+      : '0 0 8px rgba(31, 35, 255, 0.79)';
     let scale = 1;
 
     if (isConnecting) {

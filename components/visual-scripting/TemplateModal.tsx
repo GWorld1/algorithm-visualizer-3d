@@ -22,24 +22,33 @@ import {
   BookOpen,
   Play,
   Filter,
-  X
+  X,
+  User,
+  Trash2,
+  Copy,
+  Download,
+  Upload,
+  MoreHorizontal
 } from 'lucide-react';
-import { 
-  algorithmTemplates, 
-  templateCategories, 
+import {
+  algorithmTemplates,
+  templateCategories,
   AlgorithmTemplate,
   getTemplatesByCategory,
-  searchTemplates 
+  searchTemplates
 } from '@/lib/algorithmTemplates';
+import { PersonalTemplate } from '@/types/VisualScripting';
+import { PersonalTemplateManager } from '@/lib/personalTemplateStorage';
+import { useToast } from '@/components/ui/toast';
 
 interface TemplateModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSelectTemplate: (template: AlgorithmTemplate) => void;
+  onSelectTemplate: (template: AlgorithmTemplate | PersonalTemplate) => void;
   hasUnsavedChanges?: boolean;
 }
 
-const iconMap: Record<string, React.ComponentType<any>> = {
+const iconMap: Record<string, React.ComponentType<React.SVGProps<SVGSVGElement>>> = {
   Bug,
   Search,
   Database,
@@ -53,37 +62,180 @@ const TemplateModal: React.FC<TemplateModalProps> = ({
   onSelectTemplate,
   hasUnsavedChanges = false
 }) => {
+  const [activeTab, setActiveTab] = useState<'built-in' | 'personal'>('built-in');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedTemplate, setSelectedTemplate] = useState<AlgorithmTemplate | null>(null);
+  // const [selectedTemplate, setSelectedTemplate] = useState<AlgorithmTemplate | PersonalTemplate | null>(null);
+  const [personalTemplates, setPersonalTemplates] = useState<PersonalTemplate[]>([]);
+  const [showManageMenu, setShowManageMenu] = useState<string | null>(null);
+  const { addToast } = useToast();
+
+  // Load personal templates on mount
+  React.useEffect(() => {
+    if (isOpen) {
+      setPersonalTemplates(PersonalTemplateManager.getPersonalTemplates());
+    }
+  }, [isOpen]);
+
+  // Close management menu when clicking outside
+  React.useEffect(() => {
+    const handleClickOutside = () => {
+      setShowManageMenu(null);
+    };
+
+    if (showManageMenu) {
+      document.addEventListener('click', handleClickOutside);
+      return () => document.removeEventListener('click', handleClickOutside);
+    }
+  }, [showManageMenu]);
 
   // Filter templates based on category and search
   const filteredTemplates = useMemo(() => {
-    let templates = algorithmTemplates;
-    
-    if (selectedCategory !== 'all') {
-      templates = getTemplatesByCategory(selectedCategory);
-    }
-    
-    if (searchQuery.trim()) {
-      templates = searchTemplates(searchQuery).filter(template => 
-        selectedCategory === 'all' || template.category === selectedCategory
-      );
-    }
-    
-    return templates;
-  }, [selectedCategory, searchQuery]);
+    if (activeTab === 'personal') {
+      let templates = personalTemplates;
 
-  const handleTemplateSelect = (template: AlgorithmTemplate) => {
+      if (selectedCategory !== 'all') {
+        templates = templates.filter(template => template.category === selectedCategory);
+      }
+
+      if (searchQuery.trim()) {
+        const query = searchQuery.toLowerCase();
+        templates = templates.filter(template =>
+          template.name.toLowerCase().includes(query) ||
+          template.description.toLowerCase().includes(query) ||
+          template.category.toLowerCase().includes(query)
+        );
+      }
+
+      return templates;
+    } else {
+      let templates = algorithmTemplates;
+
+      if (selectedCategory !== 'all') {
+        templates = getTemplatesByCategory(selectedCategory);
+      }
+
+      if (searchQuery.trim()) {
+        templates = searchTemplates(searchQuery).filter(template =>
+          selectedCategory === 'all' || template.category === selectedCategory
+        );
+      }
+
+      return templates;
+    }
+  }, [activeTab, selectedCategory, searchQuery, personalTemplates]);
+
+  const handleTemplateSelect = (template: AlgorithmTemplate | PersonalTemplate) => {
     if (hasUnsavedChanges) {
       const confirmed = confirm(
         'You have unsaved changes. Selecting a template will replace your current work. Continue?'
       );
       if (!confirmed) return;
     }
-    
+
     onSelectTemplate(template);
     onClose();
+  };
+
+  const handleDeleteTemplate = (templateId: string) => {
+    if (confirm('Are you sure you want to delete this template? This action cannot be undone.')) {
+      const result = PersonalTemplateManager.deleteTemplate(templateId);
+      if (result.success) {
+        setPersonalTemplates(PersonalTemplateManager.getPersonalTemplates());
+        addToast({
+          type: 'success',
+          title: 'Template Deleted',
+          description: result.message
+        });
+      } else {
+        addToast({
+          type: 'error',
+          title: 'Delete Failed',
+          description: result.message
+        });
+      }
+    }
+  };
+
+  const handleDuplicateTemplate = (templateId: string) => {
+    const result = PersonalTemplateManager.duplicateTemplate(templateId);
+    if (result.success) {
+      setPersonalTemplates(PersonalTemplateManager.getPersonalTemplates());
+      addToast({
+        type: 'success',
+        title: 'Template Duplicated',
+        description: result.message
+      });
+    } else {
+      addToast({
+        type: 'error',
+        title: 'Duplicate Failed',
+        description: result.message
+      });
+    }
+  };
+
+  const handleExportTemplates = () => {
+    try {
+      const exportData = PersonalTemplateManager.exportTemplates();
+      const blob = new Blob([exportData], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `personal-templates-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      addToast({
+        type: 'success',
+        title: 'Templates Exported',
+        description: 'Your personal templates have been exported successfully.'
+      });
+    } catch {
+      addToast({
+        type: 'error',
+        title: 'Export Failed',
+        description: 'Failed to export templates. Please try again.'
+      });
+    }
+  };
+
+  const handleImportTemplates = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const jsonData = e.target?.result as string;
+        const result = PersonalTemplateManager.importTemplates(jsonData);
+        if (result.success) {
+          setPersonalTemplates(PersonalTemplateManager.getPersonalTemplates());
+          addToast({
+            type: 'success',
+            title: 'Templates Imported',
+            description: result.message
+          });
+        } else {
+          addToast({
+            type: 'error',
+            title: 'Import Failed',
+            description: result.message
+          });
+        }
+      } catch {
+        addToast({
+          type: 'error',
+          title: 'Import Failed',
+          description: 'Failed to import templates. Please check the file format.'
+        });
+      }
+    };
+    reader.readAsText(file);
+
+    // Reset the input
+    event.target.value = '';
   };
 
   const getComplexityColor = (level: string) => {
@@ -115,9 +267,67 @@ const TemplateModal: React.FC<TemplateModalProps> = ({
             Algorithm Templates
           </DialogTitle>
           <DialogDescription className="text-gray-300">
-            Choose from pre-built algorithm templates to get started quickly
+            Choose from pre-built algorithm templates or your personal templates
           </DialogDescription>
         </DialogHeader>
+
+        {/* Tab Navigation */}
+        <div className="flex border-b border-gray-600">
+          <button
+            onClick={() => setActiveTab('built-in')}
+            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+              activeTab === 'built-in'
+                ? 'border-blue-400 text-blue-400'
+                : 'border-transparent text-gray-400 hover:text-gray-300'
+            }`}
+          >
+            <BookOpen className="w-4 h-4 inline mr-2" />
+            Built-in Templates ({algorithmTemplates.length})
+          </button>
+          <button
+            onClick={() => setActiveTab('personal')}
+            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+              activeTab === 'personal'
+                ? 'border-purple-400 text-purple-400'
+                : 'border-transparent text-gray-400 hover:text-gray-300'
+            }`}
+          >
+            <User className="w-4 h-4 inline mr-2" />
+            Personal Templates ({personalTemplates.length})
+          </button>
+
+          {/* Personal Template Management */}
+          {activeTab === 'personal' && (
+            <div className="ml-auto flex items-center gap-2">
+              <input
+                type="file"
+                accept=".json"
+                onChange={handleImportTemplates}
+                className="hidden"
+                id="import-templates"
+              />
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => document.getElementById('import-templates')?.click()}
+                className="text-gray-400 hover:text-white"
+                title="Import Templates"
+              >
+                <Upload className="w-4 h-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleExportTemplates}
+                disabled={personalTemplates.length === 0}
+                className="text-gray-400 hover:text-white disabled:opacity-50"
+                title="Export Templates"
+              >
+                <Download className="w-4 h-4" />
+              </Button>
+            </div>
+          )}
+        </div>
 
         <div className="flex h-[70vh] gap-4">
           {/* Left Sidebar - Categories and Search */}
@@ -158,13 +368,15 @@ const TemplateModal: React.FC<TemplateModalProps> = ({
                 className="w-full justify-start text-sm"
                 aria-pressed={selectedCategory === 'all'}
               >
-                All Templates ({algorithmTemplates.length})
+                All Templates ({activeTab === 'personal' ? personalTemplates.length : algorithmTemplates.length})
               </Button>
-              
+
               {templateCategories.map(category => {
                 const CategoryIcon = iconMap[category.icon];
-                const count = getTemplatesByCategory(category.id).length;
-                
+                const count = activeTab === 'personal'
+                  ? personalTemplates.filter(t => t.category === category.id).length
+                  : getTemplatesByCategory(category.id).length;
+
                 return (
                   <Button
                     key={category.id}
@@ -178,6 +390,19 @@ const TemplateModal: React.FC<TemplateModalProps> = ({
                   </Button>
                 );
               })}
+
+              {/* Custom category for personal templates */}
+              {activeTab === 'personal' && (
+                <Button
+                  variant={selectedCategory === 'custom' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setSelectedCategory('custom')}
+                  className="w-full justify-start text-sm"
+                >
+                  <User className="w-4 h-4 mr-2" />
+                  Custom ({personalTemplates.filter(t => t.category === 'custom').length})
+                </Button>
+              )}
             </div>
           </div>
 
@@ -191,77 +416,137 @@ const TemplateModal: React.FC<TemplateModalProps> = ({
               </div>
             ) : (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 p-2">
-                {filteredTemplates.map(template => (
-                  <Card 
-                    key={template.id} 
-                    className="bg-gray-700 border-gray-600 hover:bg-gray-650 transition-colors cursor-pointer"
-                    onClick={() => setSelectedTemplate(template)}
-                  >
-                    <CardHeader className="pb-3">
-                      <div className="flex items-start justify-between">
-                        <CardTitle className="text-lg text-white">{template.name}</CardTitle>
-                        <Badge className={getCategoryColor(template.category)}>
-                          {template.category}
-                        </Badge>
-                      </div>
-                      <p className="text-sm text-gray-300">{template.description}</p>
-                    </CardHeader>
-                    
-                    <CardContent className="pt-0">
-                      <div className="space-y-3">
-                        {/* Complexity and Time */}
-                        <div className="flex items-center gap-4 text-xs">
-                          <div className="flex items-center gap-1">
-                            <Clock className="w-3 h-3 text-gray-400" />
-                            <span className="text-gray-400">{template.estimatedTime}</span>
-                          </div>
-                          <Badge className={getComplexityColor(template.complexity.level)}>
-                            {template.complexity.level}
-                          </Badge>
-                        </div>
+                {filteredTemplates.map(template => {
+                  const isPersonal = activeTab === 'personal';
+                  const personalTemplate = template as PersonalTemplate;
+                  const builtInTemplate = template as AlgorithmTemplate;
 
-                        {/* Preview Stats */}
-                        <div className="flex items-center gap-4 text-xs text-gray-400">
-                          <div className="flex items-center gap-1">
-                            <Layers className="w-3 h-3" />
-                            <span>{template.preview.nodeCount} nodes</span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <GitBranch className="w-3 h-3" />
-                            <span>{template.preview.connectionCount} connections</span>
+                  return (
+                    <Card
+                      key={template.id}
+                      className="bg-gray-700 border-gray-600 hover:bg-gray-650 transition-colors cursor-pointer relative"
+                      onClick={() => setSelectedTemplate(template)}
+                    >
+                      <CardHeader className="pb-3">
+                        <div className="flex items-start justify-between">
+                          <CardTitle className="text-lg text-white">{template.name}</CardTitle>
+                          <div className="flex items-center gap-2">
+                            <Badge className={getCategoryColor(template.category)}>
+                              {template.category}
+                            </Badge>
+                            {isPersonal && (
+                              <div className="relative">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setShowManageMenu(showManageMenu === template.id ? null : template.id);
+                                  }}
+                                  className="h-6 w-6 p-0 text-gray-400 hover:text-white"
+                                >
+                                  <MoreHorizontal className="w-4 h-4" />
+                                </Button>
+
+                                {showManageMenu === template.id && (
+                                  <div className="absolute right-0 top-8 z-10 bg-gray-800 border border-gray-600 rounded-md shadow-lg py-1 min-w-[120px]">
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleDuplicateTemplate(template.id);
+                                        setShowManageMenu(null);
+                                      }}
+                                      className="w-full px-3 py-1 text-left text-sm text-gray-300 hover:bg-gray-700 flex items-center gap-2"
+                                    >
+                                      <Copy className="w-3 h-3" />
+                                      Duplicate
+                                    </button>
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleDeleteTemplate(template.id);
+                                        setShowManageMenu(null);
+                                      }}
+                                      className="w-full px-3 py-1 text-left text-sm text-red-400 hover:bg-gray-700 flex items-center gap-2"
+                                    >
+                                      <Trash2 className="w-3 h-3" />
+                                      Delete
+                                    </button>
+                                  </div>
+                                )}
+                              </div>
+                            )}
                           </div>
                         </div>
+                        <p className="text-sm text-gray-300">{template.description}</p>
+                      </CardHeader>
 
-                        {/* Tags */}
-                        <div className="flex flex-wrap gap-1">
-                          {template.tags.slice(0, 3).map(tag => (
-                            <Badge key={tag} variant="outline" className="text-xs border-gray-500 text-gray-300">
-                              {tag}
+                      <CardContent className="pt-0">
+                        <div className="space-y-3">
+                          {/* Complexity and Time */}
+                          <div className="flex items-center gap-4 text-xs">
+                            <div className="flex items-center gap-1">
+                              <Clock className="w-3 h-3 text-gray-400" />
+                              <span className="text-gray-400">{template.estimatedTime}</span>
+                            </div>
+                            <Badge className={getComplexityColor(template.complexity.level)}>
+                              {template.complexity.level}
                             </Badge>
-                          ))}
-                          {template.tags.length > 3 && (
-                            <Badge variant="outline" className="text-xs border-gray-500 text-gray-300">
-                              +{template.tags.length - 3}
-                            </Badge>
+                          </div>
+
+                          {/* Preview Stats */}
+                          <div className="flex items-center gap-4 text-xs text-gray-400">
+                            <div className="flex items-center gap-1">
+                              <Layers className="w-3 h-3" />
+                              <span>
+                                {isPersonal ? personalTemplate.metadata.nodeCount : builtInTemplate.preview.nodeCount} nodes
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <GitBranch className="w-3 h-3" />
+                              <span>
+                                {isPersonal ? personalTemplate.metadata.connectionCount : builtInTemplate.preview.connectionCount} connections
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Tags or Date for Personal Templates */}
+                          {isPersonal ? (
+                            <div className="text-xs text-gray-400">
+                              Created: {new Date(personalTemplate.metadata.createdAt).toLocaleDateString()}
+                            </div>
+                          ) : (
+                            <div className="flex flex-wrap gap-1">
+                              {builtInTemplate.tags.slice(0, 3).map(tag => (
+                                <Badge key={tag} variant="outline" className="text-xs border-gray-500 text-gray-300">
+                                  {tag}
+                                </Badge>
+                              ))}
+                              {builtInTemplate.tags.length > 3 && (
+                                <Badge variant="outline" className="text-xs border-gray-500 text-gray-300">
+                                  +{builtInTemplate.tags.length - 3}
+                                </Badge>
+                              )}
+                            </div>
                           )}
-                        </div>
 
-                        {/* Action Button */}
-                        <Button
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleTemplateSelect(template);
-                          }}
-                          className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-                        >
-                          <Play className="w-4 h-4 mr-2" />
-                          Use Template
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+                          {/* Action Button */}
+                          <Button
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleTemplateSelect(template);
+                            }}
+                            className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                          >
+                            <Play className="w-4 h-4 mr-2" />
+                            Use Template
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
               </div>
             )}
           </div>

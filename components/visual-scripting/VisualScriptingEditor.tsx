@@ -25,6 +25,8 @@ import { useArrayStore } from '@/store/useArrayStore';
 import { ScriptNode, NodeType, ValidationResult } from '@/types/VisualScripting';
 import { getNodeTemplate } from '@/lib/visualScriptingTemplates';
 import { AlgorithmTemplate } from '@/lib/algorithmTemplates';
+import { PersonalTemplate } from '@/types/VisualScripting';
+import { useToast } from '@/components/ui/toast';
 import NodePalette from './NodePalette';
 import CustomNode from './CustomNode';
 import TutorialOverlay from './TutorialOverlay';
@@ -32,6 +34,7 @@ import ArrayIterationGuide from './ArrayIterationGuide';
 import DebuggerModal from '@/components/layout/DebuggerModal';
 import ConnectionStatus from './ConnectionStatus';
 import TemplateModal from './TemplateModal';
+import SaveTemplateModal from './SaveTemplateModal';
 import { Button } from '@/components/ui/button';
 import { Play, Save, Trash2, Eye, EyeOff, HelpCircle, BookOpen, Bug, FileText } from 'lucide-react';
 
@@ -72,7 +75,9 @@ const VisualScriptingEditor: React.FC = () => {
   const [showArrayGuide, setShowArrayGuide] = React.useState(false);
   const [showDebuggerModal, setShowDebuggerModal] = React.useState(false);
   const [showTemplateModal, setShowTemplateModal] = React.useState(false);
+  const [showSaveTemplateModal, setShowSaveTemplateModal] = React.useState(false);
   const [currentValidation, setCurrentValidation] = React.useState<ValidationResult>({ isValid: true, errors: [], warnings: [] });
+  const { addToast } = useToast();
   const [connectionState, setConnectionState] = React.useState<{
     isConnecting: boolean;
     sourceNode?: string;
@@ -469,32 +474,57 @@ const VisualScriptingEditor: React.FC = () => {
     }
   };
 
-  const handleTemplateSelect = (template: AlgorithmTemplate) => {
+  const handleTemplateSelect = (template: AlgorithmTemplate | PersonalTemplate) => {
     clearAll();
+
+    // Determine if this is a personal template or built-in template
+    const isPersonalTemplate = 'metadata' in template;
+    const templateNodes = isPersonalTemplate ? (template as PersonalTemplate).nodes : template.nodes;
+    const templateConnections = isPersonalTemplate ? (template as PersonalTemplate).connections : template.connections;
 
     // Keep track of created nodes for connection mapping
     const nodeIdMap = new Map<string, string>();
     let nodeCounter = 1;
 
     // Add nodes from template
-    template.nodes.forEach((nodeTemplate, index) => {
+    templateNodes.forEach((nodeTemplate, index) => {
       setTimeout(() => {
-        addNode(nodeTemplate.type, nodeTemplate.position);
+        if (isPersonalTemplate) {
+          // For personal templates, nodes are already ScriptNode objects
+          const personalNode = nodeTemplate as ScriptNode;
+          addNode(personalNode.type, personalNode.position);
 
-        // Map template node reference to actual node ID
-        const templateNodeId = `${nodeTemplate.type}-${nodeCounter}`;
-        nodeIdMap.set(templateNodeId, templateNodeId);
-        nodeCounter++;
+          const templateNodeId = `${personalNode.type}-${nodeCounter}`;
+          nodeIdMap.set(personalNode.id, templateNodeId);
+          nodeCounter++;
 
-        // Update node data if provided
-        if (nodeTemplate.data) {
+          // Update node data
           setTimeout(() => {
             const { nodes, updateNode: storeUpdateNode } = useVisualScriptingStore.getState();
             const addedNode = nodes.find(n => n.id === templateNodeId);
-            if (addedNode) {
-              storeUpdateNode(addedNode.id, nodeTemplate.data);
+            if (addedNode && personalNode.data) {
+              storeUpdateNode(addedNode.id, personalNode.data);
             }
           }, 50);
+        } else {
+          // For built-in templates, nodes are template objects
+          const builtInNode = nodeTemplate as { type: NodeType; position: { x: number; y: number }; data?: Record<string, any> };
+          addNode(builtInNode.type, builtInNode.position);
+
+          const templateNodeId = `${builtInNode.type}-${nodeCounter}`;
+          nodeIdMap.set(templateNodeId, templateNodeId);
+          nodeCounter++;
+
+          // Update node data if provided
+          if (builtInNode.data) {
+            setTimeout(() => {
+              const { nodes, updateNode: storeUpdateNode } = useVisualScriptingStore.getState();
+              const addedNode = nodes.find(n => n.id === templateNodeId);
+              if (addedNode && builtInNode.data) {
+                storeUpdateNode(addedNode.id, builtInNode.data);
+              }
+            }, 50);
+          }
         }
       }, index * 50); // Reduced delay for faster loading
     });
@@ -503,25 +533,44 @@ const VisualScriptingEditor: React.FC = () => {
     setTimeout(() => {
       const { addConnection, nodes } = useVisualScriptingStore.getState();
 
-      template.connections.forEach(connection => {
-        // Find actual node IDs based on the template structure
-        const sourceNode = nodes.find(n => connection.source.includes(n.type));
-        const targetNode = nodes.find(n => connection.target.includes(n.type));
+      templateConnections.forEach(connection => {
+        if (isPersonalTemplate) {
+          // For personal templates, use the node ID mapping
+          const sourceNodeId = nodeIdMap.get(connection.source);
+          const targetNodeId = nodeIdMap.get(connection.target);
 
-        if (sourceNode && targetNode) {
-          try {
-            addConnection({
-              source: sourceNode.id,
-              sourceHandle: connection.sourceHandle,
-              target: targetNode.id,
-              targetHandle: connection.targetHandle
-            });
-          } catch (error) {
-            console.warn('Failed to create connection:', error);
+          if (sourceNodeId && targetNodeId) {
+            try {
+              addConnection({
+                source: sourceNodeId,
+                sourceHandle: connection.sourceHandle,
+                target: targetNodeId,
+                targetHandle: connection.targetHandle
+              });
+            } catch (error) {
+              console.warn('Failed to create personal template connection:', error);
+            }
+          }
+        } else {
+          // For built-in templates, find nodes by type matching
+          const sourceNode = nodes.find(n => connection.source.includes(n.type));
+          const targetNode = nodes.find(n => connection.target.includes(n.type));
+
+          if (sourceNode && targetNode) {
+            try {
+              addConnection({
+                source: sourceNode.id,
+                sourceHandle: connection.sourceHandle,
+                target: targetNode.id,
+                targetHandle: connection.targetHandle
+              });
+            } catch (error) {
+              console.warn('Failed to create built-in template connection:', error);
+            }
           }
         }
       });
-    }, template.nodes.length * 50 + 300);
+    }, templateNodes.length * 50 + 300);
   };
 
   return (
@@ -601,6 +650,16 @@ const VisualScriptingEditor: React.FC = () => {
               >
                 <FileText className="w-4 h-4 mr-1" />
                 Templates
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowSaveTemplateModal(true)}
+                disabled={storeNodes.length === 0}
+                className="text-purple-400 hover:text-purple-300 whitespace-nowrap disabled:opacity-50"
+              >
+                <Save className="w-4 h-4 mr-1" />
+                Save as Template
               </Button>
               <Button
                 variant="ghost"
@@ -707,6 +766,21 @@ const VisualScriptingEditor: React.FC = () => {
         onClose={() => setShowTemplateModal(false)}
         onSelectTemplate={handleTemplateSelect}
         hasUnsavedChanges={storeNodes.length > 0}
+      />
+
+      {/* Save Template Modal */}
+      <SaveTemplateModal
+        isOpen={showSaveTemplateModal}
+        onClose={() => setShowSaveTemplateModal(false)}
+        nodes={storeNodes}
+        connections={storeConnections}
+        onSaveSuccess={(templateName) => {
+          addToast({
+            type: 'success',
+            title: 'Template Saved',
+            description: `Template "${templateName}" has been saved to your personal templates.`
+          });
+        }}
       />
     </div>
   );

@@ -41,7 +41,7 @@ const iconMap: Record<string, React.ComponentType<any>> = {
 
 const NodePalette: React.FC = () => {
   const [expandedCategory, setExpandedCategory] = React.useState<string>('control');
-  const { addNode } = useVisualScriptingStore();
+  // const { addNode } = useVisualScriptingStore();
 
   const onDragStart = (event: React.DragEvent, nodeType: NodeType) => {
     event.dataTransfer.setData('application/reactflow', nodeType);

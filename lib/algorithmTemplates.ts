@@ -20,7 +20,7 @@ export interface AlgorithmTemplate {
   nodes: Array<{
     type: NodeType;
     position: { x: number; y: number };
-    data?: Record<string, any>;
+    data?: Record<string, unknown>;
   }>;
   connections: Array<{
     source: string;

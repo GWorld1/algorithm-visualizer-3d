@@ -137,3 +137,44 @@ export interface ValidationResult {
   errors: string[];
   warnings: string[];
 }
+
+// Personal Template Types
+export interface PersonalTemplate {
+  id: string;
+  name: string;
+  description: string;
+  category: 'sorting' | 'searching' | 'graph' | 'array' | 'debug' | 'custom';
+  complexity: {
+    level: 'beginner' | 'intermediate' | 'advanced';
+  };
+  estimatedTime: string;
+  metadata: {
+    createdAt: string;
+    lastModified: string;
+    nodeCount: number;
+    connectionCount: number;
+    version: string;
+  };
+  nodes: ScriptNode[];
+  connections: Connection[];
+}
+
+export interface PersonalTemplateStorage {
+  templates: PersonalTemplate[];
+  version: string;
+  lastUpdated: string;
+}
+
+export interface TemplateFormData {
+  name: string;
+  description: string;
+  category: 'sorting' | 'searching' | 'graph' | 'array' | 'debug' | 'custom';
+  complexity: 'beginner' | 'intermediate' | 'advanced';
+  estimatedTime: string;
+}
+
+export interface TemplateOperationResult {
+  success: boolean;
+  message: string;
+  template?: PersonalTemplate;
+}

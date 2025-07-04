@@ -24,14 +24,16 @@ import { useAlgorithmStore } from '@/store/useAlgorithmStore';
 import { useArrayStore } from '@/store/useArrayStore';
 import { ScriptNode, NodeType, ValidationResult } from '@/types/VisualScripting';
 import { getNodeTemplate } from '@/lib/visualScriptingTemplates';
+import { AlgorithmTemplate } from '@/lib/algorithmTemplates';
 import NodePalette from './NodePalette';
 import CustomNode from './CustomNode';
 import TutorialOverlay from './TutorialOverlay';
 import ArrayIterationGuide from './ArrayIterationGuide';
 import DebuggerModal from '@/components/layout/DebuggerModal';
 import ConnectionStatus from './ConnectionStatus';
+import TemplateModal from './TemplateModal';
 import { Button } from '@/components/ui/button';
-import { Play, Save, Trash2, Eye, EyeOff, HelpCircle, BookOpen, Bug } from 'lucide-react';
+import { Play, Save, Trash2, Eye, EyeOff, HelpCircle, BookOpen, Bug, FileText } from 'lucide-react';
 
 // Custom node types for React Flow
 const nodeTypes = {
@@ -69,6 +71,7 @@ const VisualScriptingEditor: React.FC = () => {
   const [showTutorial, setShowTutorial] = React.useState(false);
   const [showArrayGuide, setShowArrayGuide] = React.useState(false);
   const [showDebuggerModal, setShowDebuggerModal] = React.useState(false);
+  const [showTemplateModal, setShowTemplateModal] = React.useState(false);
   const [currentValidation, setCurrentValidation] = React.useState<ValidationResult>({ isValid: true, errors: [], warnings: [] });
   const [connectionState, setConnectionState] = React.useState<{
     isConnecting: boolean;
@@ -466,6 +469,61 @@ const VisualScriptingEditor: React.FC = () => {
     }
   };
 
+  const handleTemplateSelect = (template: AlgorithmTemplate) => {
+    clearAll();
+
+    // Keep track of created nodes for connection mapping
+    const nodeIdMap = new Map<string, string>();
+    let nodeCounter = 1;
+
+    // Add nodes from template
+    template.nodes.forEach((nodeTemplate, index) => {
+      setTimeout(() => {
+        addNode(nodeTemplate.type, nodeTemplate.position);
+
+        // Map template node reference to actual node ID
+        const templateNodeId = `${nodeTemplate.type}-${nodeCounter}`;
+        nodeIdMap.set(templateNodeId, templateNodeId);
+        nodeCounter++;
+
+        // Update node data if provided
+        if (nodeTemplate.data) {
+          setTimeout(() => {
+            const { nodes, updateNode: storeUpdateNode } = useVisualScriptingStore.getState();
+            const addedNode = nodes.find(n => n.id === templateNodeId);
+            if (addedNode) {
+              storeUpdateNode(addedNode.id, nodeTemplate.data);
+            }
+          }, 50);
+        }
+      }, index * 50); // Reduced delay for faster loading
+    });
+
+    // Add connections after nodes are created
+    setTimeout(() => {
+      const { addConnection, nodes } = useVisualScriptingStore.getState();
+
+      template.connections.forEach(connection => {
+        // Find actual node IDs based on the template structure
+        const sourceNode = nodes.find(n => connection.source.includes(n.type));
+        const targetNode = nodes.find(n => connection.target.includes(n.type));
+
+        if (sourceNode && targetNode) {
+          try {
+            addConnection({
+              source: sourceNode.id,
+              sourceHandle: connection.sourceHandle,
+              target: targetNode.id,
+              targetHandle: connection.targetHandle
+            });
+          } catch (error) {
+            console.warn('Failed to create connection:', error);
+          }
+        }
+      });
+    }, template.nodes.length * 50 + 300);
+  };
+
   return (
     <div className="h-full w-full bg-gray-900 text-white flex overflow-hidden">
       {/* Node Palette */}
@@ -535,6 +593,15 @@ const VisualScriptingEditor: React.FC = () => {
 
             {/* Action controls */}
             <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowTemplateModal(true)}
+                className="text-orange-400 hover:text-orange-300 whitespace-nowrap"
+              >
+                <FileText className="w-4 h-4 mr-1" />
+                Templates
+              </Button>
               <Button
                 variant="ghost"
                 size="sm"
@@ -632,6 +699,14 @@ const VisualScriptingEditor: React.FC = () => {
         validation={currentValidation}
         onOpenGuide={() => setShowArrayGuide(true)}
         onCreateExample={createArrayIterationExample}
+      />
+
+      {/* Template Modal */}
+      <TemplateModal
+        isOpen={showTemplateModal}
+        onClose={() => setShowTemplateModal(false)}
+        onSelectTemplate={handleTemplateSelect}
+        hasUnsavedChanges={storeNodes.length > 0}
       />
     </div>
   );

@@ -21,7 +21,6 @@ import {
 import { nodeTemplates, nodeCategories } from '@/lib/visualScriptingTemplates';
 import { NodeType } from '@/types/VisualScripting';
 import { useVisualScriptingStore } from '@/store/useVisualScriptingStore';
-import { useArrayStore } from '@/store/useArrayStore';
 
 // Icon mapping for node types
 const iconMap: Record<string, React.ComponentType<any>> = {
@@ -42,7 +41,7 @@ const iconMap: Record<string, React.ComponentType<any>> = {
 
 const NodePalette: React.FC = () => {
   const [expandedCategory, setExpandedCategory] = React.useState<string>('control');
-  const { addNode, clearAll } = useVisualScriptingStore();
+  const { addNode } = useVisualScriptingStore();
 
   const onDragStart = (event: React.DragEvent, nodeType: NodeType) => {
     event.dataTransfer.setData('application/reactflow', nodeType);
@@ -53,169 +52,11 @@ const NodePalette: React.FC = () => {
     setExpandedCategory(expandedCategory === categoryId ? '' : categoryId);
   };
 
-  const loadSimpleTestTemplate = () => {
-    clearAll();
 
-    // Create a simple test: Start → Array Access → Array Highlight → End
-    addNode('start', { x: 100, y: 200 });
-    addNode('array-access', { x: 300, y: 200 });
-    addNode('array-highlight', { x: 500, y: 200 });
-    addNode('end', { x: 700, y: 200 });
 
-    // Add connections after a brief delay to ensure nodes are created
-    setTimeout(() => {
-      const { addConnection } = useVisualScriptingStore.getState();
 
-      addConnection({
-        source: 'start-1',
-        sourceHandle: 'exec-out',
-        target: 'array-access-1',
-        targetHandle: 'exec-in'
-      });
 
-      addConnection({
-        source: 'array-access-1',
-        sourceHandle: 'exec-out',
-        target: 'array-highlight-1',
-        targetHandle: 'exec-in'
-      });
 
-      addConnection({
-        source: 'array-highlight-1',
-        sourceHandle: 'exec-out',
-        target: 'end-1',
-        targetHandle: 'exec-in'
-      });
-    }, 100);
-  };
-
-  const loadLinearSearchTemplate = () => {
-    clearAll();
-
-    // Create nodes for linear search algorithm
-    addNode('start', { x: 100, y: 100 });
-    addNode('variable-set', { x: 100, y: 200 });
-    addNode('for-loop', { x: 100, y: 300 });
-    addNode('array-access', { x: 300, y: 350 });
-    addNode('if-condition', { x: 300, y: 450 });
-    addNode('array-highlight', { x: 500, y: 400 });
-    addNode('update-description', { x: 500, y: 500 });
-    addNode('end', { x: 700, y: 450 });
-
-    // Update node data
-    setTimeout(() => {
-      const { nodes, updateNode } = useVisualScriptingStore.getState();
-
-      // Find nodes by type and update their data
-      const variableSetNode = nodes.find(n => n.type === 'variable-set');
-      if (variableSetNode) {
-        updateNode(variableSetNode.id, {
-          variableName: 'target',
-          variableValue: 5,
-          label: 'Set Target = 5'
-        });
-      }
-
-      const forLoopNode = nodes.find(n => n.type === 'for-loop');
-      if (forLoopNode) {
-        updateNode(forLoopNode.id, {
-          loopStart: 0,
-          loopEnd: useArrayStore.getState().elements.length,
-          loopVariable: 'i',
-          label: `For i = 0 to ${useArrayStore.getState().elements.length}`
-        });
-      }
-
-      const ifConditionNode = nodes.find(n => n.type === 'if-condition');
-      if (ifConditionNode) {
-        updateNode(ifConditionNode.id, {
-          condition: 'array[i] == target',
-          label: 'If array[i] == target'
-        });
-      }
-
-      const highlightNode = nodes.find(n => n.type === 'array-highlight');
-      if (highlightNode) {
-        updateNode(highlightNode.id, {
-          arrayIndex1: 0,
-          highlightColor: 'green',
-          label: 'Highlight Found Element'
-        });
-      }
-
-      const descriptionNode = nodes.find(n => n.type === 'update-description');
-      if (descriptionNode) {
-        updateNode(descriptionNode.id, {
-          description: 'Element found!',
-          label: 'Show Success Message'
-        });
-      }
-    }, 100);
-  };
-
-  const loadFindMaxTemplate = () => {
-    clearAll();
-
-    // Create nodes for find maximum algorithm
-    addNode('start', { x: 100, y: 100 });
-    addNode('variable-set', { x: 100, y: 200 });
-    addNode('for-loop', { x: 100, y: 300 });
-    addNode('array-access', { x: 300, y: 350 });
-    addNode('if-condition', { x: 300, y: 450 });
-    addNode('variable-set', { x: 500, y: 400 });
-    addNode('array-highlight', { x: 500, y: 500 });
-    addNode('end', { x: 700, y: 450 });
-
-    // Update node data
-    setTimeout(() => {
-      const { nodes, updateNode } = useVisualScriptingStore.getState();
-
-      const firstVariableSetNode = nodes.filter(n => n.type === 'variable-set')[0];
-      if (firstVariableSetNode) {
-        updateNode(firstVariableSetNode.id, {
-          variableName: 'max',
-          variableValue: 'array[0]',
-          label: 'Set max = array[0]'
-        });
-      }
-
-      const forLoopNode = nodes.find(n => n.type === 'for-loop');
-      if (forLoopNode) {
-        updateNode(forLoopNode.id, {
-          loopStart: 1,
-          loopEnd: useArrayStore.getState().elements.length,
-          loopVariable: 'i',
-          label: `For i = 1 to ${useArrayStore.getState().elements.length}`
-        });
-      }
-
-      const ifConditionNode = nodes.find(n => n.type === 'if-condition');
-      if (ifConditionNode) {
-        updateNode(ifConditionNode.id, {
-          condition: 'array[i] > max',
-          label: 'If array[i] > max'
-        });
-      }
-
-      const secondVariableSetNode = nodes.filter(n => n.type === 'variable-set')[1];
-      if (secondVariableSetNode) {
-        updateNode(secondVariableSetNode.id, {
-          variableName: 'max',
-          variableValue: 'array[i]',
-          label: 'Update max = array[i]'
-        });
-      }
-
-      const highlightNode = nodes.find(n => n.type === 'array-highlight');
-      if (highlightNode) {
-        updateNode(highlightNode.id, {
-          arrayIndex1: 0,
-          highlightColor: 'blue',
-          label: 'Highlight New Max'
-        });
-      }
-    }, 100);
-  };
 
   return (
     <div className="h-full bg-gray-800 overflow-y-auto">
@@ -291,46 +132,7 @@ const NodePalette: React.FC = () => {
             </div>
           </div>
 
-          {/* Quick Templates */}
-          <div className="mt-4">
-            <div className="text-xs font-medium text-gray-300 mb-2">Quick Templates</div>
-            <div className="space-y-1">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="w-full justify-start text-xs text-blue-400 hover:text-white hover:bg-gray-700 border border-blue-500/30"
-                onClick={() => loadSimpleTestTemplate()}
-              >
-                🧪 Simple Test (Debug)
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="w-full justify-start text-xs text-gray-400 hover:text-white hover:bg-gray-700"
-                onClick={() => loadLinearSearchTemplate()}
-              >
-                Linear Search
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="w-full justify-start text-xs text-gray-400 hover:text-white hover:bg-gray-700"
-                onClick={() => loadFindMaxTemplate()}
-              >
-                Find Maximum
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="w-full justify-start text-xs text-gray-400 hover:text-white hover:bg-gray-700"
-                onClick={() => {
-                  console.log('Bubble Sort template coming soon!');
-                }}
-              >
-                Bubble Sort (Soon)
-              </Button>
-            </div>
-          </div>
+
         </CardContent>
       </Card>
     </div>

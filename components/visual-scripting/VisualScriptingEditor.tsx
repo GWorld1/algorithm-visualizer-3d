@@ -640,8 +640,8 @@ const VisualScriptingEditor: React.FC = () => {
               </Button>
             </div>
 
-            {/* Action controls */}
-            <div className="flex items-center gap-2">
+             {/* Template Actions */}
+             <div className="flex items-center gap-2 pr-4 border-r border-gray-600">
               <Button
                 variant="ghost"
                 size="sm"
@@ -661,6 +661,15 @@ const VisualScriptingEditor: React.FC = () => {
                 <Save className="w-4 h-4 mr-1" />
                 Save as Template
               </Button>
+            </div>
+
+             
+
+
+
+            {/* Action controls */}
+            <div className="flex items-center gap-2">
+              
               <Button
                 variant="ghost"
                 size="sm"
@@ -670,7 +679,7 @@ const VisualScriptingEditor: React.FC = () => {
                 <Play className="w-4 h-4 mr-1" />
                 Run
               </Button>
-              <Button
+              {/* <Button
                 variant="ghost"
                 size="sm"
                 onClick={handleSave}
@@ -678,7 +687,7 @@ const VisualScriptingEditor: React.FC = () => {
               >
                 <Save className="w-4 h-4 mr-1" />
                 Save
-              </Button>
+              </Button> */}
               <Button
                 variant="ghost"
                 size="sm"

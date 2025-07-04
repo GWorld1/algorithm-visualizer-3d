@@ -33,6 +33,7 @@ interface VisualScriptingState {
   addNode: (type: NodeType, position: Position) => void;
   removeNode: (nodeId: string) => void;
   updateNode: (nodeId: string, data: Partial<ScriptNode['data']>) => void;
+  updateNodePosition: (nodeId: string, position: Position) => void;
   selectNode: (nodeId: string | null) => void;
   
   // Connection actions
@@ -124,6 +125,16 @@ export const useVisualScriptingStore = create<VisualScriptingState>((set, get) =
       nodes: state.nodes.map(node =>
         node.id === nodeId
           ? { ...node, data: { ...node.data, ...data } }
+          : node
+      )
+    }));
+  },
+
+  updateNodePosition: (nodeId: string, position: Position) => {
+    set(state => ({
+      nodes: state.nodes.map(node =>
+        node.id === nodeId
+          ? { ...node, position }
           : node
       )
     }));

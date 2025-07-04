@@ -93,6 +93,7 @@ const VisualScriptingEditor: React.FC = () => {
     addNode,
     removeNode,
     updateNode,
+    updateNodePosition,
     selectNode,
     addConnection,
     removeConnection,
@@ -158,13 +159,53 @@ const VisualScriptingEditor: React.FC = () => {
     animated: true
   }));
 
-  const [nodes, setNodes, onNodesChange] = useNodesState(reactFlowNodes);
+  const [nodes, setNodes, onNodesChangeDefault] = useNodesState(reactFlowNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(reactFlowEdges);
 
-  // Update React Flow state when store changes
+  // Custom onNodesChange handler to sync positions back to store
+  const onNodesChange = useCallback((changes: any[]) => {
+    onNodesChangeDefault(changes);
+
+    // Sync position changes back to the store
+    changes.forEach(change => {
+      if (change.type === 'position' && change.position) {
+        updateNodePosition(change.id, change.position);
+      }
+    });
+  }, [onNodesChangeDefault, updateNodePosition]);
+
+  // Track previous node IDs to detect structural changes
+  const prevNodeIds = React.useRef<Set<string>>(new Set());
+
+  // Update React Flow state when store changes - but preserve positions
   React.useEffect(() => {
-    setNodes(reactFlowNodes);
-  }, [storeNodes, selectedNode]);
+    const currentNodeIds = new Set(storeNodes.map(n => n.id));
+    const hasStructuralChange =
+      currentNodeIds.size !== prevNodeIds.current.size ||
+      [...currentNodeIds].some(id => !prevNodeIds.current.has(id)) ||
+      [...prevNodeIds.current].some(id => !currentNodeIds.has(id));
+
+    if (hasStructuralChange) {
+      // Structural change: update all nodes
+      setNodes(reactFlowNodes);
+      prevNodeIds.current = currentNodeIds;
+    } else {
+      // No structural change: update node data but preserve positions
+      setNodes(currentNodes => {
+        const currentPositions = new Map(
+          currentNodes.map(node => [node.id, node.position])
+        );
+
+        return reactFlowNodes.map(newNode => {
+          const currentPosition = currentPositions.get(newNode.id);
+          return {
+            ...newNode,
+            position: currentPosition || newNode.position
+          };
+        });
+      });
+    }
+  }, [storeNodes, selectedNode]); // React to store changes
 
   React.useEffect(() => {
     setEdges(reactFlowEdges);

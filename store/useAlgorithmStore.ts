@@ -61,8 +61,8 @@ export const useAlgorithmStore = create<AlgorithmState>((set) => ({
   updateAnimationSettings: (settings) => {
     set((state) => ({ animationSettings: { ...state.animationSettings, ...settings } }));
   },
-  algorithmType: 'bfs',
-  dataStructure: 'binaryTree',
+  algorithmType: 'bubbleSort',
+  dataStructure: 'array',
   setDataStructure: (dataStructure: DataStructureType) => {
     // Stop any running animations before switching
     const currentState = useAlgorithmStore.getState();

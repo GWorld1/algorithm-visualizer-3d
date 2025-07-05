@@ -173,7 +173,23 @@ export class VisualScriptingInterpreter {
           loopComplete: true,
           loopVariable: loopVariable
         });
-        this.currentNodeId = this.getNextNode(node.id, 'exec-complete');
+
+        // Check if we have an exec-complete connection
+        const hasCompleteConnection = this.connections.some(conn =>
+          conn.source === node.id && conn.sourceHandle === 'exec-complete'
+        );
+
+        if (hasCompleteConnection) {
+          // Follow the exec-complete connection
+          this.currentNodeId = this.getNextNode(node.id, 'exec-complete');
+        } else if (this.context.loopStack.length > 0) {
+          // No exec-complete connection but we're still in outer loops
+          // Return to the outer loop to continue its iteration
+          this.handleLoopReturn();
+        } else {
+          // No outer loops and no exec-complete connection - end execution
+          this.currentNodeId = null;
+        }
       }
     } else {
       // Continue existing loop - this happens when we return from loop body
@@ -195,14 +211,30 @@ export class VisualScriptingInterpreter {
         // Re-execute loop body for this iteration
         this.currentNodeId = this.getNextNode(node.id, 'exec-out');
       } else {
-        // Loop complete
+        // Loop complete - remove this loop from stack
         this.context.loopStack = this.context.loopStack.filter(loop => loop.nodeId !== node.id);
         this.addStep(`Loop completed: processed ${existingLoop.end - loopStart} iterations`, 'custom', {
           loopComplete: true,
           loopVariable: loopVariable,
           totalIterations: existingLoop.end - loopStart
         });
-        this.currentNodeId = this.getNextNode(node.id, 'exec-complete');
+
+        // Check if we have an exec-complete connection
+        const hasCompleteConnection = this.connections.some(conn =>
+          conn.source === node.id && conn.sourceHandle === 'exec-complete'
+        );
+
+        if (hasCompleteConnection) {
+          // Follow the exec-complete connection
+          this.currentNodeId = this.getNextNode(node.id, 'exec-complete');
+        } else if (this.context.loopStack.length > 0) {
+          // No exec-complete connection but we're still in outer loops
+          // Return to the outer loop to continue its iteration
+          this.handleLoopReturn();
+        } else {
+          // No outer loops and no exec-complete connection - end execution
+          this.currentNodeId = null;
+        }
       }
     }
   }
@@ -364,37 +396,136 @@ export class VisualScriptingInterpreter {
 
   private executeArrayCompare(node: ScriptNode): void {
     const { arrayIndex1 = 0, arrayIndex2 = 1 } = node.data;
-    const index1 = this.resolveValue(arrayIndex1);
-    const index2 = this.resolveValue(arrayIndex2);
-    
+
+    // Check for data flow connections for both indices
+    const hasIndex1Connection = this.connections.some(conn =>
+      conn.target === node.id && conn.targetHandle === 'index1-in'
+    );
+    const hasIndex2Connection = this.connections.some(conn =>
+      conn.target === node.id && conn.targetHandle === 'index2-in'
+    );
+
+    // Resolve indices from data flow connections or use default values
+    const index1 = hasIndex1Connection ?
+      this.resolveValue(arrayIndex1, node.id, 'index1-in') :
+      this.resolveValue(arrayIndex1);
+    const index2 = hasIndex2Connection ?
+      this.resolveValue(arrayIndex2, node.id, 'index2-in') :
+      this.resolveValue(arrayIndex2);
+
     if (this.isValidIndex(index1) && this.isValidIndex(index2)) {
       const value1 = this.context.currentArray[index1];
       const value2 = this.context.currentArray[index2];
       const result = value1 > value2;
-      
-      this.addStep(`Comparing array[${index1}] (${value1}) with array[${index2}] (${value2})`, 'compare', {
-        indices: [index1, index2]
-      });
+
+      // Store comparison result for potential data flow usage
+      this.context.variables.set(`__array_compare_${node.id}`, result);
+
+      // Add loop context if we're in a loop
+      const currentLoop = this.context.loopStack.length > 0 ?
+        this.context.loopStack[this.context.loopStack.length - 1] : null;
+      const loopContext = currentLoop ?
+        ` (Loop iteration ${currentLoop.current}: ${currentLoop.variable} = ${currentLoop.current})` : '';
+
+      this.addStep(
+        `Comparing array[${index1}] (${value1}) with array[${index2}] (${value2}) = ${result}${loopContext}`,
+        'compare',
+        {
+          indices: [index1, index2],
+          values: [value1, value2],
+          result: result,
+          isLoopIteration: currentLoop !== null,
+          loopVariable: currentLoop?.variable,
+          loopValue: currentLoop?.current,
+          iterationNumber: currentLoop?.current,
+          hasDataFlow: hasIndex1Connection || hasIndex2Connection
+        }
+      );
+    } else {
+      // Add error handling for invalid indices
+      const currentLoop = this.context.loopStack.length > 0 ?
+        this.context.loopStack[this.context.loopStack.length - 1] : null;
+      const loopContext = currentLoop ?
+        ` (Loop iteration ${currentLoop.current})` : '';
+
+      this.addStep(
+        `Compare failed: invalid indices [${index1}, ${index2}]${loopContext}`,
+        'custom',
+        {
+          error: true,
+          indices: [index1, index2],
+          isLoopIteration: currentLoop !== null,
+          loopVariable: currentLoop?.variable,
+          loopValue: currentLoop?.current
+        }
+      );
     }
-    
+
     this.currentNodeId = this.getNextNode(node.id, 'exec-out');
   }
 
   private executeArraySwap(node: ScriptNode): void {
     const { arrayIndex1 = 0, arrayIndex2 = 1 } = node.data;
-    const index1 = this.resolveValue(arrayIndex1);
-    const index2 = this.resolveValue(arrayIndex2);
-    
+
+    // Check for data flow connections for both indices
+    const hasIndex1Connection = this.connections.some(conn =>
+      conn.target === node.id && conn.targetHandle === 'index1-in'
+    );
+    const hasIndex2Connection = this.connections.some(conn =>
+      conn.target === node.id && conn.targetHandle === 'index2-in'
+    );
+
+    // Resolve indices from data flow connections or use default values
+    const index1 = hasIndex1Connection ?
+      this.resolveValue(arrayIndex1, node.id, 'index1-in') :
+      this.resolveValue(arrayIndex1);
+    const index2 = hasIndex2Connection ?
+      this.resolveValue(arrayIndex2, node.id, 'index2-in') :
+      this.resolveValue(arrayIndex2);
+
     if (this.isValidIndex(index1) && this.isValidIndex(index2)) {
       const temp = this.context.currentArray[index1];
       this.context.currentArray[index1] = this.context.currentArray[index2];
       this.context.currentArray[index2] = temp;
-      
-      this.addStep(`Swapped array[${index1}] with array[${index2}]`, 'swap', {
-        indices: [index1, index2]
-      });
+
+      // Add loop context if we're in a loop
+      const currentLoop = this.context.loopStack.length > 0 ?
+        this.context.loopStack[this.context.loopStack.length - 1] : null;
+      const loopContext = currentLoop ?
+        ` (Loop iteration ${currentLoop.current}: ${currentLoop.variable} = ${currentLoop.current})` : '';
+
+      this.addStep(
+        `Swapped array[${index1}] with array[${index2}]${loopContext}`,
+        'swap',
+        {
+          indices: [index1, index2],
+          isLoopIteration: currentLoop !== null,
+          loopVariable: currentLoop?.variable,
+          loopValue: currentLoop?.current,
+          iterationNumber: currentLoop?.current,
+          hasDataFlow: hasIndex1Connection || hasIndex2Connection
+        }
+      );
+    } else {
+      // Add error handling for invalid indices
+      const currentLoop = this.context.loopStack.length > 0 ?
+        this.context.loopStack[this.context.loopStack.length - 1] : null;
+      const loopContext = currentLoop ?
+        ` (Loop iteration ${currentLoop.current})` : '';
+
+      this.addStep(
+        `Swap failed: invalid indices [${index1}, ${index2}]${loopContext}`,
+        'custom',
+        {
+          error: true,
+          indices: [index1, index2],
+          isLoopIteration: currentLoop !== null,
+          loopVariable: currentLoop?.variable,
+          loopValue: currentLoop?.current
+        }
+      );
     }
-    
+
     this.currentNodeId = this.getNextNode(node.id, 'exec-out');
   }
 
@@ -666,6 +797,11 @@ export class VisualScriptingInterpreter {
       case 'array-access':
         if (outputHandle === 'value-out') {
           return this.context.variables.get(`__array_access_${nodeId}`) || 0;
+        }
+        break;
+      case 'array-compare':
+        if (outputHandle === 'result-out') {
+          return this.context.variables.get(`__array_compare_${nodeId}`) || false;
         }
         break;
       case 'if-condition':

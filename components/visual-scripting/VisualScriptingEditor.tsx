@@ -515,6 +515,45 @@ const VisualScriptingEditor: React.FC = () => {
     }
   };
 
+  // Validate connection compatibility between nodes
+  const validateConnection = (
+    sourceNode: ScriptNode,
+    sourceHandle: string,
+    targetNode: ScriptNode,
+    targetHandle: string
+  ): { isValid: boolean; error?: string } => {
+    const sourceTemplate = getNodeTemplate(sourceNode.type);
+    const targetTemplate = getNodeTemplate(targetNode.type);
+
+    if (!sourceTemplate || !targetTemplate) {
+      return { isValid: false, error: 'Node template not found' };
+    }
+
+    // Find the source output
+    const sourceOutput = sourceTemplate.outputs.find(output => output.id === sourceHandle);
+    if (!sourceOutput) {
+      return { isValid: false, error: `Source handle '${sourceHandle}' not found on ${sourceNode.type}` };
+    }
+
+    // Find the target input
+    const targetInput = targetTemplate.inputs.find(input => input.id === targetHandle);
+    if (!targetInput) {
+      return { isValid: false, error: `Target handle '${targetHandle}' not found on ${targetNode.type}` };
+    }
+
+    // Check type compatibility
+    if (sourceOutput.type !== targetInput.type &&
+        sourceOutput.type !== 'any' &&
+        targetInput.type !== 'any') {
+      return {
+        isValid: false,
+        error: `Type mismatch: ${sourceOutput.type} cannot connect to ${targetInput.type}`
+      };
+    }
+
+    return { isValid: true };
+  };
+
   const handleTemplateSelect = (template: AlgorithmTemplate | PersonalTemplate) => {
     clearAll();
 
@@ -525,93 +564,209 @@ const VisualScriptingEditor: React.FC = () => {
 
     // Keep track of created nodes for connection mapping
     const nodeIdMap = new Map<string, string>();
-    let nodeCounter = 1;
+    const nodeCreationPromises: Promise<void>[] = [];
 
     // Add nodes from template
     templateNodes.forEach((nodeTemplate, index) => {
-      setTimeout(() => {
-        if (isPersonalTemplate) {
-          // For personal templates, nodes are already ScriptNode objects
-          const personalNode = nodeTemplate as ScriptNode;
-          addNode(personalNode.type, personalNode.position);
+      const nodePromise = new Promise<void>((resolve) => {
+        setTimeout(() => {
+          if (isPersonalTemplate) {
+            // For personal templates, nodes are already ScriptNode objects
+            const personalNode = nodeTemplate as ScriptNode;
 
-          const templateNodeId = `${personalNode.type}-${nodeCounter}`;
-          nodeIdMap.set(personalNode.id, templateNodeId);
-          nodeCounter++;
+            // Get the current state before adding the node
+            const beforeNodes = useVisualScriptingStore.getState().nodes;
+            addNode(personalNode.type, personalNode.position);
 
-          // Update node data
-          setTimeout(() => {
-            const { nodes, updateNode: storeUpdateNode } = useVisualScriptingStore.getState();
-            const addedNode = nodes.find(n => n.id === templateNodeId);
-            if (addedNode && personalNode.data) {
-              storeUpdateNode(addedNode.id, personalNode.data);
-            }
-          }, 50);
-        } else {
-          // For built-in templates, nodes are template objects
-          const builtInNode = nodeTemplate as { type: NodeType; position: { x: number; y: number }; data?: Record<string, any> };
-          addNode(builtInNode.type, builtInNode.position);
-
-          const templateNodeId = `${builtInNode.type}-${nodeCounter}`;
-          nodeIdMap.set(templateNodeId, templateNodeId);
-          nodeCounter++;
-
-          // Update node data if provided
-          if (builtInNode.data) {
+            // Find the newly created node by comparing before and after
             setTimeout(() => {
               const { nodes, updateNode: storeUpdateNode } = useVisualScriptingStore.getState();
-              const addedNode = nodes.find(n => n.id === templateNodeId);
-              if (addedNode && builtInNode.data) {
-                storeUpdateNode(addedNode.id, builtInNode.data);
+              const newNode = nodes.find(n => !beforeNodes.some(bn => bn.id === n.id));
+
+              if (newNode) {
+                // Map the original template node ID to the new store-generated ID
+                nodeIdMap.set(personalNode.id, newNode.id);
+
+                // Update node data if available
+                if (personalNode.data) {
+                  storeUpdateNode(newNode.id, personalNode.data);
+                }
               }
+              resolve();
+            }, 50);
+          } else {
+            // For built-in templates, nodes are template objects
+            const builtInNode = nodeTemplate as { type: NodeType; position: { x: number; y: number }; data?: Record<string, any> };
+
+            // Get the current state before adding the node
+            const beforeNodes = useVisualScriptingStore.getState().nodes;
+            addNode(builtInNode.type, builtInNode.position);
+
+            // Find the newly created node by comparing before and after
+            setTimeout(() => {
+              const { nodes, updateNode: storeUpdateNode } = useVisualScriptingStore.getState();
+              const newNode = nodes.find(n => !beforeNodes.some(bn => bn.id === n.id));
+
+              if (newNode) {
+                // For built-in templates, use a generated key for mapping
+                const templateKey = `${builtInNode.type}-${index}`;
+                nodeIdMap.set(templateKey, newNode.id);
+
+                // Update node data if provided
+                if (builtInNode.data) {
+                  storeUpdateNode(newNode.id, builtInNode.data);
+                }
+              }
+              resolve();
             }, 50);
           }
-        }
-      }, index * 50); // Reduced delay for faster loading
+        }, index * 50); // Staggered delay for proper loading
+      });
+
+      nodeCreationPromises.push(nodePromise);
     });
 
-    // Add connections after nodes are created
-    setTimeout(() => {
-      const { addConnection, nodes } = useVisualScriptingStore.getState();
+    // Add connections after all nodes are created
+    Promise.all(nodeCreationPromises).then(() => {
+      setTimeout(() => {
+        const { addConnection, nodes } = useVisualScriptingStore.getState();
+        let connectionsCreated = 0;
+        let connectionsFailed = 0;
 
-      templateConnections.forEach(connection => {
-        if (isPersonalTemplate) {
-          // For personal templates, use the node ID mapping
-          const sourceNodeId = nodeIdMap.get(connection.source);
-          const targetNodeId = nodeIdMap.get(connection.target);
+        templateConnections.forEach(connection => {
+          try {
+            if (isPersonalTemplate) {
+              // For personal templates, use the node ID mapping
+              const sourceNodeId = nodeIdMap.get(connection.source);
+              const targetNodeId = nodeIdMap.get(connection.target);
 
-          if (sourceNodeId && targetNodeId) {
-            try {
-              addConnection({
-                source: sourceNodeId,
-                sourceHandle: connection.sourceHandle,
-                target: targetNodeId,
-                targetHandle: connection.targetHandle
-              });
-            } catch (error) {
-              console.warn('Failed to create personal template connection:', error);
+              if (sourceNodeId && targetNodeId) {
+                // Validate that both nodes exist
+                const sourceNode = nodes.find(n => n.id === sourceNodeId);
+                const targetNode = nodes.find(n => n.id === targetNodeId);
+
+                if (sourceNode && targetNode) {
+                  // Validate connection compatibility
+                  const validation = validateConnection(
+                    sourceNode,
+                    connection.sourceHandle,
+                    targetNode,
+                    connection.targetHandle
+                  );
+
+                  if (validation.isValid) {
+                    addConnection({
+                      source: sourceNodeId,
+                      sourceHandle: connection.sourceHandle,
+                      target: targetNodeId,
+                      targetHandle: connection.targetHandle
+                    });
+                    connectionsCreated++;
+                  } else {
+                    console.warn('Template connection validation failed:', validation.error, {
+                      sourceNode: sourceNode.type,
+                      targetNode: targetNode.type,
+                      sourceHandle: connection.sourceHandle,
+                      targetHandle: connection.targetHandle
+                    });
+                    connectionsFailed++;
+                  }
+                } else {
+                  console.warn('Template connection validation failed: nodes not found', {
+                    sourceNodeId,
+                    targetNodeId,
+                    sourceExists: !!sourceNode,
+                    targetExists: !!targetNode
+                  });
+                  connectionsFailed++;
+                }
+              } else {
+                console.warn('Template connection mapping failed:', {
+                  originalSource: connection.source,
+                  originalTarget: connection.target,
+                  mappedSource: sourceNodeId,
+                  mappedTarget: targetNodeId
+                });
+                connectionsFailed++;
+              }
+            } else {
+              // For built-in templates, find nodes by type matching
+              const sourceNode = nodes.find(n => connection.source.includes(n.type));
+              const targetNode = nodes.find(n => connection.target.includes(n.type));
+
+              if (sourceNode && targetNode) {
+                // Validate connection compatibility
+                const validation = validateConnection(
+                  sourceNode,
+                  connection.sourceHandle,
+                  targetNode,
+                  connection.targetHandle
+                );
+
+                if (validation.isValid) {
+                  addConnection({
+                    source: sourceNode.id,
+                    sourceHandle: connection.sourceHandle,
+                    target: targetNode.id,
+                    targetHandle: connection.targetHandle
+                  });
+                  connectionsCreated++;
+                } else {
+                  console.warn('Built-in template connection validation failed:', validation.error, {
+                    sourceNode: sourceNode.type,
+                    targetNode: targetNode.type,
+                    sourceHandle: connection.sourceHandle,
+                    targetHandle: connection.targetHandle
+                  });
+                  connectionsFailed++;
+                }
+              } else {
+                console.warn('Built-in template connection failed: nodes not found', {
+                  sourceType: connection.source,
+                  targetType: connection.target
+                });
+                connectionsFailed++;
+              }
             }
+          } catch (error) {
+            console.error('Failed to create template connection:', error, connection);
+            connectionsFailed++;
           }
-        } else {
-          // For built-in templates, find nodes by type matching
-          const sourceNode = nodes.find(n => connection.source.includes(n.type));
-          const targetNode = nodes.find(n => connection.target.includes(n.type));
+        });
 
-          if (sourceNode && targetNode) {
-            try {
-              addConnection({
-                source: sourceNode.id,
-                sourceHandle: connection.sourceHandle,
-                target: targetNode.id,
-                targetHandle: connection.targetHandle
-              });
-            } catch (error) {
-              console.warn('Failed to create built-in template connection:', error);
-            }
-          }
+        // Log detailed summary
+        console.log('📊 Template loading summary:', {
+          templateName: template.name,
+          isPersonalTemplate,
+          totalNodes: templateNodes.length,
+          totalConnections: templateConnections.length,
+          connectionsCreated,
+          connectionsFailed,
+          nodeIdMappings: Object.fromEntries(nodeIdMap)
+        });
+
+        // Provide feedback about connection restoration
+        if (connectionsCreated > 0) {
+          addToast({
+            type: 'success',
+            title: 'Template Loaded Successfully',
+            description: `Template "${template.name}" loaded with ${connectionsCreated} connections restored${connectionsFailed > 0 ? ` (${connectionsFailed} failed)` : ''}.`
+          });
+        } else if (connectionsFailed > 0) {
+          addToast({
+            type: 'warning',
+            title: 'Template Loaded with Issues',
+            description: `Template "${template.name}" loaded but ${connectionsFailed} connections could not be restored. Check the console for details and reconnect nodes manually if needed.`
+          });
+        } else if (templateConnections.length === 0) {
+          addToast({
+            type: 'info',
+            title: 'Template Loaded',
+            description: `Template "${template.name}" loaded successfully. No connections to restore.`
+          });
         }
-      });
-    }, templateNodes.length * 50 + 300);
+      }, 100); // Small delay to ensure all nodes are fully processed
+    });
   };
 
   return (

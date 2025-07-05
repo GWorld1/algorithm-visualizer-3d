@@ -85,6 +85,9 @@ export class VisualScriptingInterpreter {
       case 'if-condition':
         this.executeIfCondition(node);
         break;
+      case 'math-operation':
+        this.executeMathOperation(node);
+        break;
       case 'array-access':
         this.executeArrayAccess(node);
         break;
@@ -134,35 +137,60 @@ export class VisualScriptingInterpreter {
   private executeForLoop(node: ScriptNode): void {
     const { loopStart = 0, loopEnd = 10, loopVariable = 'i' } = node.data;
 
+    // Check for data flow connections for dynamic loop bounds
+    const hasStartConnection = this.connections.some(conn =>
+      conn.target === node.id && conn.targetHandle === 'loopStart-in'
+    );
+    const hasEndConnection = this.connections.some(conn =>
+      conn.target === node.id && conn.targetHandle === 'loopEnd-in'
+    );
+
+    // Resolve loop bounds from data flow connections or use default values
+    const dynamicLoopStart = hasStartConnection ?
+      this.resolveValue(loopStart, node.id, 'loopStart-in') :
+      this.resolveValue(loopStart);
+    const dynamicLoopEnd = hasEndConnection ?
+      this.resolveValue(loopEnd, node.id, 'loopEnd-in') :
+      this.resolveValue(loopEnd);
+
     // Check if we're already in this loop
     const existingLoop = this.context.loopStack.find(loop => loop.nodeId === node.id);
 
     if (!existingLoop) {
-      // Start new loop
+      // Start new loop with dynamic bounds
       this.context.loopStack.push({
         variable: loopVariable,
-        current: loopStart,
-        end: loopEnd,
+        current: dynamicLoopStart,
+        end: dynamicLoopEnd,
         nodeId: node.id
       });
-      this.context.variables.set(loopVariable, loopStart);
-      this.addStep(`Starting loop: ${loopVariable} = ${loopStart} to ${loopEnd}`, 'custom', {
+      this.context.variables.set(loopVariable, dynamicLoopStart);
+
+      // Add metadata about dynamic bounds
+      const boundsMeta = {
         loopStart: true,
         loopVariable: loopVariable,
-        loopRange: `${loopStart} to ${loopEnd}`
-      });
+        loopRange: `${dynamicLoopStart} to ${dynamicLoopEnd}`,
+        hasDynamicStart: hasStartConnection,
+        hasDynamicEnd: hasEndConnection,
+        staticStart: loopStart,
+        staticEnd: loopEnd
+      };
+
+      this.addStep(`Starting loop: ${loopVariable} = ${dynamicLoopStart} to ${dynamicLoopEnd}`, 'custom', boundsMeta);
 
       // Execute loop body if we have iterations to do
-      if (loopStart < loopEnd) {
+      if (dynamicLoopStart < dynamicLoopEnd) {
         // Add step for first iteration
         this.addStep(
-          `Loop iteration ${loopStart}: ${loopVariable} = ${loopStart}`,
+          `Loop iteration ${dynamicLoopStart}: ${loopVariable} = ${dynamicLoopStart}`,
           'custom',
           {
             loopIteration: true,
             loopVariable: loopVariable,
-            loopValue: loopStart,
-            iterationNumber: loopStart
+            loopValue: dynamicLoopStart,
+            iterationNumber: dynamicLoopStart,
+            hasDynamicBounds: hasStartConnection || hasEndConnection
           }
         );
         this.currentNodeId = this.getNextNode(node.id, 'exec-out');
@@ -196,16 +224,28 @@ export class VisualScriptingInterpreter {
       existingLoop.current++;
       this.context.variables.set(loopVariable, existingLoop.current);
 
+      // Recalculate dynamic end condition for this iteration (critical for bubble sort)
+      const currentDynamicEnd = hasEndConnection ?
+        this.resolveValue(loopEnd, node.id, 'loopEnd-in') :
+        existingLoop.end;
+
+      // Update the loop's end condition if it's dynamic
+      if (hasEndConnection) {
+        existingLoop.end = currentDynamicEnd;
+      }
+
       if (existingLoop.current < existingLoop.end) {
         // Add detailed step for each iteration
         this.addStep(
-          `Loop iteration ${existingLoop.current}: ${loopVariable} = ${existingLoop.current}`,
+          `Loop iteration ${existingLoop.current}: ${loopVariable} = ${existingLoop.current} (end: ${existingLoop.end})`,
           'custom',
           {
             loopIteration: true,
             loopVariable: loopVariable,
             loopValue: existingLoop.current,
-            iterationNumber: existingLoop.current
+            iterationNumber: existingLoop.current,
+            hasDynamicBounds: hasStartConnection || hasEndConnection,
+            currentEndValue: existingLoop.end
           }
         );
         // Re-execute loop body for this iteration
@@ -213,10 +253,17 @@ export class VisualScriptingInterpreter {
       } else {
         // Loop complete - remove this loop from stack
         this.context.loopStack = this.context.loopStack.filter(loop => loop.nodeId !== node.id);
-        this.addStep(`Loop completed: processed ${existingLoop.end - loopStart} iterations`, 'custom', {
+
+        // Calculate total iterations using the original start value
+        const originalStart = hasStartConnection ? dynamicLoopStart : loopStart;
+        const totalIterations = Math.max(0, existingLoop.current - originalStart);
+
+        this.addStep(`Loop completed: processed ${totalIterations} iterations`, 'custom', {
           loopComplete: true,
           loopVariable: loopVariable,
-          totalIterations: existingLoop.end - loopStart
+          totalIterations: totalIterations,
+          hasDynamicBounds: hasStartConnection || hasEndConnection,
+          finalEndValue: existingLoop.end
         });
 
         // Check if we have an exec-complete connection
@@ -337,6 +384,80 @@ export class VisualScriptingInterpreter {
         this.currentNodeId = null;
       }
     }
+  }
+
+  private executeMathOperation(node: ScriptNode): void {
+    const { operation = 'add', leftValue = 0, rightValue = 0 } = node.data;
+
+    // Check for data flow connections for both operands
+    const hasLeftConnection = this.connections.some(conn =>
+      conn.target === node.id && conn.targetHandle === 'left-in'
+    );
+    const hasRightConnection = this.connections.some(conn =>
+      conn.target === node.id && conn.targetHandle === 'right-in'
+    );
+
+    // Resolve operands from data flow connections or use default values
+    const leftVal = hasLeftConnection ?
+      this.resolveValue(leftValue, node.id, 'left-in') :
+      this.resolveValue(leftValue);
+    const rightVal = hasRightConnection ?
+      this.resolveValue(rightValue, node.id, 'right-in') :
+      this.resolveValue(rightValue);
+
+    let result = 0;
+    let operationSymbol = '';
+
+    // Perform the arithmetic operation
+    switch (operation) {
+      case 'add':
+        result = leftVal + rightVal;
+        operationSymbol = '+';
+        break;
+      case 'subtract':
+        result = leftVal - rightVal;
+        operationSymbol = '-';
+        break;
+      case 'multiply':
+        result = leftVal * rightVal;
+        operationSymbol = '*';
+        break;
+      case 'divide':
+        result = rightVal !== 0 ? leftVal / rightVal : 0;
+        operationSymbol = '/';
+        break;
+      default:
+        result = leftVal + rightVal;
+        operationSymbol = '+';
+    }
+
+    // Store result for data flow usage
+    this.context.variables.set(`__math_result_${node.id}`, result);
+
+    // Add loop context if we're in a loop
+    const currentLoop = this.context.loopStack.length > 0 ?
+      this.context.loopStack[this.context.loopStack.length - 1] : null;
+    const loopContext = currentLoop ?
+      ` (Loop iteration ${currentLoop.current}: ${currentLoop.variable} = ${currentLoop.current})` : '';
+
+    this.addStep(
+      `Math: ${leftVal} ${operationSymbol} ${rightVal} = ${result}${loopContext}`,
+      'custom',
+      {
+        mathOperation: true,
+        operation: operation,
+        operationSymbol: operationSymbol,
+        leftValue: leftVal,
+        rightValue: rightVal,
+        result: result,
+        hasDataFlow: hasLeftConnection || hasRightConnection,
+        isLoopIteration: currentLoop !== null,
+        loopVariable: currentLoop?.variable,
+        loopValue: currentLoop?.current
+      }
+    );
+
+    this.currentNodeId = this.getNextNode(node.id, 'exec-out');
   }
 
   private executeArrayAccess(node: ScriptNode): void {
@@ -802,6 +923,11 @@ export class VisualScriptingInterpreter {
       case 'array-compare':
         if (outputHandle === 'result-out') {
           return this.context.variables.get(`__array_compare_${nodeId}`) || false;
+        }
+        break;
+      case 'math-operation':
+        if (outputHandle === 'result-out') {
+          return this.context.variables.get(`__math_result_${nodeId}`) || 0;
         }
         break;
       case 'if-condition':

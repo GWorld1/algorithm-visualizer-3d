@@ -48,7 +48,9 @@ export const nodeTemplates: NodeTemplate[] = [
     },
     inputs: [
       { id: 'exec-in', type: 'execution', label: 'Previous' },
-      { id: 'array-in', type: 'array', label: 'Array (optional)' }
+      { id: 'array-in', type: 'array', label: 'Array (optional)' },
+      { id: 'loopStart-in', type: 'number', label: 'Start Value' },
+      { id: 'loopEnd-in', type: 'number', label: 'End Value' }
     ],
     outputs: [
       { id: 'exec-out', type: 'execution', label: 'Loop Body' },
@@ -79,6 +81,29 @@ export const nodeTemplates: NodeTemplate[] = [
       { id: 'exec-true', type: 'execution', label: 'True' },
       { id: 'exec-false', type: 'execution', label: 'False' },
       { id: 'result-out', type: 'boolean', label: 'Result' }
+    ]
+  },
+  {
+    type: 'math-operation',
+    label: 'Math Operation',
+    description: 'Perform arithmetic operations (add, subtract, multiply, divide)',
+    category: 'math',
+    icon: 'Calculator',
+    defaultData: {
+      label: 'Math Operation',
+      operation: 'subtract', // add, subtract, multiply, divide
+      leftValue: 0,
+      rightValue: 1,
+      isValid: true
+    },
+    inputs: [
+      { id: 'exec-in', type: 'execution', label: 'Previous' },
+      { id: 'left-in', type: 'number', label: 'Left Value' },
+      { id: 'right-in', type: 'number', label: 'Right Value' }
+    ],
+    outputs: [
+      { id: 'exec-out', type: 'execution', label: 'Next' },
+      { id: 'result-out', type: 'number', label: 'Result' }
     ]
   },
 
@@ -285,6 +310,7 @@ export function getTemplatesByCategory(category: string): NodeTemplate[] {
 // Categories for organizing the palette
 export const nodeCategories = [
   { id: 'control', label: 'Control Flow', icon: 'GitBranch' },
+  { id: 'math', label: 'Math Operations', icon: 'Calculator' },
   { id: 'array', label: 'Array Operations', icon: 'Database' },
   { id: 'variable', label: 'Variables', icon: 'Variable' },
   { id: 'visualization', label: 'Visualization', icon: 'Eye' }

@@ -25,11 +25,12 @@ export interface Connection {
   targetHandle: string;
 }
 
-export type NodeType = 
+export type NodeType =
   | 'start'
   | 'end'
   | 'for-loop'
   | 'if-condition'
+  | 'math-operation'
   | 'array-access'
   | 'array-compare'
   | 'array-swap'
@@ -124,7 +125,7 @@ export interface NodeTemplate {
   type: NodeType;
   label: string;
   description: string;
-  category: 'control' | 'array' | 'variable' | 'visualization';
+  category: 'control' | 'math' | 'array' | 'variable' | 'visualization';
   icon: string;
   defaultData: ScriptNodeData;
   inputs: NodeInput[];

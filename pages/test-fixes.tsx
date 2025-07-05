@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { VisualScriptingInterpreter } from '@/lib/visualScriptingInterpreter';
+import { createBubbleSortTemplate } from '@/lib/bubbleSortTemplate';
 
 interface TestResult {
   success: boolean;
@@ -55,7 +56,50 @@ const TestFixesPage: React.FC = () => {
       });
     }
 
-    // Test 2: Nested Loop Execution Flow
+    // Test 2: Dynamic Loop End Conditions
+    try {
+      const nodes = [
+        { id: 'start-1', type: 'start', data: { label: 'Start' } },
+        { id: 'var-n', type: 'variable-set', data: { variableName: 'n', variableValue: 5 } },
+        { id: 'math-1', type: 'math-operation', data: { operation: 'subtract', leftValue: 5, rightValue: 1 } },
+        { id: 'loop-1', type: 'for-loop', data: { loopStart: 0, loopEnd: 4, loopVariable: 'i' } },
+        { id: 'end-1', type: 'end', data: { label: 'End' } }
+      ];
+
+      const connections = [
+        { source: 'start-1', sourceHandle: 'exec-out', target: 'var-n', targetHandle: 'exec-in' },
+        { source: 'var-n', sourceHandle: 'exec-out', target: 'math-1', targetHandle: 'exec-in' },
+        { source: 'math-1', sourceHandle: 'exec-out', target: 'loop-1', targetHandle: 'exec-in' },
+        { source: 'loop-1', sourceHandle: 'exec-complete', target: 'end-1', targetHandle: 'exec-in' },
+        // Dynamic end condition
+        { source: 'var-n', sourceHandle: 'value-out', target: 'math-1', targetHandle: 'left-in' },
+        { source: 'math-1', sourceHandle: 'result-out', target: 'loop-1', targetHandle: 'loopEnd-in' }
+      ];
+
+      const interpreter = new VisualScriptingInterpreter(nodes, connections, [1, 2, 3, 4, 5]);
+      const steps = interpreter.execute();
+
+      // Check for dynamic loop bounds
+      const loopSteps = steps.filter(step =>
+        step.metadata?.loopIteration && step.metadata?.hasDynamicBounds
+      );
+
+      results.push({
+        success: loopSteps.length > 0,
+        message: loopSteps.length > 0
+          ? '✅ Dynamic loop end conditions working correctly'
+          : '❌ Dynamic loop end conditions not working',
+        steps: steps
+      });
+    } catch (error) {
+      results.push({
+        success: false,
+        message: '❌ Dynamic loop conditions test failed',
+        error: error instanceof Error ? error.message : String(error)
+      });
+    }
+
+    // Test 3: Nested Loop Execution Flow
     try {
       const nodes = [
         { id: 'start-1', type: 'start', data: { label: 'Start' } },
@@ -96,6 +140,40 @@ const TestFixesPage: React.FC = () => {
       results.push({
         success: false,
         message: '❌ Nested loop test failed',
+        error: error instanceof Error ? error.message : String(error)
+      });
+    }
+
+    // Test 4: Complete Bubble Sort with Dynamic Inner Loop
+    try {
+      const bubbleSortTemplate = createBubbleSortTemplate(4);
+      const interpreter = new VisualScriptingInterpreter(
+        bubbleSortTemplate.nodes,
+        bubbleSortTemplate.connections,
+        [64, 34, 25, 12]
+      );
+      const steps = interpreter.execute();
+
+      // Check for proper bubble sort execution
+      const mathSteps = steps.filter(step => step.metadata?.mathOperation);
+      const swapSteps = steps.filter(step => step.action === 'swap');
+      const dynamicLoopSteps = steps.filter(step =>
+        step.metadata?.loopIteration && step.metadata?.hasDynamicBounds
+      );
+
+      const hasBubbleSortFeatures = mathSteps.length > 0 && swapSteps.length > 0 && dynamicLoopSteps.length > 0;
+
+      results.push({
+        success: hasBubbleSortFeatures,
+        message: hasBubbleSortFeatures
+          ? '✅ Complete bubble sort with dynamic inner loop working'
+          : '❌ Bubble sort template not working correctly',
+        steps: steps.slice(0, 20) // Limit steps for display
+      });
+    } catch (error) {
+      results.push({
+        success: false,
+        message: '❌ Bubble sort template test failed',
         error: error instanceof Error ? error.message : String(error)
       });
     }
@@ -170,11 +248,14 @@ const TestFixesPage: React.FC = () => {
       <div className="mt-8 p-4 bg-gray-50 rounded-lg">
         <h2 className="text-xl font-semibold mb-2">Test Summary</h2>
         <p className="text-sm text-gray-600">
-          These tests verify that the Visual Script Editor fixes are working correctly:
+          These tests verify that the Visual Script Editor enhancements are working correctly:
         </p>
         <ul className="list-disc list-inside text-sm text-gray-600 mt-2">
           <li>Dynamic data flow connections for swap and compare nodes</li>
+          <li>Dynamic loop end conditions for efficient bubble sort implementation</li>
           <li>Proper nested loop execution flow with return-to-outer-loop behavior</li>
+          <li>Math operation nodes for calculating loop bounds (n - i - 1)</li>
+          <li>Complete bubble sort algorithm with optimized inner loop bounds</li>
         </ul>
       </div>
     </div>

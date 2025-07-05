@@ -6,29 +6,31 @@ import { Handle, Position, NodeProps } from 'reactflow';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { 
-  X, 
-  Play, 
-  Square, 
-  RotateCw, 
-  GitBranch, 
-  Database, 
-  ArrowUpDown, 
-  ArrowLeftRight, 
-  Highlighter, 
-  Equal, 
-  Variable, 
-  Plus, 
-  MessageSquare, 
-  Pause 
+import { Select } from '@/components/ui/select';
+import {
+  X,
+  Play,
+  Square,
+  RotateCw,
+  GitBranch,
+  Database,
+  ArrowUpDown,
+  ArrowLeftRight,
+  Highlighter,
+  Equal,
+  Variable,
+  Plus,
+  MessageSquare,
+  Pause,
+  Calculator
 } from 'lucide-react';
 import { NodeType } from '@/types/VisualScripting';
 import { getNodeTemplate } from '@/lib/visualScriptingTemplates';
 
 // Icon mapping
 const iconMap: Record<string, React.ComponentType<any>> = {
-  Play, Square, RotateCw, GitBranch, Database, ArrowUpDown, 
-  ArrowLeftRight, Highlighter, Equal, Variable, Plus, MessageSquare, Pause
+  Play, Square, RotateCw, GitBranch, Database, ArrowUpDown,
+  ArrowLeftRight, Highlighter, Equal, Variable, Plus, MessageSquare, Pause, Calculator
 };
 
 interface CustomNodeData {
@@ -252,6 +254,51 @@ const CustomNode: React.FC<NodeProps<CustomNodeData>> = ({ data, selected }) => 
             onChange={(e) => handleInputChange('pauseDuration', parseInt(e.target.value) || 1000)}
             className="h-6 text-xs bg-gray-800 border-gray-600 text-white"
           />
+        );
+
+      case 'math-operation':
+        const operationOptions = [
+          { value: 'add', label: 'Add (+)' },
+          { value: 'subtract', label: 'Subtract (-)' },
+          { value: 'multiply', label: 'Multiply (×)' },
+          { value: 'divide', label: 'Divide (÷)' }
+        ];
+
+        return (
+          <div className="space-y-2">
+            {/* Operation Type Selector */}
+            <Select
+              value={data.operation || 'add'}
+              onValueChange={(value) => handleInputChange('operation', value)}
+              options={operationOptions}
+              className="h-6 text-xs bg-gray-800 border-gray-600 text-white"
+            />
+
+            {/* Left and Right Value Inputs */}
+            <div className="grid grid-cols-2 gap-2">
+              <Input
+                placeholder="Left"
+                type="number"
+                value={data.leftValue ?? 0}
+                onChange={(e) => handleInputChange('leftValue', parseFloat(e.target.value) || 0)}
+                className="h-6 text-xs bg-gray-800 border-gray-600 text-white"
+                title="Left operand (overridden by left-in connection)"
+              />
+              <Input
+                placeholder="Right"
+                type="number"
+                value={data.rightValue ?? 0}
+                onChange={(e) => handleInputChange('rightValue', parseFloat(e.target.value) || 0)}
+                className="h-6 text-xs bg-gray-800 border-gray-600 text-white"
+                title="Right operand (overridden by right-in connection)"
+              />
+            </div>
+
+            {/* Visual feedback for data flow connections */}
+            <div className="text-xs text-gray-400 px-1">
+              Values override when connected via data flow
+            </div>
+          </div>
         );
 
       default:

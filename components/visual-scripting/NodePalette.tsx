@@ -3,20 +3,21 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { 
-  Play, 
-  Square, 
-  RotateCw, 
-  GitBranch, 
-  Database, 
-  ArrowUpDown, 
-  ArrowLeftRight, 
-  Highlighter, 
-  Equal, 
-  Variable, 
-  Plus, 
-  MessageSquare, 
-  Pause 
+import {
+  Play,
+  Square,
+  RotateCw,
+  GitBranch,
+  Database,
+  ArrowUpDown,
+  ArrowLeftRight,
+  Highlighter,
+  Equal,
+  Variable,
+  Plus,
+  MessageSquare,
+  Pause,
+  Calculator
 } from 'lucide-react';
 import { nodeTemplates, nodeCategories } from '@/lib/visualScriptingTemplates';
 import { NodeType } from '@/types/VisualScripting';
@@ -36,7 +37,8 @@ const iconMap: Record<string, React.ComponentType<any>> = {
   Variable,
   Plus,
   MessageSquare,
-  Pause
+  Pause,
+  Calculator
 };
 
 const NodePalette: React.FC = () => {

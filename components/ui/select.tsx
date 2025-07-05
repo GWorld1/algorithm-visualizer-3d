@@ -93,7 +93,7 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
           )}
         >
           <span className={cn(
-            currentValue ? "text-foreground" : "text-muted-foreground"
+            currentValue ? "text-white" : "text-gray-400"
           )}>
             {displayText}
           </span>
@@ -109,7 +109,7 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
             "absolute top-full z-50 mt-1 w-full rounded-md border bg-popover shadow-md",
             "animate-in fade-in-0 zoom-in-95"
           )}>
-            <div className="max-h-60 overflow-auto p-1">
+            <div className="max-h-60 overflow-auto p-1 ">
               {options.map((option) => (
                 <button
                   key={option.value}
@@ -119,7 +119,7 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
                   className={cn(
                     "relative flex w-full cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none",
                     "hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
-                    "disabled:pointer-events-none disabled:opacity-50",
+                    "disabled:pointer-events-none disabled:opacity-50 text-muted-foreground",
                     currentValue === option.value && "bg-accent text-accent-foreground"
                   )}
                 >

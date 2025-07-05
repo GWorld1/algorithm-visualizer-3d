@@ -239,6 +239,7 @@ const SaveTemplateModal: React.FC<SaveTemplateModalProps> = ({
               <label className="block text-sm font-medium text-gray-300 mb-2">
                 Category
               </label>
+              
               <Select
                 value={formData.category}
                 onValueChange={(value) => handleInputChange('category', value)}

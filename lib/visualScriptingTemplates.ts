@@ -177,12 +177,12 @@ export const nodeTemplates: NodeTemplate[] = [
   },
   {
     type: 'array-highlight',
-    label: 'Highlight Elements',
-    description: 'Highlight specific array elements',
+    label: 'Highlight Element',
+    description: 'Highlight a specific array element by index',
     category: 'visualization',
     icon: 'Highlighter',
     defaultData: {
-      label: 'Highlight Elements',
+      label: 'Highlight Element',
       arrayIndex1: 0,
       highlightColor: 'yellow',
       highlightDuration: 1000,
@@ -190,7 +190,7 @@ export const nodeTemplates: NodeTemplate[] = [
     },
     inputs: [
       { id: 'exec-in', type: 'execution', label: 'Previous' },
-      { id: 'indices-in', type: 'array', label: 'Indices' }
+      { id: 'index-in', type: 'number', label: 'Index' }
     ],
     outputs: [
       { id: 'exec-out', type: 'execution', label: 'Next' }

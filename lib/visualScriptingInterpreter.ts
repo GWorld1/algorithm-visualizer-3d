@@ -664,15 +664,51 @@ export class VisualScriptingInterpreter {
 
   private executeArrayHighlight(node: ScriptNode): void {
     const { arrayIndex1 = 0, highlightColor = 'yellow' } = node.data;
-    const index = this.resolveValue(arrayIndex1);
-    
+
+    // Check for data flow connection for the index
+    const hasIndexConnection = this.connections.some(conn =>
+      conn.target === node.id && conn.targetHandle === 'index-in'
+    );
+
+    // Resolve index from data flow connection or use default value
+    const index = hasIndexConnection ?
+      this.resolveValue(arrayIndex1, node.id, 'index-in') :
+      this.resolveValue(arrayIndex1);
+
+    // Check if we're in a loop context for enhanced step description
+    const currentLoop = this.context.loopStack.length > 0 ?
+      this.context.loopStack[this.context.loopStack.length - 1] : null;
+
+    const loopContext = currentLoop ?
+      ` (Loop iteration ${currentLoop.current}: ${currentLoop.variable} = ${currentLoop.current})` : '';
+
     if (this.isValidIndex(index)) {
-      this.addStep(`Highlighting array[${index}]`, 'highlight', {
-        indices: [index],
-        color: highlightColor
-      });
+      this.addStep(
+        `Highlighting array[${index}]${loopContext}`,
+        'highlight',
+        {
+          indices: [index],
+          color: highlightColor,
+          isLoopIteration: currentLoop !== null,
+          loopVariable: currentLoop?.variable,
+          loopValue: currentLoop?.current,
+          iterationNumber: currentLoop?.current
+        }
+      );
+    } else {
+      this.addStep(
+        `Highlight failed: index ${index} out of bounds${loopContext}`,
+        'custom',
+        {
+          error: true,
+          indices: [index],
+          isLoopIteration: currentLoop !== null,
+          loopVariable: currentLoop?.variable,
+          loopValue: currentLoop?.current
+        }
+      );
     }
-    
+
     this.currentNodeId = this.getNextNode(node.id, 'exec-out');
   }
 

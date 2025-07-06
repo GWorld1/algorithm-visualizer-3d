@@ -80,6 +80,67 @@ export const algorithmTemplates: AlgorithmTemplate[] = [
     }
   },
   {
+    id: 'highlight-loop-demo',
+    name: 'Highlight Loop Demo',
+    description: 'Demonstrates dynamic index highlighting using loop data flow',
+    category: 'debug',
+    complexity: {
+      time: 'O(n)',
+      space: 'O(1)',
+      level: 'beginner'
+    },
+    estimatedTime: '1 minute',
+    tags: ['debug', 'loop', 'highlight', 'data-flow'],
+    preview: {
+      nodeCount: 4,
+      connectionCount: 4
+    },
+    nodes: [
+      { type: 'start', position: { x: 100, y: 200 } },
+      {
+        type: 'for-loop',
+        position: { x: 300, y: 200 },
+        data: {
+          loopStart: 0,
+          loopEnd: 5,
+          loopVariable: 'i',
+          label: 'For i = 0 to 4'
+        }
+      },
+      {
+        type: 'array-highlight',
+        position: { x: 500, y: 200 },
+        data: {
+          highlightColor: 'cyan',
+          label: 'Highlight Current Index'
+        }
+      },
+      { type: 'end', position: { x: 700, y: 200 } }
+    ],
+    connections: [
+      { source: 'start-1', sourceHandle: 'exec-out', target: 'for-loop-1', targetHandle: 'exec-in' },
+      { source: 'for-loop-1', sourceHandle: 'exec-out', target: 'array-highlight-1', targetHandle: 'exec-in' },
+      { source: 'array-highlight-1', sourceHandle: 'exec-out', target: 'end-1', targetHandle: 'exec-in' },
+      // Data flow connection: pass loop index to highlight node
+      { source: 'for-loop-1', sourceHandle: 'index-out', target: 'array-highlight-1', targetHandle: 'index-in' }
+    ],
+    documentation: {
+      overview: 'This template shows how to use data flow connections to dynamically highlight array elements based on loop indices.',
+      steps: [
+        'Start the algorithm',
+        'Begin loop from index 0 to 4',
+        'Highlight the current loop index in the array',
+        'Continue until loop completes',
+        'End the algorithm'
+      ],
+      learningObjectives: [
+        'Understand data flow connections',
+        'Learn dynamic index highlighting',
+        'Practice loop-based array operations'
+      ]
+    }
+  },
+  {
     id: 'linear-search',
     name: 'Linear Search',
     description: 'Search for a target value by checking each element sequentially',

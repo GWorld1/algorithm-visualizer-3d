@@ -109,8 +109,24 @@ const TestMathNodePage: React.FC = () => {
       let resultText = 'Math Operation Results:\n\n';
       
       mathSteps.forEach(step => {
-        const { operation, leftValue, rightValue, result, operationSymbol } = step.metadata;
+        const {
+          operation,
+          leftValue,
+          rightValue,
+          result,
+          operationSymbol,
+          originalLeftValue,
+          originalRightValue
+        } = step.metadata;
+
         resultText += `${operation.toUpperCase()}: ${leftValue} ${operationSymbol} ${rightValue} = ${result}\n`;
+
+        // Show type conversion info if original values were different
+        if (originalLeftValue !== undefined && originalRightValue !== undefined) {
+          if (originalLeftValue !== leftValue || originalRightValue !== rightValue) {
+            resultText += `  ↳ Converted from: ${originalLeftValue} (${typeof originalLeftValue}) ${operationSymbol} ${originalRightValue} (${typeof originalRightValue})\n`;
+          }
+        }
       });
       
       if (mathSteps.length === 0) {
@@ -138,6 +154,16 @@ const TestMathNodePage: React.FC = () => {
           <li>✅ <strong>Data Flow Integration</strong>: Input values override when connections are made</li>
           <li>✅ <strong>Visual Feedback</strong>: Clear indication of data flow override behavior</li>
         </ul>
+      </div>
+
+      <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+        <h2 className="text-lg font-semibold mb-2">🔧 Critical Bug Fix Applied</h2>
+        <div className="text-sm text-gray-700 space-y-2">
+          <p><strong>Issue Fixed:</strong> Addition operations were performing string concatenation instead of numeric addition when values came through data flow connections.</p>
+          <p><strong>Example:</strong> 2 + 3 was returning &quot;23&quot; instead of 5</p>
+          <p><strong>Solution:</strong> Added proper type conversion using Number() before performing mathematical operations.</p>
+          <p><strong>Test Below:</strong> The test will show both the final numeric result and any type conversions that occurred.</p>
+        </div>
       </div>
 
       <div className="bg-white border rounded-lg p-6 mb-6">
@@ -178,14 +204,14 @@ const TestMathNodePage: React.FC = () => {
             <strong>3. Set Default Values:</strong> Enter numbers in the Left and Right input fields
           </div>
           <div>
-            <strong>4. Connect Data Flow:</strong> Connect other nodes' outputs to the "Left Value" and "Right Value" inputs
+            <strong>4. Connect Data Flow:</strong> Connect other nodes&apos; outputs to the &quot;Left Value&quot; and &quot;Right Value&quot; inputs
           </div>
           <div>
-            <strong>5. Use Result:</strong> Connect the "Result" output to other nodes that need the calculated value
+            <strong>5. Use Result:</strong> Connect the &quot;Result&quot; output to other nodes that need the calculated value
           </div>
           <div className="bg-yellow-50 border border-yellow-200 rounded p-2 mt-2">
             <strong>Note:</strong> When data flow connections are made, they override the manual input values.
-            This enables dynamic calculations like "n - i - 1" for bubble sort optimization.
+            This enables dynamic calculations like &quot;n - i - 1&quot; for bubble sort optimization.
           </div>
         </div>
       </div>

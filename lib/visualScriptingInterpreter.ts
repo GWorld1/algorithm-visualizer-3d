@@ -405,29 +405,39 @@ export class VisualScriptingInterpreter {
       this.resolveValue(rightValue, node.id, 'right-in') :
       this.resolveValue(rightValue);
 
+    // Convert values to numbers to ensure proper mathematical operations
+    // This fixes the bug where string concatenation occurs instead of numeric addition
+    const leftNum = Number(leftVal);
+    const rightNum = Number(rightVal);
+
+    // Validate that the conversion resulted in valid numbers
+    if (isNaN(leftNum) || isNaN(rightNum)) {
+      console.warn(`Math operation received invalid numeric values: left=${leftVal} (${typeof leftVal}), right=${rightVal} (${typeof rightVal})`);
+    }
+
     let result = 0;
     let operationSymbol = '';
 
-    // Perform the arithmetic operation
+    // Perform the arithmetic operation using the converted numeric values
     switch (operation) {
       case 'add':
-        result = leftVal + rightVal;
+        result = leftNum + rightNum;
         operationSymbol = '+';
         break;
       case 'subtract':
-        result = leftVal - rightVal;
+        result = leftNum - rightNum;
         operationSymbol = '-';
         break;
       case 'multiply':
-        result = leftVal * rightVal;
+        result = leftNum * rightNum;
         operationSymbol = '*';
         break;
       case 'divide':
-        result = rightVal !== 0 ? leftVal / rightVal : 0;
+        result = rightNum !== 0 ? leftNum / rightNum : 0;
         operationSymbol = '/';
         break;
       default:
-        result = leftVal + rightVal;
+        result = leftNum + rightNum;
         operationSymbol = '+';
     }
 
@@ -441,14 +451,16 @@ export class VisualScriptingInterpreter {
       ` (Loop iteration ${currentLoop.current}: ${currentLoop.variable} = ${currentLoop.current})` : '';
 
     this.addStep(
-      `Math: ${leftVal} ${operationSymbol} ${rightVal} = ${result}${loopContext}`,
+      `Math: ${leftNum} ${operationSymbol} ${rightNum} = ${result}${loopContext}`,
       'custom',
       {
         mathOperation: true,
         operation: operation,
         operationSymbol: operationSymbol,
-        leftValue: leftVal,
-        rightValue: rightVal,
+        leftValue: leftNum,
+        rightValue: rightNum,
+        originalLeftValue: leftVal,
+        originalRightValue: rightVal,
         result: result,
         hasDataFlow: hasLeftConnection || hasRightConnection,
         isLoopIteration: currentLoop !== null,

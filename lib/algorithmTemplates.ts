@@ -433,7 +433,7 @@ export const templateCategories = [
   { id: 'searching', name: 'Search Algorithms', icon: 'Search', description: 'Templates for various search algorithms' },
   { id: 'array', name: 'Array Operations', icon: 'Database', description: 'Templates for array manipulation and analysis' },
   { id: 'sorting', name: 'Sorting Algorithms', icon: 'ArrowUpDown', description: 'Templates for sorting algorithms' },
-  { id: 'graph', name: 'Graph Algorithms', icon: 'GitBranch', description: 'Templates for graph traversal and analysis' }
+//  { id: 'graph', name: 'Graph Algorithms', icon: 'GitBranch', description: 'Templates for graph traversal and analysis' }
 ];
 
 // Helper functions

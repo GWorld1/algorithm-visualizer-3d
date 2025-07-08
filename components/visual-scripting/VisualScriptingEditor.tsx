@@ -36,7 +36,9 @@ import ConnectionStatus from './ConnectionStatus';
 import TemplateModal from './TemplateModal';
 import SaveTemplateModal from './SaveTemplateModal';
 import { Button } from '@/components/ui/button';
-import { Play, Save, Trash2, Eye, EyeOff, HelpCircle, BookOpen, Bug, FileText } from 'lucide-react';
+import { Play, Save, Trash2, Eye, EyeOff, HelpCircle, BookOpen, Bug, FileText, Share2 } from 'lucide-react';
+import { ShareAlgorithmModal } from '@/components/community/ShareAlgorithmModal';
+import { AlgorithmSharingAPI } from '@/lib/api/algorithmSharingClient';
 
 // Custom node types for React Flow
 const nodeTypes = {
@@ -76,6 +78,7 @@ const VisualScriptingEditor: React.FC = () => {
   const [showDebuggerModal, setShowDebuggerModal] = React.useState(false);
   const [showTemplateModal, setShowTemplateModal] = React.useState(false);
   const [showSaveTemplateModal, setShowSaveTemplateModal] = React.useState(false);
+  const [showShareModal, setShowShareModal] = React.useState(false);
   const [currentValidation, setCurrentValidation] = React.useState<ValidationResult>({ isValid: true, errors: [], warnings: [] });
   const { addToast } = useToast();
   const [connectionState, setConnectionState] = React.useState<{
@@ -857,6 +860,19 @@ const VisualScriptingEditor: React.FC = () => {
                 <Save className="w-4 h-4 mr-1" />
                 Save as Template
               </Button>
+              {AlgorithmSharingAPI.isCommunityEnabled() && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowShareModal(true)}
+                  disabled={storeNodes.length === 0}
+                  className="text-cyan-400 hover:text-cyan-300 whitespace-nowrap disabled:opacity-50"
+                  title="Share with Community"
+                >
+                  <Share2 className="w-4 h-4 mr-1" />
+                  Share
+                </Button>
+              )}
             </div>
 
              
@@ -986,6 +1002,12 @@ const VisualScriptingEditor: React.FC = () => {
             description: `Template "${templateName}" has been saved to your personal templates.`
           });
         }}
+      />
+
+      {/* Share Algorithm Modal */}
+      <ShareAlgorithmModal
+        isOpen={showShareModal}
+        onClose={() => setShowShareModal(false)}
       />
     </div>
   );

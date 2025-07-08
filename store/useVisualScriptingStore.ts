@@ -1,14 +1,25 @@
 import { create } from 'zustand';
-import { 
-  ScriptNode, 
-  Connection, 
-  CustomAlgorithm, 
-  CustomAlgorithmStep, 
-  NodeType, 
+import {
+  ScriptNode,
+  Connection,
+  CustomAlgorithm,
+  CustomAlgorithmStep,
+  NodeType,
   Position,
   ExecutionContext,
   ValidationResult
 } from '@/types/VisualScripting';
+import {
+  AlgorithmSharingAPI,
+  CommunityAlgorithm,
+  CommunityFilters
+} from '@/lib/api/algorithmSharingClient';
+import {
+  convertToShareFormat,
+  convertToCustomAlgorithm,
+  validateAlgorithmForSharing,
+  ShareMetadata
+} from '@/lib/api/algorithmConverter';
 
 interface VisualScriptingState {
   // Editor state
@@ -16,18 +27,31 @@ interface VisualScriptingState {
   connections: Connection[];
   selectedNode: string | null;
   isEditing: boolean;
-  
+
   // Algorithm state
   currentAlgorithm: CustomAlgorithm | null;
   savedAlgorithms: CustomAlgorithm[];
-  
+
   // Execution state
   compiledSteps: CustomAlgorithmStep[];
   executionContext: ExecutionContext | null;
-  
+
   // UI state
   showNodePalette: boolean;
   draggedNodeType: NodeType | null;
+
+  // Community features state
+  communityAlgorithms: CommunityAlgorithm[];
+  isLoadingCommunity: boolean;
+  communityError: string | null;
+  currentCommunityFilters: CommunityFilters;
+  communityPagination: {
+    currentPage: number;
+    totalPages: number;
+    totalItems: number;
+    hasNextPage: boolean;
+    hasPrevPage: boolean;
+  } | null;
   
   // Actions
   addNode: (type: NodeType, position: Position) => void;
@@ -35,31 +59,39 @@ interface VisualScriptingState {
   updateNode: (nodeId: string, data: Partial<ScriptNode['data']>) => void;
   updateNodePosition: (nodeId: string, position: Position) => void;
   selectNode: (nodeId: string | null) => void;
-  
+
   // Connection actions
   addConnection: (connection: Omit<Connection, 'id'>) => void;
   removeConnection: (connectionId: string) => void;
-  
+
   // Algorithm actions
   createNewAlgorithm: (name: string, description: string) => void;
   saveAlgorithm: () => void;
   loadAlgorithm: (algorithmId: string) => void;
   compileAlgorithm: () => CustomAlgorithmStep[];
   validateScript: () => ValidationResult;
-  
+
   // Execution actions
   executeAlgorithm: (inputArray: number[]) => CustomAlgorithmStep[];
   resetExecution: () => void;
-  
+
   // UI actions
   setEditing: (editing: boolean) => void;
   toggleNodePalette: () => void;
   setDraggedNodeType: (type: NodeType | null) => void;
-  
+
   // Utility actions
   clearAll: () => void;
   importAlgorithm: (algorithm: CustomAlgorithm) => void;
   exportAlgorithm: () => CustomAlgorithm | null;
+
+  // Community actions
+  shareCurrentAlgorithm: (metadata: ShareMetadata) => Promise<any>;
+  loadCommunityAlgorithms: (filters?: CommunityFilters) => Promise<void>;
+  importCommunityAlgorithm: (algorithmId: string) => Promise<void>;
+  toggleAlgorithmLike: (algorithmId: string) => Promise<any>;
+  setCommunityFilters: (filters: CommunityFilters) => void;
+  clearCommunityError: () => void;
 }
 
 // Generate unique IDs
@@ -81,15 +113,22 @@ export const useVisualScriptingStore = create<VisualScriptingState>((set, get) =
   connections: [],
   selectedNode: null,
   isEditing: false,
-  
+
   currentAlgorithm: null,
   savedAlgorithms: [],
-  
+
   compiledSteps: [],
   executionContext: null,
-  
+
   showNodePalette: true,
   draggedNodeType: null,
+
+  // Community features initial state
+  communityAlgorithms: [],
+  isLoadingCommunity: false,
+  communityError: null,
+  currentCommunityFilters: {},
+  communityPagination: null,
   
   // Node actions
   addNode: (type: NodeType, position: Position) => {
@@ -324,6 +363,129 @@ export const useVisualScriptingStore = create<VisualScriptingState>((set, get) =
   exportAlgorithm: () => {
     const state = get();
     return state.currentAlgorithm;
+  },
+
+  // Community actions implementation
+  shareCurrentAlgorithm: async (metadata: ShareMetadata) => {
+    const state = get();
+
+    if (!state.currentAlgorithm) {
+      throw new Error('No algorithm to share');
+    }
+
+    const validation = state.validateScript();
+    if (!validation.isValid) {
+      throw new Error('Algorithm must be valid before sharing: ' + validation.errors.join(', '));
+    }
+
+    try {
+      const shareData = convertToShareFormat(
+        state.currentAlgorithm,
+        state.nodes,
+        state.connections,
+        metadata
+      );
+
+      const result = await AlgorithmSharingAPI.shareAlgorithm(shareData);
+
+      if (!result.success) {
+        throw new Error(result.message || 'Failed to share algorithm');
+      }
+
+      console.log('Algorithm shared successfully:', result);
+
+      return result;
+    } catch (error) {
+      console.error('Failed to share algorithm:', error);
+      throw error;
+    }
+  },
+
+  loadCommunityAlgorithms: async (filters: CommunityFilters = {}) => {
+    if (!AlgorithmSharingAPI.isCommunityEnabled()) {
+      console.warn('Community features are disabled');
+      return;
+    }
+
+    set({ isLoadingCommunity: true, communityError: null });
+
+    try {
+      const result = await AlgorithmSharingAPI.getCommunityAlgorithms(filters);
+
+      if (!result.success || !result.data) {
+        throw new Error(result.message || 'Failed to load community algorithms');
+      }
+
+      set({
+        communityAlgorithms: result.data.algorithms,
+        communityPagination: result.data.pagination,
+        currentCommunityFilters: filters,
+        isLoadingCommunity: false,
+      });
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      set({
+        communityError: errorMessage,
+        isLoadingCommunity: false,
+      });
+      console.error('Failed to load community algorithms:', error);
+    }
+  },
+
+  importCommunityAlgorithm: async (algorithmId: string) => {
+    try {
+      const result = await AlgorithmSharingAPI.getAlgorithmById(algorithmId);
+
+      if (!result.success || !result.data) {
+        throw new Error(result.message || 'Failed to fetch algorithm');
+      }
+
+      const algorithm = result.data.algorithm;
+
+      // Convert to CustomAlgorithm format
+      const customAlgorithm = convertToCustomAlgorithm(algorithm);
+
+      // Import into editor
+      get().importAlgorithm(customAlgorithm);
+
+      console.log('Community algorithm imported successfully:', customAlgorithm);
+
+    } catch (error) {
+      console.error('Failed to import community algorithm:', error);
+      throw error;
+    }
+  },
+
+  toggleAlgorithmLike: async (algorithmId: string) => {
+    try {
+      const result = await AlgorithmSharingAPI.toggleLike(algorithmId);
+
+      if (!result.success || !result.data) {
+        throw new Error(result.message || 'Failed to toggle like');
+      }
+
+      // Update local state
+      set(state => ({
+        communityAlgorithms: state.communityAlgorithms.map(alg =>
+          alg._id === algorithmId
+            ? { ...alg, likes: result.data!.totalLikes, isLikedByUser: result.data!.isLiked }
+            : alg
+        ),
+      }));
+
+      return result;
+    } catch (error) {
+      console.error('Failed to toggle like:', error);
+      throw error;
+    }
+  },
+
+  setCommunityFilters: (filters: CommunityFilters) => {
+    set({ currentCommunityFilters: filters });
+  },
+
+  clearCommunityError: () => {
+    set({ communityError: null });
   }
 }));
 

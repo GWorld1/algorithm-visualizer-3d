@@ -7,6 +7,7 @@ import ControlDashboard from './ControlDashboard';
 import AlgorithmExplanationPanel from './AlgorithmExplanationPanel';
 import ResponsiveLayout from './ResponsiveLayout';
 import SplitScreenLayout from './SplitScreenLayout';
+import { CommunityFloatingButton } from '@/components/community/CommunityFloatingButton';
 
 const QuadPanelLayout = () => {
   const { isMobileView, isVisualScriptingMode, setMobileView } = useUIStore();
@@ -24,12 +25,22 @@ const QuadPanelLayout = () => {
 
   // Mobile layout
   if (isMobileView) {
-    return <ResponsiveLayout />;
+    return (
+      <>
+        <ResponsiveLayout />
+        <CommunityFloatingButton />
+      </>
+    );
   }
 
   // Split-screen layout for Visual Scripting
   if (isVisualScriptingMode) {
-    return <SplitScreenLayout />;
+    return (
+      <>
+        <SplitScreenLayout />
+        <CommunityFloatingButton />
+      </>
+    );
   }
 
   // Desktop quad-panel layout
@@ -75,6 +86,9 @@ const QuadPanelLayout = () => {
           </a>
         </p>
       </footer>
+
+      {/* Community Floating Button */}
+      <CommunityFloatingButton />
     </div>
   );
 };

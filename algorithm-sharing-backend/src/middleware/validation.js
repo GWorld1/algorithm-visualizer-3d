@@ -191,12 +191,16 @@ const validateCommunityQuery = [
   
   query('category')
     .optional()
-    .isIn(['sorting', 'searching', 'graph', 'array', 'debug', 'custom'])
+    .custom((value) => {
+      return value === '' || ['sorting', 'searching', 'graph', 'array', 'debug', 'custom'].includes(value);
+    })
     .withMessage('Invalid category'),
-  
+
   query('difficulty')
     .optional()
-    .isIn(['beginner', 'intermediate', 'advanced'])
+    .custom((value) => {
+      return value === '' || ['beginner', 'intermediate', 'advanced'].includes(value);
+    })
     .withMessage('Invalid difficulty level'),
   
   query('sortBy')
@@ -212,7 +216,10 @@ const validateCommunityQuery = [
   query('search')
     .optional()
     .trim()
-    .isLength({ min: 1, max: 100 })
+    .custom((value) => {
+      // Allow empty string or valid length
+      return value === '' || (value.length >= 1 && value.length <= 100);
+    })
     .withMessage('Search query must be between 1 and 100 characters'),
   
   query('tags')

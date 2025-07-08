@@ -68,7 +68,7 @@ export const Controls = () => {
     array: [
       { value: 'bubbleSort', label: 'Bubble Sort' },
       { value: 'quickSort', label: 'Quick Sort' },
-      { value: 'insertionSort', label: 'Insertion Sort' },
+    //  { value: 'insertionSort', label: 'Insertion Sort' },
       { value: 'selectionSort', label: 'Selection Sort' },
       { value: 'mergeSort', label: 'Merge Sort' }
     ],

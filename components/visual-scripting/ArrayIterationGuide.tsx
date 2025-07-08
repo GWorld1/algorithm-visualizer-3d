@@ -309,7 +309,7 @@ const ArrayIterationGuide: React.FC<ArrayIterationGuideProps> = ({ onClose, onCr
         <CardHeader className="border-b border-gray-700">
           <div className="flex items-center justify-between">
             <CardTitle className="text-white">Array Iteration Guide</CardTitle>
-            <Button variant="ghost" size="sm" onClick={onClose}>×</Button>
+            <Button className='text-white' variant="ghost" size="sm" onClick={onClose}>X</Button>
           </div>
           <div className="flex items-center gap-2 mt-2">
             {steps.map((_, index) => (

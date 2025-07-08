@@ -96,7 +96,7 @@ const WeightedTree = () => {
                 <group position={[0, 0.4, 0]}>
                   <Text
                     fontSize={0.3}
-                    color="black"
+                    color="white"
                     anchorX="center"
                     anchorY="middle"
                     quaternion={camera.quaternion}

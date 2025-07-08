@@ -65,7 +65,7 @@ const ControlDashboard = () => {
     array: [
       { value: 'bubbleSort', label: 'Bubble Sort' },
       { value: 'quickSort', label: 'Quick Sort' },
-      { value: 'insertionSort', label: 'Insertion Sort' },
+  //  { value: 'insertionSort', label: 'Insertion Sort' },
       { value: 'selectionSort', label: 'Selection Sort' },
       { value: 'mergeSort', label: 'Merge Sort' },
       { value: 'customVisualScript', label: 'Custom Script' }
@@ -377,7 +377,7 @@ const ControlDashboard = () => {
       bubbleSort: 'Bubble Sort',
       quickSort: 'Quick Sort',
       mergeSort: 'Merge Sort',
-      insertionSort: 'Insertion Sort',
+  //  insertionSort: 'Insertion Sort',
       selectionSort: 'Selection Sort',
       bfs: 'Breadth-First Search',
       dfs: 'Depth-First Search',

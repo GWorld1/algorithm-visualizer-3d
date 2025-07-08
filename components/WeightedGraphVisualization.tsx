@@ -123,7 +123,7 @@ const WeightedTree = () => {
               ]}>
                 <Text
                   fontSize={0.3}
-                  color={isInPath ? "#22c55e" : "black"}
+                  color={isInPath ? "#22c55e" : "white"}
                   anchorX="center"
                   anchorY="middle"
                 >

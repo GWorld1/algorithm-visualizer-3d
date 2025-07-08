@@ -93,7 +93,7 @@ const WeightedTreeNode = ({
       {/* Value label */}
       <Text
         position={[0, 0.7, 0]}
-        color={node.isSource ? "#8B5CF6" : "black"}
+        color={node.isSource ? "#8B5CF6" : "steelblue"}
         fontSize={0.3}
         anchorX="center"
         anchorY="middle"

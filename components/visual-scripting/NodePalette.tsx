@@ -21,7 +21,7 @@ import {
 } from 'lucide-react';
 import { nodeTemplates, nodeCategories } from '@/lib/visualScriptingTemplates';
 import { NodeType } from '@/types/VisualScripting';
-import { useVisualScriptingStore } from '@/store/useVisualScriptingStore';
+
 
 // Icon mapping for node types
 const iconMap: Record<string, React.ComponentType<any>> = {

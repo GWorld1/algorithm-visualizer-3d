@@ -342,7 +342,8 @@ function getDefaultLabel(type: NodeType): string {
     'variable-get': 'Get Variable',
     'counter-increment': 'Increment Counter',
     'update-description': 'Update Description',
-    'pause-execution': 'Pause'
+    'pause-execution': 'Pause',
+    'math-operation': ''
   };
   
   return labels[type] || type;
